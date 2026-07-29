@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pulse-green: #0a5f66;
+  --color-blaze-haze: #f3f5f4;
+}
