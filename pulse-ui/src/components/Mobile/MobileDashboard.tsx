@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { NavItems } from "../../NavBar/NavItems";
-import { HamburgerMenu } from "../../Util/HamburgerMenu";
-import { PulseIcon } from "../../Util/PulseIcon";
+import { NavItems } from "../NavBar/NavItems";
+import { HamburgerMenu } from "../Util/HamburgerMenu";
+import { PulseIcon } from "../Util/PulseIcon";
 
 export const MobileDashboard = () => {
   const [isHamburgerMenuClicked, setIsHamburgerMenuClicked] = useState(false);

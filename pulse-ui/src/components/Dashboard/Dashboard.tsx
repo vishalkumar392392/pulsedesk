@@ -1,13 +1,13 @@
-import { DesktopDashboard } from "./View/DesktopDashboard";
-import { MobileDashboard } from "./View/MobileDashboard";
+import { DesktopDashboard } from "../Desktop/DesktopDashboard";
+import { MobileDashboard } from "../Mobile/MobileDashboard";
 
 const Dashboard = () => {
   return (
     <div className="">
-      <div className="block md:hidden">
+      <div className="block sm:hidden">
         <MobileDashboard />
       </div>
-      <div className="hidden md:block">
+      <div className="hidden sm:block">
         <DesktopDashboard />
       </div>
     </div>

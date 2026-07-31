@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { ROUTES } from "../../util/helper";
+import { useNavigate } from "react-router";
 
 export const NavItems = ({
-  isHamburgerMenuClicked,
+  isHamburgerMenuClicked = true,
 }: {
-  isHamburgerMenuClicked: boolean;
+  isHamburgerMenuClicked?: boolean;
 }) => {
-  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [selectedMenu, setSelectedMenu] = useState<string>("Dashboard");
+
+  const navigate = useNavigate();
+
   return (
     <div>
       {isHamburgerMenuClicked === true && (
@@ -15,8 +19,11 @@ export const NavItems = ({
             {Object.keys(ROUTES).map((key: string) => (
               <li
                 key={key}
-                onClick={() => setSelectedMenu(key)}
-                className={`active:bg-blaze-haze-100 flex cursor-pointer items-center gap-1.5 rounded-sm py-1 ${selectedMenu === key ? "bg-blaze-haze-100 underline underline-offset-2" : ""}`}
+                onClick={() => {
+                  setSelectedMenu(key);
+                  navigate(`/${key.toLocaleLowerCase()}`);
+                }}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-sm py-1 ${selectedMenu === key ? "bg-blaze-haze-200 underline underline-offset-2" : ""}`}
               >
                 {ROUTES[key]}
                 {key}
