@@ -1,14 +1,14 @@
-import { DesktopView } from "../View/DesktopView";
-import { MobileView } from "../View/MobileView";
+import { DesktopDashboard } from "./View/DesktopDashboard";
+import { MobileDashboard } from "./View/MobileDashboard";
 
 const Dashboard = () => {
   return (
-    <div className="bg-blaze-haze">
+    <div className="">
       <div className="block md:hidden">
-        <MobileView />
+        <MobileDashboard />
       </div>
       <div className="hidden md:block">
-        <DesktopView />
+        <DesktopDashboard />
       </div>
     </div>
   );
