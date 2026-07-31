@@ -4,8 +4,10 @@ import { useNavigate } from "react-router";
 
 export const NavItems = ({
   isHamburgerMenuClicked = true,
+  setIsHamburgerMenuClicked = () => {},
 }: {
   isHamburgerMenuClicked?: boolean;
+  setIsHamburgerMenuClicked?: (isClicked: boolean) => void;
 }) => {
   const [selectedMenu, setSelectedMenu] = useState<string>("Dashboard");
 
@@ -21,6 +23,12 @@ export const NavItems = ({
                 key={key}
                 onClick={() => {
                   setSelectedMenu(key);
+                  if (key === "Dashboard") {
+                    navigate(`/`);
+                    setIsHamburgerMenuClicked(!isHamburgerMenuClicked);
+                    return;
+                  }
+                  setIsHamburgerMenuClicked(!isHamburgerMenuClicked);
                   navigate(`/${key.toLocaleLowerCase()}`);
                 }}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-sm py-1 ${selectedMenu === key ? "bg-blaze-haze-200 underline underline-offset-2" : ""}`}

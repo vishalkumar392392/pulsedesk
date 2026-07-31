@@ -1,7 +1,7 @@
-import { NavItems } from "../NavBar/NavItems";
-import { PulseIcon } from "../Util/PulseIcon";
+import { NavItems } from "../../../NavBar/NavItems";
+import { PulseIcon } from "../../../Util/PulseIcon";
 
-const Icon = () => {
+const SideBar = () => {
   return (
     <div className="w-[30%] border-r-[1.5px] border-gray-300 pt-12">
       <PulseIcon />
@@ -12,4 +12,4 @@ const Icon = () => {
   );
 };
 
-export default Icon;
+export default SideBar;
