@@ -17,10 +17,14 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
 @Table(name = "users")
+@EqualsAndHashCode(exclude = "roles")
+@ToString(exclude = "roles")
 public class UserEntity {
 
 	@Id
@@ -43,7 +47,7 @@ public class UserEntity {
 
 	@JsonIgnore
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "student_role", joinColumns = @JoinColumn(name="student_id"), inverseJoinColumns = @JoinColumn(name="role_id"))
+	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name="user_id"), inverseJoinColumns = @JoinColumn(name="role_id"))
 	private Set<Role> roles;
 	
 

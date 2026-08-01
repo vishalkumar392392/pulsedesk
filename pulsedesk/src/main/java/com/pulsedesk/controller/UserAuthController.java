@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.model.ApiResponse;
 import com.pulsedesk.model.AuthenticationRequest;
+import com.pulsedesk.model.RegisterRequest;
 import com.pulsedesk.security.config.JwtUtils;
 import com.pulsedesk.service.UserService;
 
@@ -44,7 +45,8 @@ public class UserAuthController {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
 		if (userDetails != null) {
 			String token = jwtUtils.generateToken(userDetails);
-			return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(token, "token generated successfully", HttpStatus.OK.value()));
+			return ResponseEntity.status(HttpStatus.OK)
+					.body(ApiResponse.success(token, "token generated successfully", HttpStatus.OK.value()));
 		} else {
 			throw new BadCredentialsException("User not found");
 		}
@@ -52,9 +54,10 @@ public class UserAuthController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<UserEntity>> create(@RequestBody UserEntity user) {
-		UserEntity saved = service.save(user);
-		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(saved, "User Registered successfully", HttpStatus.CREATED.value()));
+	public ResponseEntity<ApiResponse<UserEntity>> create(@RequestBody RegisterRequest request) {
+		UserEntity saved = service.save(request);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.success(saved, "User Registered successfully", HttpStatus.CREATED.value()));
 	}
 
 }

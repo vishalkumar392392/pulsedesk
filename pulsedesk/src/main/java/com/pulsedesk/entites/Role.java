@@ -10,9 +10,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
+@EqualsAndHashCode(exclude = "userEntites")
+@ToString(exclude = "userEntites")
 public class Role implements GrantedAuthority {
 
 	private static final long serialVersionUID = 5569737971709284000L;
