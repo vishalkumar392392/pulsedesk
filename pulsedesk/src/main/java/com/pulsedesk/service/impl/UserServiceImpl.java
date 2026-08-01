@@ -1,18 +1,22 @@
 package com.pulsedesk.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.pulsedesk.entites.Role;
 import com.pulsedesk.entites.UserEntity;
+import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
 import com.pulsedesk.model.RegisterRequest;
+import com.pulsedesk.model.UserModel;
 import com.pulsedesk.repository.RoleRepository;
 import com.pulsedesk.repository.UserRepository;
 import com.pulsedesk.service.UserService;
@@ -37,9 +41,8 @@ public class UserServiceImpl implements UserService {
 			throw new BadUserRequestException("EmailId is already registered..");
 		}
 
-		Role role = roleRepository.findByName(request.getRole())
-				.orElseThrow(() -> new BadUserRequestException(
-						"Invalid role '" + request.getRole() + "'. Allowed: admin, employee, agent"));
+		Role role = roleRepository.findByName(request.getRole()).orElseThrow(() -> new BadUserRequestException(
+				"Invalid role '" + request.getRole() + "'. Allowed: admin, employee, agent"));
 
 		UserEntity user = new UserEntity();
 		user.setName(request.getName());
@@ -48,8 +51,24 @@ public class UserServiceImpl implements UserService {
 		user.setPwd(encoder.encode(request.getPwd()));
 		user.setCreateDt(LocalDateTime.now().toString());
 		user.setRoles(Set.of(role));
+		user.setStatus(Status.ACTIVE);
 
 		return userRepository.save(user);
+	}
+
+	@Override
+	public List<UserModel> getAllUsers() {
+		
+		List<UserEntity> userEntites = userRepository.findAll();
+		List<UserModel> users = new ArrayList<>();
+		UserModel userModel = null;
+		for(UserEntity entity: userEntites) {
+			userModel = new UserModel();
+			BeanUtils.copyProperties(entity, userModel);
+			users.add(userModel);
+		}
+
+		return users;
 	}
 
 }

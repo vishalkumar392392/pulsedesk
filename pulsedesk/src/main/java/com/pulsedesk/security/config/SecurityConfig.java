@@ -23,6 +23,9 @@ public class SecurityConfig {
 
 	@Autowired
 	private JwtFilter jwtFilter;
+	
+	@Autowired
+	private CustomAccessDeniedHandler accessDeniedHandler;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,8 +36,10 @@ public class SecurityConfig {
 
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/auth/login", "/auth/register", "/auth/refreshToken").permitAll()
-						.requestMatchers("/message").authenticated().anyRequest().authenticated())
-
+						.requestMatchers("/admin/**").hasAuthority("admin")
+						.anyRequest().authenticated())
+				
+				.exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler))
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
