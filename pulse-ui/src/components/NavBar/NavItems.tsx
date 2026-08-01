@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { ROUTES } from "../../util/helper";
 import { useNavigate } from "react-router";
 
 export const NavItems = ({
   isHamburgerMenuClicked = true,
   setIsHamburgerMenuClicked = () => {},
+  ROUTES,
 }: {
   isHamburgerMenuClicked?: boolean;
   setIsHamburgerMenuClicked?: (isClicked: boolean) => void;
+  ROUTES: Record<string, React.ReactNode>;
 }) => {
   const [selectedMenu, setSelectedMenu] = useState<string>("Dashboard");
 
@@ -18,25 +19,32 @@ export const NavItems = ({
       {isHamburgerMenuClicked === true && (
         <div>
           <ul>
-            {Object.keys(ROUTES).map((key: string) => (
-              <li
-                key={key}
-                onClick={() => {
-                  setSelectedMenu(key);
-                  if (key === "Dashboard") {
-                    navigate(`/`);
+            {Object.keys(ROUTES).map((key: string, index: number) => {
+              return (
+                <li
+                  key={key}
+                  onClick={() => {
+                    setSelectedMenu(key);
                     setIsHamburgerMenuClicked(!isHamburgerMenuClicked);
-                    return;
-                  }
-                  setIsHamburgerMenuClicked(!isHamburgerMenuClicked);
-                  navigate(`/${key.toLocaleLowerCase()}`);
-                }}
-                className={`flex cursor-pointer items-center gap-1.5 rounded-sm py-1 ${selectedMenu === key ? "bg-blaze-haze-200 underline underline-offset-2" : ""}`}
-              >
-                {ROUTES[key]}
-                {key}
-              </li>
-            ))}
+                    if (key === "Logout") {
+                      navigate("/login");
+                      return;
+                    }
+                    navigate(`/${key.toLocaleLowerCase()}`);
+                  }}
+                >
+                  {index === 5 ? (
+                    <hr className="my-3 w-[95%] border-gray-300" />
+                  ) : null}
+                  <div
+                    className={`flex cursor-pointer items-center gap-1.5 rounded-sm py-1 sm:py-2 ${selectedMenu === key ? "bg-blaze-haze-200 underline underline-offset-2" : ""}`}
+                  >
+                    {ROUTES[key]}
+                    {key}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
