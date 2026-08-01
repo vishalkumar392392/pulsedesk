@@ -12,51 +12,74 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-
 @Service
 public class JwtUtils {
 
-	 private String secret = "jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4";
+	private static final String TOKEN_TYPE_CLAIM = "tokenType";
+	private static final String ACCESS_TOKEN = "access";
+	private static final String REFRESH_TOKEN = "refresh";
 
-	    public String extractUsername(String token) {
-	        return extractClaim(token, Claims::getSubject);
-	    }
+	// Access token: 10 hours
+	private static final long ACCESS_TOKEN_EXPIRY_MS = 1000L * 60 * 60 * 10;
 
-	    public Date extractExpiration(String token) {
-	        return extractClaim(token, Claims::getExpiration);
-	    }
+	// Refresh token: 7 days
+	private static final long REFRESH_TOKEN_EXPIRY_MS = 1000L * 60 * 60 * 24 * 7;
 
-	    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-	        final Claims claims = extractAllClaims(token);
-	        return claimsResolver.apply(claims);
-	    }
-	    private Claims extractAllClaims(String token) {
-	        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-	    }
+	private String secret = "jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4";
 
-	    private Boolean isTokenExpired(String token) {
-	        return extractExpiration(token).before(new Date());
-	    }
+	public String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
+	}
 
-		/*
-		 * public String generateToken(String username) { Map<String, Object> claims =
-		 * new HashMap<>(); return createToken(claims, username); }
-		 */
-	    
-	    public String generateToken(UserDetails userDetails) {
-			Map<String, Object> claims = new HashMap<>();
-			return createToken(claims, userDetails);
-		}
+	public Date extractExpiration(String token) {
+		return extractClaim(token, Claims::getExpiration);
+	}
 
-	    private String createToken(Map<String, Object> claims, UserDetails userDetails) {
+	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+		final Claims claims = extractAllClaims(token);
+		return claimsResolver.apply(claims);
+	}
 
-	        return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername()).claim("authorities", userDetails.getAuthorities()).setIssuedAt(new Date(System.currentTimeMillis()))
-	                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-	                .signWith(SignatureAlgorithm.HS256, secret).compact();
-	    }
+	private Claims extractAllClaims(String token) {
+		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+	}
 
-	    public Boolean validateToken(String token, UserDetails userDetails) {
-	        final String username = extractUsername(token);
-	        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-	    }
+	private Boolean isTokenExpired(String token) {
+		return extractExpiration(token).before(new Date());
+	}
+
+	public String generateToken(UserDetails userDetails) {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN);
+		claims.put("authorities", userDetails.getAuthorities());
+		return Jwts.builder()
+				.setClaims(claims)
+				.setSubject(userDetails.getUsername())
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY_MS))
+				.signWith(SignatureAlgorithm.HS256, secret)
+				.compact();
+	}
+
+	public String generateRefreshToken(UserDetails userDetails) {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN);
+		return Jwts.builder()
+				.setClaims(claims)
+				.setSubject(userDetails.getUsername())
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY_MS))
+				.signWith(SignatureAlgorithm.HS256, secret)
+				.compact();
+	}
+
+	public Boolean isRefreshToken(String token) {
+		String tokenType = extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class));
+		return REFRESH_TOKEN.equals(tokenType);
+	}
+
+	public Boolean validateToken(String token, UserDetails userDetails) {
+		final String username = extractUsername(token);
+		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	}
 }

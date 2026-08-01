@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.model.ApiResponse;
 import com.pulsedesk.model.AuthenticationRequest;
+import com.pulsedesk.model.AuthTokenResponse;
+import com.pulsedesk.model.RefreshTokenRequest;
 import com.pulsedesk.model.RegisterRequest;
 import com.pulsedesk.security.config.JwtUtils;
 import com.pulsedesk.service.UserService;
@@ -37,20 +39,50 @@ public class UserAuthController {
 	private UserService service;
 
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<String>> register(@RequestBody AuthenticationRequest request) {
+	public ResponseEntity<ApiResponse<AuthTokenResponse>> login(@RequestBody AuthenticationRequest request) {
 
 		authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
 		UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
 		if (userDetails != null) {
-			String token = jwtUtils.generateToken(userDetails);
+			String accessToken = jwtUtils.generateToken(userDetails);
+			String refreshToken = jwtUtils.generateRefreshToken(userDetails);
+			AuthTokenResponse tokens = new AuthTokenResponse(accessToken, refreshToken);
 			return ResponseEntity.status(HttpStatus.OK)
-					.body(ApiResponse.success(token, "token generated successfully", HttpStatus.OK.value()));
+					.body(ApiResponse.success(tokens, "Login successful", HttpStatus.OK.value()));
 		} else {
 			throw new BadCredentialsException("User not found");
 		}
 
+	}
+
+	@PostMapping("/refreshToken")
+	public ResponseEntity<ApiResponse<AuthTokenResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
+
+		String refreshToken = request.getRefreshToken();
+
+		if (refreshToken == null || refreshToken.isBlank()) {
+			throw new BadCredentialsException("Refresh token is missing");
+		}
+
+		String username = jwtUtils.extractUsername(refreshToken);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+		if (!jwtUtils.validateToken(refreshToken, userDetails)) {
+			throw new BadCredentialsException("Refresh token is expired or invalid");
+		}
+
+		if (!jwtUtils.isRefreshToken(refreshToken)) {
+			throw new BadCredentialsException("Provided token is not a refresh token");
+		}
+
+		String newAccessToken = jwtUtils.generateToken(userDetails);
+		String newRefreshToken = jwtUtils.generateRefreshToken(userDetails);
+		AuthTokenResponse tokens = new AuthTokenResponse(newAccessToken, newRefreshToken);
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(tokens, "Token refreshed successfully", HttpStatus.OK.value()));
 	}
 
 	@PostMapping("/register")
