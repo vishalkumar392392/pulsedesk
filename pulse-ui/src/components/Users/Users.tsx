@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { DropDown } from "../Util/DropDown";
+import { useGetUsersQuery } from "../../services/users/userApi";
+import type { User } from "../../types/user";
+import { titleCase } from "../../util/helper";
 
 const DROPDOWN_VALUES: Array<string> = ["All", "Employee", "Agent"];
 interface FormData {
@@ -8,6 +11,9 @@ interface FormData {
 }
 export const Users = () => {
   const [role, setRole] = useState(false);
+  const { data } = useGetUsersQuery();
+  const users: User[] = data ?? [];
+
   const { control } = useForm<FormData>({
     mode: "onChange",
     defaultValues: {
@@ -47,23 +53,29 @@ export const Users = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="">
-              <td className="border-y border-gray-300 p-4">Vikas Palla</td>
-              <td className="border-y border-gray-300 p-4 text-gray-500">
-                vikas@gmail.com
-              </td>
-              <td className="border-y border-gray-300 p-4 text-gray-500">
-                Agent
-              </td>
-              <td className="border-y border-gray-300 p-4">
-                <span className="bg-pulse-green-100 rounded-4xl px-2 py-1">
-                  Active
-                </span>
-              </td>
-              <td className="border-y border-gray-300 p-4 cursor-pointer">
-                <span className="rounded-md border border-gray-300 px-2 py-1">Edit</span>
-              </td>
-            </tr>
+            {users.map((user) => (
+              <tr className="" key={user.id}>
+                <td className="border-y border-gray-300 p-4">
+                  {titleCase(user.name)}
+                </td>
+                <td className="border-y border-gray-300 p-4 text-gray-500">
+                  {user.email}
+                </td>
+                <td className="border-y border-gray-300 p-4 text-gray-500">
+                  {titleCase(user.role)}
+                </td>
+                <td className="border-y border-gray-300 p-4">
+                  <span className="bg-pulse-green-100 rounded-4xl px-2 py-1 text-sm">
+                    {user.status}
+                  </span>
+                </td>
+                <td className="cursor-pointer border-y border-gray-300 p-4">
+                  <span className="rounded-md border border-gray-300 px-2 py-1">
+                    Edit
+                  </span>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

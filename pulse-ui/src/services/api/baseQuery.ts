@@ -7,6 +7,7 @@ import {
 
 import { showLoader, hideLoader } from "../../redux/loaderSlice";
 import { showErrorModal } from "../../redux/errorSlice";
+import { authStorage } from "../auth/authStorage";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -28,6 +29,14 @@ export function isApiResponse(value: unknown): value is ApiResponse<unknown> {
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:8080/",
+  prepareHeaders: (headers) => {
+    const token = authStorage.getAccessToken();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    headers.set("Content-Type", "application/json");
+    return headers;
+  },
 });
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const baseQueryWithLoader: BaseQueryFn<

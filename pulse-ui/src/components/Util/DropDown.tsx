@@ -12,6 +12,7 @@ interface DropDownProps {
   control: Control<FormData, FieldValues>;
   values: Array<string>;
   label?: string;
+  placeholder?: string;
 }
 
 export const DropDown = ({
@@ -20,6 +21,7 @@ export const DropDown = ({
   control,
   values,
   label = "",
+  placeholder = "",
 }: DropDownProps) => {
   return (
     <Controller
@@ -34,7 +36,7 @@ export const DropDown = ({
               onClick={() => setData(!data)}
             >
               <span>{label && <label>{label}:</label>}</span>
-              <span>{field.value || "Select Country"}</span>
+              <span>{field.value || placeholder}</span>
               <IoMdArrowDropdown
                 className={`transition-transform ${data ? "rotate-180" : ""}`}
               />
