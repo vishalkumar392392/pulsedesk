@@ -7,11 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.pulsedesk.entites.Role;
+import com.pulsedesk.entites.RoleEntity;
 
-public interface RoleRepository extends JpaRepository<Role, Long> {
+public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
-	Optional<Role> findByName(String name);
+	Optional<RoleEntity> findByName(String name);
 
 	@Query(value = """
 	        SELECT r.*
@@ -20,6 +20,6 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 	            ON r.id = ur.role_id
 	        WHERE ur.user_id = :userId
 	        """, nativeQuery = true)
-	    List<Role> findRolesByUserId(@Param("userId") String userId);
+	    List<RoleEntity> findRolesByUserId(@Param("userId") String userId);
 
 }

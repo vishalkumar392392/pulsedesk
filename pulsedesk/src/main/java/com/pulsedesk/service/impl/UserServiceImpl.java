@@ -12,7 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.pulsedesk.entites.Role;
+import com.pulsedesk.entites.RoleEntity;
+import com.pulsedesk.entites.RoleUserEntity;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
@@ -20,6 +21,7 @@ import com.pulsedesk.modal.RegisterRequest;
 import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.repository.RoleRepository;
 import com.pulsedesk.repository.UserRepository;
+import com.pulsedesk.repository.UserRoleRepository;
 import com.pulsedesk.service.UserService;
 
 @Service
@@ -32,6 +34,9 @@ public class UserServiceImpl implements UserService {
 	private RoleRepository roleRepository;
 
 	@Autowired
+	private UserRoleRepository userRoleRepository;
+
+	@Autowired
 	private PasswordEncoder encoder;
 
 	@Override
@@ -42,7 +47,7 @@ public class UserServiceImpl implements UserService {
 			throw new BadUserRequestException("EmailId is already registered..");
 		}
 
-		Role role = roleRepository.findByName(request.getRole()).orElseThrow(() -> new BadUserRequestException(
+		RoleEntity role = roleRepository.findByName(request.getRole()).orElseThrow(() -> new BadUserRequestException(
 				"Invalid role '" + request.getRole() + "'. Allowed: admin, employee, agent"));
 
 		UserEntity user = new UserEntity();
@@ -61,12 +66,16 @@ public class UserServiceImpl implements UserService {
 	public List<UserModel> getAllUsers() {
 
 		List<UserEntity> userEntites = userRepository.findAll();
+		List<RoleUserEntity> allUsersAndTheirRoles = userRoleRepository.getAllUsersAndTheirRoles();
 		List<UserModel> users = new ArrayList<>();
 		UserModel userModel = null;
 		for (UserEntity entity : userEntites) {
 			userModel = new UserModel();
+			userModel.setRoles(allUsersAndTheirRoles.stream().filter(i -> i.getUserId().equals(entity.getId()))
+					.map(RoleUserEntity::getRoleName).collect(Collectors.toList()));
 			BeanUtils.copyProperties(entity, userModel);
 			users.add(userModel);
+
 		}
 
 		return users;
@@ -83,7 +92,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private List<String> getRoles(UserEntity user) {
-		List<String> roles = roleRepository.findRolesByUserId(user.getId().toString()).stream().map(Role::getName)
+		List<String> roles = roleRepository.findRolesByUserId(user.getId().toString()).stream().map(RoleEntity::getName)
 				.collect(Collectors.toList());
 		return roles;
 	}
