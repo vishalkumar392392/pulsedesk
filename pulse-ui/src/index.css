@@ -1,7 +1,133 @@
 @import "tailwindcss";
 
+/* ==========================================================
+   Dot Spinner
+   ========================================================== */
+
+.dot-spinner {
+  --uib-size: 2.8rem;
+  --uib-speed: 0.9s;
+  --uib-color: #183153;
+
+  position: relative;
+  width: var(--uib-size);
+  height: var(--uib-size);
+
+  color: var(--uib-color);
+
+  pointer-events: none;
+}
+
+.dot-spinner__dot {
+  position: absolute;
+  inset: 0;
+}
+
+.dot-spinner__dot::before {
+  content: "";
+
+  display: block;
+
+  width: 20%;
+  height: 20%;
+
+  border-radius: 9999px;
+
+  background: currentColor;
+
+  opacity: 0.5;
+
+  transform: scale(0) translateZ(0);
+
+  box-shadow: 0 0 20px rgba(18, 31, 53, 0.3);
+
+  animation: dotSpinnerPulse calc(var(--uib-speed) * 1.111) ease-in-out infinite;
+}
+
+/* ==========================================================
+   Dot Rotation
+   ========================================================== */
+
+.dot-spinner__dot:nth-child(2) {
+  transform: rotate(45deg);
+}
+
+.dot-spinner__dot:nth-child(3) {
+  transform: rotate(90deg);
+}
+
+.dot-spinner__dot:nth-child(4) {
+  transform: rotate(135deg);
+}
+
+.dot-spinner__dot:nth-child(5) {
+  transform: rotate(180deg);
+}
+
+.dot-spinner__dot:nth-child(6) {
+  transform: rotate(225deg);
+}
+
+.dot-spinner__dot:nth-child(7) {
+  transform: rotate(270deg);
+}
+
+.dot-spinner__dot:nth-child(8) {
+  transform: rotate(315deg);
+}
+
+/* ==========================================================
+   Animation Delay
+   ========================================================== */
+
+.dot-spinner__dot:nth-child(2)::before {
+  animation-delay: calc(var(--uib-speed) * -0.875);
+}
+
+.dot-spinner__dot:nth-child(3)::before {
+  animation-delay: calc(var(--uib-speed) * -0.75);
+}
+
+.dot-spinner__dot:nth-child(4)::before {
+  animation-delay: calc(var(--uib-speed) * -0.625);
+}
+
+.dot-spinner__dot:nth-child(5)::before {
+  animation-delay: calc(var(--uib-speed) * -0.5);
+}
+
+.dot-spinner__dot:nth-child(6)::before {
+  animation-delay: calc(var(--uib-speed) * -0.375);
+}
+
+.dot-spinner__dot:nth-child(7)::before {
+  animation-delay: calc(var(--uib-speed) * -0.25);
+}
+
+.dot-spinner__dot:nth-child(8)::before {
+  animation-delay: calc(var(--uib-speed) * -0.125);
+}
+
+/* ==========================================================
+   Animation
+   ========================================================== */
+
+@keyframes dotSpinnerPulse {
+  0%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @theme {
   --color-pulse-green: #0a5f66;
+  --color-pulse-green-100: #d8efe6;
   --color-blaze-haze-100: #effefd;
   --color-blaze-haze-200: #cef9f7;
   --color-blaze-haze: #f3f5f4;

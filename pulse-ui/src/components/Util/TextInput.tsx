@@ -8,13 +8,18 @@ interface TextInputProps {
   label?: string;
   min?: number;
   max?: number;
+  placeholder?: string;
   style?: TextInputStyleProps;
 }
 
-export const TextInput = ({ min = 3, ...props }: TextInputProps) => {
+export const TextInput = ({
+  min = 3,
+  placeholder = "",
+  ...props
+}: TextInputProps) => {
   const { control, handleSubmit } = useForm({
     defaultValues: {
-      ticketId: "",
+      userInput: "",
     },
   });
 
@@ -26,7 +31,7 @@ export const TextInput = ({ min = 3, ...props }: TextInputProps) => {
     >
       {props?.label && <label>Search</label>}
       <Controller
-        name="ticketId"
+        name="userInput"
         control={control}
         rules={{
           minLength: {
@@ -46,7 +51,7 @@ export const TextInput = ({ min = 3, ...props }: TextInputProps) => {
                 {...field}
                 className="h-8 min-w-0 flex-1 border-none bg-transparent p-0 outline-none"
                 type="text"
-                placeholder={"Search"}
+                placeholder={`Search ${placeholder}`}
               />
             </div>
             {fieldState.error && (

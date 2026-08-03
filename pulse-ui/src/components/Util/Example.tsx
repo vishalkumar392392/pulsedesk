@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 interface FormData {
   firstName: string;
@@ -23,6 +25,8 @@ export default function UserForm() {
       acceptTerms: false,
     },
   });
+
+  const [isCountryOpen, setIsCountryOpen] = useState(false);
 
   const onSubmit = (data: FormData) => {
     console.log(data);
@@ -107,16 +111,49 @@ export default function UserForm() {
         rules={{
           required: "Please select a country",
         }}
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <>
             <label>Country</label>
 
-            <select {...field} className="rounded border p-2">
-              <option value="">Select Country</option>
-              <option value="India">India</option>
-              <option value="USA">USA</option>
-              <option value="Canada">Canada</option>
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+
+                onClick={() => setIsCountryOpen(!isCountryOpen)}
+
+                className={`flex w-full items-center rounded-md border px-3 py-2 text-left ${
+                  fieldState.error ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                <span>{field.value || "Select Country"}</span>
+
+                <IoMdArrowDropdown
+                  className={`transition-transform ${
+                    isCountryOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {isCountryOpen && (
+                <ul className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-lg">
+                  {["India", "USA", "Canada"].map((country) => (
+                    <li
+                      key={country}
+
+                      onClick={() => {
+                        field.onChange(country);
+
+                        setIsCountryOpen(false);
+                      }}
+
+                      className="cursor-pointer px-3 py-2 hover:bg-gray-100"
+                    >
+                      {country}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
             <p className="min-h-5 text-sm text-red-500">
               {errors.country?.message}

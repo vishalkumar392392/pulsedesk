@@ -9,22 +9,26 @@ import { Users } from "./components/Users/Users";
 import { Reports } from "./components/Reports/Reports";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { Login } from "./components/Login/Login";
+import Loader from "./components/Util/Loader";
 
 function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/tickets" element={<Tickets />} />
-        <Route path="/assets" element={<Assets />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/example" element={<UserForm />} />
-        <Route path="*" element={<PageNotFound />} />
-      </Route>
-      <Route path="/login" element={<Login />} />
-    </Routes>
+    <>
+      <Loader />
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tickets" element={<Tickets />} />
+          <Route path="/assets" element={<Assets />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/example" element={<UserForm />} />
+          <Route path="*" element={<PageNotFound />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </>
   );
 }
 

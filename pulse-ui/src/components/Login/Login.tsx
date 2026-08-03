@@ -1,5 +1,7 @@
 import { Controller, useForm } from "react-hook-form";
 import { PulseIcon } from "../Util/PulseIcon";
+import { useLoginMutation } from "../../services/auth/authApi";
+import { authStorage } from "../../services/auth/authStorage";
 
 interface FormData {
   email: string;
@@ -19,12 +21,20 @@ export const Login = () => {
       rememberMe: false,
     },
   });
-  const onSubmit = (data: FormData) => {
-    // if (data.rememberMe) {
-
-    // } else {
-    // }
+  const [login] = useLoginMutation();
+  const onSubmit = async (data: FormData) => {
     console.log(data);
+    try {
+      const response = await login(data).unwrap();
+      // console.log(response);
+      authStorage.saveTokens(
+        response.data.accessToken,
+        response.data.refreshToken,
+        data.rememberMe,
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <form

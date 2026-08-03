@@ -1,13 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { pulseApi } from "./services/pulseApi";
+import { baseApi } from "../services/api/baseApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
-
+import loaderReducer from "../redux/loaderSlice";
 export const store = configureStore({
   reducer: {
-    [pulseApi.reducerPath]: pulseApi.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
+    loader: loaderReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(pulseApi.middleware),
+    getDefaultMiddleware().concat(baseApi.middleware),
 });
 
 setupListeners(store.dispatch);
