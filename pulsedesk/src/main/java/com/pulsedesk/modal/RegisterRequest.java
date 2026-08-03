@@ -1,4 +1,4 @@
-package com.pulsedesk.model;
+package com.pulsedesk.modal;
 
 import lombok.Data;
 

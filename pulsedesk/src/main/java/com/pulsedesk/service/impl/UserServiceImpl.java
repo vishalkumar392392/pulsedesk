@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ import com.pulsedesk.entites.Role;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
-import com.pulsedesk.model.RegisterRequest;
-import com.pulsedesk.model.UserModel;
+import com.pulsedesk.modal.RegisterRequest;
+import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.repository.RoleRepository;
 import com.pulsedesk.repository.UserRepository;
 import com.pulsedesk.service.UserService;
@@ -58,17 +59,43 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserModel> getAllUsers() {
-		
+
 		List<UserEntity> userEntites = userRepository.findAll();
 		List<UserModel> users = new ArrayList<>();
 		UserModel userModel = null;
-		for(UserEntity entity: userEntites) {
+		for (UserEntity entity : userEntites) {
 			userModel = new UserModel();
 			BeanUtils.copyProperties(entity, userModel);
 			users.add(userModel);
 		}
 
 		return users;
+	}
+
+	@Override
+	public UserModel getByUserId(Integer id) {
+		UserEntity user = userRepository.findById(id).get();
+		UserModel userResponse = new UserModel();
+		BeanUtils.copyProperties(user, userResponse);
+		List<String> roles = getRoles(user);
+		userResponse.setRoles(roles);
+		return userResponse;
+	}
+
+	private List<String> getRoles(UserEntity user) {
+		List<String> roles = roleRepository.findRolesByUserId(user.getId().toString()).stream().map(Role::getName)
+				.collect(Collectors.toList());
+		return roles;
+	}
+
+	@Override
+	public UserModel getByUserEmail(String email) {
+		UserEntity user = userRepository.findByEmail(email).get(0);
+		UserModel userResponse = new UserModel();
+		BeanUtils.copyProperties(user, userResponse);
+		List<String> roles = getRoles(user);
+		userResponse.setRoles(roles);
+		return userResponse;
 	}
 
 }

@@ -1,12 +1,13 @@
-package com.pulsedesk.security.config;
+package com.pulsedesk.security.handler;
 
 import java.io.IOException;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
-import com.pulsedesk.model.ApiResponse;
+import com.pulsedesk.modal.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,12 +22,12 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException ex) throws IOException {
-
+    	
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType("application/json");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ApiResponse<Void> apiResponse =
-                ApiResponse.error("Access denied", 403);
+                ApiResponse.error("You do not have permission to access this resource.", 403);
 
         objectMapper.writeValue(response.getWriter(), apiResponse);
         response.getWriter().flush();

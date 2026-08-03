@@ -1,4 +1,4 @@
-package com.pulsedesk.model;
+package com.pulsedesk.modal;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,5 +11,7 @@ public class AuthTokenResponse {
 
     private String accessToken;
     private String refreshToken;
+	private UserModel user;
+
 
 }

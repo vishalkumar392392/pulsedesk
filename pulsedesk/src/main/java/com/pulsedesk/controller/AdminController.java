@@ -10,23 +10,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pulsedesk.model.ApiResponse;
-import com.pulsedesk.model.UserModel;
+import com.pulsedesk.modal.ApiResponse;
+import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.service.UserService;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@GetMapping("/users")
 	@PreAuthorize("hasAuthority('admin')")
-	public ResponseEntity<ApiResponse<List<UserModel>>> getAllUsers(){
-		
-		 List<UserModel> users = userService.getAllUsers();
-		 return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(users, "Featched users successfully", HttpStatus.OK.value()));
+	public ResponseEntity<ApiResponse<List<UserModel>>> getAllUsers() {
+
+		List<UserModel> users = userService.getAllUsers();
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(users, "Featched users successfully", HttpStatus.OK.value()));
 	}
 
 }

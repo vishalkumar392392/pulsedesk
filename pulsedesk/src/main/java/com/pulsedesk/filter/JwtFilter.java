@@ -1,6 +1,7 @@
 package com.pulsedesk.filter;
 
 import java.io.IOException;
+import java.security.SignatureException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.pulsedesk.security.config.JwtUtils;
 import com.pulsedesk.security.config.UserEntityDetailService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private UserEntityDetailService customerUserDetailService;
-	
+
 	@Autowired
 	private JwtUtils jwtUtils;
 
@@ -40,18 +44,30 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 
 		String jwtToken = authHeader.substring(7);
-		String userEmail = jwtUtils.extractUsername(jwtToken);
+		try {
+			String userEmail = jwtUtils.extractUsername(jwtToken);
 
-		if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			UserDetails userDetails = customerUserDetailService.loadUserByUsername(userEmail);
-			final boolean isTokenValid = jwtUtils.validateToken(jwtToken, userDetails);
-			if (isTokenValid) {
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-						null, userDetails.getAuthorities());
+			if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				UserDetails userDetails = customerUserDetailService.loadUserByUsername(userEmail);
+				final boolean isTokenValid = jwtUtils.validateToken(jwtToken, userDetails);
+				if (isTokenValid) {
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+							null, userDetails.getAuthorities());
 
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				}
 			}
+		} catch (ExpiredJwtException ex) {
+			request.setAttribute("exception", ex);
+		}
+
+		catch (MalformedJwtException ex) {
+			request.setAttribute("exception", ex);
+		}
+
+		catch (JwtException ex) {
+			request.setAttribute("exception", ex);
 		}
 
 		filterChain.doFilter(request, response);

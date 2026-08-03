@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pulsedesk.entites.UserEntity;
-import com.pulsedesk.model.ApiResponse;
-import com.pulsedesk.model.AuthenticationRequest;
-import com.pulsedesk.model.AuthTokenResponse;
-import com.pulsedesk.model.RefreshTokenRequest;
-import com.pulsedesk.model.RegisterRequest;
+import com.pulsedesk.modal.ApiResponse;
+import com.pulsedesk.modal.AuthTokenResponse;
+import com.pulsedesk.modal.AuthenticationRequest;
+import com.pulsedesk.modal.RefreshTokenRequest;
+import com.pulsedesk.modal.RegisterRequest;
 import com.pulsedesk.security.config.JwtUtils;
 import com.pulsedesk.service.UserService;
 
 @RestController
 @RequestMapping("/auth")
-public class UserAuthController {
+public class AuthController {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -48,9 +48,12 @@ public class UserAuthController {
 		if (userDetails != null) {
 			String accessToken = jwtUtils.generateToken(userDetails);
 			String refreshToken = jwtUtils.generateRefreshToken(userDetails);
-			AuthTokenResponse tokens = new AuthTokenResponse(accessToken, refreshToken);
+			AuthTokenResponse response = new AuthTokenResponse();
+			response.setAccessToken(accessToken);
+			response.setRefreshToken(refreshToken);
+			response.setUser(service.getByUserEmail(request.getEmail()));
 			return ResponseEntity.status(HttpStatus.OK)
-					.body(ApiResponse.success(tokens, "Login successful", HttpStatus.OK.value()));
+					.body(ApiResponse.success(response, "Login successful", HttpStatus.OK.value()));
 		} else {
 			throw new BadCredentialsException("User not found");
 		}
@@ -79,10 +82,12 @@ public class UserAuthController {
 
 		String newAccessToken = jwtUtils.generateToken(userDetails);
 		String newRefreshToken = jwtUtils.generateRefreshToken(userDetails);
-		AuthTokenResponse tokens = new AuthTokenResponse(newAccessToken, newRefreshToken);
+		AuthTokenResponse response = new AuthTokenResponse();
+		response.setAccessToken(newAccessToken);
+		response.setRefreshToken(newRefreshToken);
 
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(ApiResponse.success(tokens, "Token refreshed successfully", HttpStatus.OK.value()));
+				.body(ApiResponse.success(response, "Token refreshed successfully", HttpStatus.OK.value()));
 	}
 
 	@PostMapping("/register")
