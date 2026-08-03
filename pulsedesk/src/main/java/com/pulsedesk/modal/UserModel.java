@@ -1,7 +1,5 @@
 package com.pulsedesk.modal;
 
-import java.util.List;
-
 import com.pulsedesk.enums.Status;
 
 import lombok.AllArgsConstructor;
@@ -18,6 +16,6 @@ public class UserModel {
 	private Status status;
 	private String mobileNumber;
 	private String createDt;
-	private List<String> roles;
+	private String role;
 
 }

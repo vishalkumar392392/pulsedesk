@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.pulsedesk.entites.RoleEntity;
-import com.pulsedesk.entites.RoleUserEntity;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
@@ -21,7 +18,6 @@ import com.pulsedesk.modal.RegisterRequest;
 import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.repository.RoleRepository;
 import com.pulsedesk.repository.UserRepository;
-import com.pulsedesk.repository.UserRoleRepository;
 import com.pulsedesk.service.UserService;
 
 @Service
@@ -32,9 +28,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RoleRepository roleRepository;
-
-	@Autowired
-	private UserRoleRepository userRoleRepository;
 
 	@Autowired
 	private PasswordEncoder encoder;
@@ -56,7 +49,7 @@ public class UserServiceImpl implements UserService {
 		user.setMobileNumber(request.getMobileNumber());
 		user.setPwd(encoder.encode(request.getPwd()));
 		user.setCreateDt(LocalDateTime.now().toString());
-		user.setRoles(Set.of(role));
+		user.setRoleId(role.getId());
 		user.setStatus(Status.ACTIVE);
 
 		return userRepository.save(user);
@@ -64,20 +57,17 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserModel> getAllUsers() {
-
 		List<UserEntity> userEntites = userRepository.findAll();
-		List<RoleUserEntity> allUsersAndTheirRoles = userRoleRepository.getAllUsersAndTheirRoles();
 		List<UserModel> users = new ArrayList<>();
-		UserModel userModel = null;
+		List<RoleEntity> roles = roleRepository.findAll();
 		for (UserEntity entity : userEntites) {
-			userModel = new UserModel();
-			userModel.setRoles(allUsersAndTheirRoles.stream().filter(i -> i.getUserId().equals(entity.getId()))
-					.map(RoleUserEntity::getRoleName).collect(Collectors.toList()));
+			UserModel userModel = new UserModel();
 			BeanUtils.copyProperties(entity, userModel);
+			userModel.setRole(roles.stream().filter(i -> entity.getRoleId().equals(i.getId())).map(RoleEntity::getName)
+					.findFirst().orElse(""));
+
 			users.add(userModel);
-
 		}
-
 		return users;
 	}
 
@@ -86,15 +76,8 @@ public class UserServiceImpl implements UserService {
 		UserEntity user = userRepository.findById(id).get();
 		UserModel userResponse = new UserModel();
 		BeanUtils.copyProperties(user, userResponse);
-		List<String> roles = getRoles(user);
-		userResponse.setRoles(roles);
+		roleRepository.findById(user.getRoleId()).ifPresent(role -> userResponse.setRole(role.getName()));
 		return userResponse;
-	}
-
-	private List<String> getRoles(UserEntity user) {
-		List<String> roles = roleRepository.findRolesByUserId(user.getId().toString()).stream().map(RoleEntity::getName)
-				.collect(Collectors.toList());
-		return roles;
 	}
 
 	@Override
@@ -102,8 +85,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity user = userRepository.findByEmail(email).get(0);
 		UserModel userResponse = new UserModel();
 		BeanUtils.copyProperties(user, userResponse);
-		List<String> roles = getRoles(user);
-		userResponse.setRoles(roles);
+		roleRepository.findById(user.getRoleId()).ifPresent(role -> userResponse.setRole(role.getName()));
 		return userResponse;
 	}
 
