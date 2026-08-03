@@ -3,12 +3,16 @@ const REFRESH_TOKEN = "refreshToken";
 
 export const authStorage = {
   saveTokens(accessToken: string, refreshToken: string, rememberMe: boolean) {
+    localStorage.removeItem(ACCESS_TOKEN);
+    localStorage.removeItem(REFRESH_TOKEN);
+    sessionStorage.removeItem(ACCESS_TOKEN);
+    sessionStorage.removeItem(REFRESH_TOKEN);
     if (rememberMe) {
-      localStorage.setItem(ACCESS_TOKEN, accessToken);
-      localStorage.setItem(REFRESH_TOKEN, refreshToken);
-    } else {
       sessionStorage.setItem(ACCESS_TOKEN, accessToken);
       sessionStorage.setItem(REFRESH_TOKEN, refreshToken);
+    } else {
+      localStorage.setItem(ACCESS_TOKEN, accessToken);
+      localStorage.setItem(REFRESH_TOKEN, refreshToken);
     }
   },
 

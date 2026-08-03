@@ -10,20 +10,16 @@ const initialState: LoaderState = {
 
 const loaderSlice = createSlice({
   name: "loader",
-
   initialState,
-
   reducers: {
     showLoader: (state) => {
       state.loadingCount++;
     },
-
     hideLoader: (state) => {
       if (state.loadingCount > 0) {
         state.loadingCount--;
       }
     },
-
     resetLoader: (state) => {
       state.loadingCount = 0;
     },

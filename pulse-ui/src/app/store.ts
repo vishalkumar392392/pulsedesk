@@ -2,10 +2,12 @@ import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "../services/api/baseApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import loaderReducer from "../redux/loaderSlice";
+import errorReducer from "../redux/errorSlice";
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
     loader: loaderReducer,
+    error: errorReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware),

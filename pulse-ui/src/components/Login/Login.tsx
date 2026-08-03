@@ -23,18 +23,13 @@ export const Login = () => {
   });
   const [login] = useLoginMutation();
   const onSubmit = async (data: FormData) => {
-    console.log(data);
-    try {
-      const response = await login(data).unwrap();
-      // console.log(response);
-      authStorage.saveTokens(
-        response.data.accessToken,
-        response.data.refreshToken,
-        data.rememberMe,
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    const response = await login(data).unwrap();
+    // console.log(response);
+    authStorage.saveTokens(
+      response.data.accessToken,
+      response.data.refreshToken,
+      data.rememberMe,
+    );
   };
   return (
     <form

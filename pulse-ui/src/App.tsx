@@ -10,10 +10,12 @@ import { Reports } from "./components/Reports/Reports";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { Login } from "./components/Login/Login";
 import Loader from "./components/Util/Loader";
+import { Modal } from "./components/Util/Modal";
 
 function App() {
   return (
     <>
+      <Modal />
       <Loader />
       <Routes>
         <Route element={<Layout />}>
