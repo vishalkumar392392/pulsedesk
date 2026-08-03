@@ -1,8 +1,11 @@
 package com.pulsedesk.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +21,18 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	@GetMapping("/all")
+	@PreAuthorize("hasAuthority('admin')")
+	public ResponseEntity<ApiResponse<List<UserModel>>> getAllUsers() {
+
+		List<UserModel> users = userService.getAllUsers();
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(users, "Featched users successfully", HttpStatus.OK.value()));
+	}
 
 	@GetMapping("id/{userId}")
+	@PreAuthorize("hasAuthority('admin')")
 	public ResponseEntity<ApiResponse<UserModel>> getByUserId(@PathVariable Integer userId) {
 		UserModel user = userService.getByUserId(userId);
 		return ResponseEntity.status(HttpStatus.OK)
@@ -27,6 +40,7 @@ public class UserController {
 	}
 
 	@GetMapping("email/{email}")
+	@PreAuthorize("hasAuthority('admin')")
 	public ResponseEntity<ApiResponse<UserModel>> getByUserEmail(@PathVariable String email) {
 		UserModel user = userService.getByUserEmail(email);
 		return ResponseEntity.status(HttpStatus.OK)

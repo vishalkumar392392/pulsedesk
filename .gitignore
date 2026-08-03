@@ -2,3 +2,4 @@ Pulse-Project-Documents/
 New-*
 pulsedesk/.metadata/
 .DS_Store
+pulsedesk-dbschema.sql
