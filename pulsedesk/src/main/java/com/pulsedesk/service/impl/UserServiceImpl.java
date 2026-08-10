@@ -7,15 +7,21 @@ import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.pulsedesk.entites.AllUsersEntity;
 import com.pulsedesk.entites.RoleEntity;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
+import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.RegisterRequest;
 import com.pulsedesk.modal.UserModel;
+import com.pulsedesk.repository.GetAllUsersRepository;
 import com.pulsedesk.repository.RoleRepository;
 import com.pulsedesk.repository.UserRepository;
 import com.pulsedesk.service.UserService;
@@ -25,6 +31,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private GetAllUsersRepository allUsersRepository;
 
 	@Autowired
 	private RoleRepository roleRepository;
@@ -87,6 +96,31 @@ public class UserServiceImpl implements UserService {
 		BeanUtils.copyProperties(user, userResponse);
 		roleRepository.findById(user.getRoleId()).ifPresent(role -> userResponse.setRole(role.getName()));
 		return userResponse;
+	}
+
+	@Override
+	public PageResponse<UserModel> getAllUsers(int page, int size, String role) {
+		int currentPage = Math.max(page, 0);
+		int pageSize = Math.min(Math.max(size, 1), 100);
+		Pageable pageable = PageRequest.of(currentPage, pageSize);
+		Page<AllUsersEntity> users = allUsersRepository.findUsers(role, pageable);
+		Page<UserModel> userModels = users.map(this::convertToUserModel);
+		return new PageResponse<>(userModels.getContent(), userModels.getNumber(), userModels.getSize(),
+				userModels.getTotalElements(), userModels.getTotalPages(), userModels.isFirst(), userModels.isLast());
+
+	}
+
+	private UserModel convertToUserModel(AllUsersEntity entity) {
+
+		UserModel model = new UserModel();
+		model.setId(entity.getId());
+		model.setName(entity.getName());
+		model.setEmail(entity.getEmail());
+		model.setMobileNumber(entity.getMobileNumber());
+		model.setStatus(entity.getStatus());
+		model.setRole(entity.getRole());
+		return model;
+
 	}
 
 }

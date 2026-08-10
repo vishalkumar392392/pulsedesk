@@ -14,7 +14,7 @@ const TopNavBar = () => {
           </div>
         </div>
       </div>
-      <hr className="mb-5 border-gray-300" />
+      {/* <hr className="mb-5 border-gray-300" /> */}
       <Outlet />
     </div>
   );

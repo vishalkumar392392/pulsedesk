@@ -47,7 +47,6 @@ export const baseQueryWithLoader: BaseQueryFn<
   api.dispatch(showLoader()); // Before request
 
   // Only for testing
-
   if (import.meta.env.DEV) {
     await delay(500);
   }

@@ -1,5 +1,5 @@
 import { Controller } from "react-hook-form";
-import type { Control, FieldValues } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import { IoMdArrowDropdown } from "react-icons/io";
 
 interface FormData {
@@ -9,7 +9,7 @@ interface FormData {
 interface DropDownProps {
   data: boolean;
   setData: (data: boolean) => void;
-  control: Control<FormData, FieldValues>;
+  control: Control<FormData>;
   values: Array<string>;
   label?: string;
   placeholder?: string;
@@ -33,7 +33,9 @@ export const DropDown = ({
             <button
               type="button"
               className="flex w-full items-center gap-1 rounded-md border border-gray-300 px-3 py-2 text-left"
-              onClick={() => setData(!data)}
+              onClick={() => {
+                setData(!data);
+              }}
             >
               <span>{label && <label>{label}:</label>}</span>
               <span>{field.value || placeholder}</span>

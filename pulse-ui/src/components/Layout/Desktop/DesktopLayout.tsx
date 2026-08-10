@@ -3,7 +3,7 @@ import SearchInput from "../../NavBar/TopNavBar";
 
 export const DesktopLayout = () => {
   return (
-    <div className="flex h-screen w-screen gap-10 px-10">
+    <div className="flex min-h-screen gap-10 pr-10">
       <SideNavBar />
       <SearchInput />
     </div>

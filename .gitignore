@@ -3,3 +3,4 @@ New-*
 pulsedesk/.metadata/
 .DS_Store
 pulsedesk-dbschema.sql
+pulsedesk-seed-users.sql

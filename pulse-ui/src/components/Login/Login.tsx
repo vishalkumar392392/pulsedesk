@@ -2,6 +2,7 @@ import { Controller, useForm } from "react-hook-form";
 import { PulseIcon } from "../Util/PulseIcon";
 import { useLoginMutation } from "../../services/auth/authApi";
 import { authStorage } from "../../services/auth/authStorage";
+import { useNavigate } from "react-router";
 
 interface FormData {
   email: string;
@@ -9,6 +10,7 @@ interface FormData {
   rememberMe: boolean;
 }
 export const Login = () => {
+  const navigate = useNavigate();
   const {
     control,
     handleSubmit,
@@ -30,6 +32,7 @@ export const Login = () => {
       response.data.refreshToken,
       data.rememberMe,
     );
+    navigate("/dashboard");
   };
   return (
     <form

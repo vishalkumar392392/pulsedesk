@@ -4,7 +4,7 @@ import { PulseIcon } from "../Util/PulseIcon";
 
 const SideNavBar = () => {
   return (
-    <div className="w-[20%] border-r-[1.5px] border-gray-300 pt-12">
+    <div className="bg-pulse-gray w-[20%] border-r-[1.5px] border-gray-300 pt-12 pl-10">
       <PulseIcon />
       <div className="mt-7 flex flex-col">
         <NavItems ROUTES={ROUTES} />

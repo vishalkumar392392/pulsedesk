@@ -4,29 +4,38 @@ import { DropDown } from "../Util/DropDown";
 import { useGetUsersQuery } from "../../services/users/userApi";
 import type { User } from "../../types/user";
 import { titleCase } from "../../util/helper";
-
+import { GoChevronRight } from "react-icons/go";
+import { GoChevronLeft } from "react-icons/go";
+import { TableDropDown } from "../Util/TableDropDown";
 const DROPDOWN_VALUES: Array<string> = ["All", "Employee", "Agent"];
 interface FormData {
   value: string;
 }
 export const Users = () => {
-  const [role, setRole] = useState(false);
-  const { data } = useGetUsersQuery();
-  const users: User[] = data ?? [];
+  const [isOpen, setIsOpen] = useState(false);
 
-  const { control } = useForm<FormData>({
+  const { control, getValues } = useForm<FormData>({
     mode: "onChange",
     defaultValues: {
       value: "",
     },
   });
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState("10");
+
+  const { data } = useGetUsersQuery({
+    page: page,
+    pageSize: Number(pageSize),
+    role: getValues("value"),
+  });
+  const users: User[] = data?.content || [];
 
   return (
     <div>
       <form>
         <DropDown
-          data={role}
-          setData={setRole}
+          data={isOpen}
+          setData={setIsOpen}
           control={control}
           values={DROPDOWN_VALUES}
           label="Role"
@@ -78,6 +87,49 @@ export const Users = () => {
             ))}
           </tbody>
         </table>
+        <div className="my-4 flex items-center justify-center gap-4">
+          <div
+            className={`rounded-md border border-gray-300 ${page - 1 < 0 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+          >
+            <GoChevronLeft
+              fontSize={28}
+              color="gray"
+              onClick={() => {
+                if (page - 1 < 0) {
+                  return;
+                }
+                setPage(page - 1);
+              }}
+            />
+          </div>
+
+          <span className="text-gray-600">
+            Page {page + 1} of {data?.totalPages}
+          </span>
+
+          <div
+            className={`rounded-md border border-gray-300 ${page + 1 >= (data?.totalPages ?? 0) ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+          >
+            <GoChevronRight
+              fontSize={28}
+              color="gray"
+              onClick={() => {
+                if ((data?.totalPages ?? 0) <= page + 1) {
+                  return;
+                }
+                setPage(page + 1);
+              }}
+            />
+          </div>
+          <div className="text-gray-600">
+            Rows:{" "}
+            <TableDropDown
+              options={["10", "20", "30"]}
+              defaultValue={pageSize}
+              onChange={setPageSize}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
