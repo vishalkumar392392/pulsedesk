@@ -14,16 +14,22 @@ export interface GetUsersParams {
   page?: number;
   pageSize?: number;
   role?: string;
+  sort?: string | null;
+  direction?: string | null;
 }
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query<UsersResponse, GetUsersParams>({
-      query: ({ page = 0, pageSize = 25, role = "" }) => {
+      query: ({ page = 0, pageSize = 25, role = "", sort, direction }) => {
         role = role === "All" ? "" : role;
-        return role
-          ? `/user/all?page=${page}&size=${pageSize}&role=${role}`
-          : `/user/all?page=${page}&size=${pageSize}`;
+        const params = new URLSearchParams();
+        params.set("page", String(page));
+        params.set("size", String(pageSize));
+        if (role) params.set("role", role);
+        if (sort) params.set("sort", sort);
+        if (direction) params.set("direction", direction);
+        return `/user/all?${params.toString()}`;
       },
       transformResponse: (response: ApiResponse<UsersResponse>) =>
         response.data,

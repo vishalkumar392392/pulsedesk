@@ -1,7 +1,6 @@
 package com.pulsedesk.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,12 +23,12 @@ public class UserController {
 	private UserService userService;
 
 	@GetMapping("/all")
-
 	@PreAuthorize("hasAuthority('admin')")
-
 	public ResponseEntity<ApiResponse<PageResponse<UserModel>>> getAllUsers(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "25") int size, @RequestParam(required = false) String role) {
-		PageResponse<UserModel> users = userService.getAllUsers(page, size, role);
+			@RequestParam(defaultValue = "25") int size, @RequestParam(required = false) String role,
+			@RequestParam(defaultValue = "name") String sort,
+			@RequestParam(defaultValue = "asc") String direction) {
+		PageResponse<UserModel> users = userService.getAllUsers(page, size, role,sort, direction);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(users, "Fetched users successfully", HttpStatus.OK.value()));
 

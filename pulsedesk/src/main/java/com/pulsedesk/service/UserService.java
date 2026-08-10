@@ -18,7 +18,7 @@ public interface UserService {
 
 	public UserModel getByUserEmail(String email);
 
-	PageResponse<UserModel>  getAllUsers(int page, int size, String role
+	PageResponse<UserModel>  getAllUsers(int page, int size, String role, String sort, String direction
 
 	);
 

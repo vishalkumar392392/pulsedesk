@@ -13,6 +13,7 @@ interface DropDownProps {
   values: Array<string>;
   label?: string;
   placeholder?: string;
+  onSelect?: (value: string) => void;
 }
 
 export const DropDown = ({
@@ -22,6 +23,7 @@ export const DropDown = ({
   values,
   label = "",
   placeholder = "",
+  onSelect,
 }: DropDownProps) => {
   return (
     <Controller
@@ -51,6 +53,7 @@ export const DropDown = ({
                     onClick={() => {
                       field.onChange(value);
                       setData(false);
+                      onSelect?.(value);
                     }}
                     className="cursor-pointer px-3 py-2 hover:bg-gray-100"
                   >

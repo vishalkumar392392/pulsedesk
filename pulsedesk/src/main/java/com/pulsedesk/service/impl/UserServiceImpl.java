@@ -99,11 +99,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public PageResponse<UserModel> getAllUsers(int page, int size, String role) {
+	public PageResponse<UserModel> getAllUsers(int page, int size, String role, String sort, String direction) {
 		int currentPage = Math.max(page, 0);
 		int pageSize = Math.min(Math.max(size, 1), 100);
 		Pageable pageable = PageRequest.of(currentPage, pageSize);
-		Page<AllUsersEntity> users = allUsersRepository.findUsers(role, pageable);
+		Page<AllUsersEntity> users = allUsersRepository.findUsers(role, sort, direction,pageable);
 		Page<UserModel> userModels = users.map(this::convertToUserModel);
 		return new PageResponse<>(userModels.getContent(), userModels.getNumber(), userModels.getSize(),
 				userModels.getTotalElements(), userModels.getTotalPages(), userModels.isFirst(), userModels.isLast());
