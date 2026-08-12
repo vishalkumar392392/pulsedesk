@@ -5,6 +5,7 @@ interface InitialStateProps {
   title: string;
   message: string;
   type: string;
+  errorRef: string;
 }
 
 const initialState: InitialStateProps = {
@@ -12,6 +13,7 @@ const initialState: InitialStateProps = {
   title: "",
   message: "",
   type: "error",
+  errorRef: "",
 };
 const errorSlice = createSlice({
   name: "error",
@@ -22,12 +24,14 @@ const errorSlice = createSlice({
       state.title = action.payload.title;
       state.open = true;
       state.type = "error";
+      state.errorRef = action.payload.errorRef ?? "";
     },
     resetError: (state) => {
       state.message = "";
       state.type = "error";
       state.open = false;
       state.title = "";
+      state.errorRef = "";
     },
   },
 });

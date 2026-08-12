@@ -11,6 +11,7 @@ export interface LoginResponse {
   statusCode: number;
   message: string;
   data: AuthTokens;
+  errorRef: string;
 }
 
 export interface AuthTokens {

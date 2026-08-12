@@ -14,6 +14,7 @@ export interface ApiResponse<T> {
   statusCode: number;
   message: string;
   data: T;
+  errorRef: string;
 }
 
 export function isApiResponse(value: unknown): value is ApiResponse<unknown> {
@@ -72,7 +73,9 @@ export const baseQueryWithLoader: BaseQueryFn<
           showErrorModal({
             open: true,
             title: "Internal Server Error",
-            message: error.data.message,
+            message:
+              "Something went wrong on our end. Please try again, or contact support if the problem persists.",
+            errorRef: error.data.errorRef,
           }),
         );
       }
