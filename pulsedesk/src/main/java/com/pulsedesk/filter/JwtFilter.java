@@ -1,15 +1,16 @@
 package com.pulsedesk.filter;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.pulsedesk.security.config.JwtUtils;
 import com.pulsedesk.security.config.UserEntityDetailService;
@@ -30,6 +31,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private JwtUtils jwtUtils;
+
+	// routes uncaught filter exceptions through GlobalException so they get
+	// DB-logged
+	@Autowired
+	@Qualifier("handlerExceptionResolver")
+	private HandlerExceptionResolver handlerExceptionResolver;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -60,14 +67,13 @@ public class JwtFilter extends OncePerRequestFilter {
 			}
 		} catch (ExpiredJwtException ex) {
 			request.setAttribute("exception", ex);
-		}
-
-		catch (MalformedJwtException ex) {
+		} catch (MalformedJwtException ex) {
 			request.setAttribute("exception", ex);
-		}
-
-		catch (JwtException ex) {
+		} catch (JwtException ex) {
 			request.setAttribute("exception", ex);
+		} catch (Exception ex) {
+			handlerExceptionResolver.resolveException(request, response, null, ex);
+			return;
 		}
 
 		filterChain.doFilter(request, response);

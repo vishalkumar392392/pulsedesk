@@ -14,11 +14,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.pulsedesk.modal.ApiResponse;
+import com.pulsedesk.service.ErrorLogService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalException {
 
 	private static final Logger log = LoggerFactory.getLogger(GlobalException.class);
+
+	private final ErrorLogService errorLogService;
+
+	public GlobalException(ErrorLogService errorLogService) {
+		this.errorLogService = errorLogService;
+	}
 
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
@@ -42,11 +51,14 @@ public class GlobalException {
 	}
 
 	@ExceptionHandler(InternalAuthenticationServiceException.class)
-	public ResponseEntity<ApiResponse<Void>> handleInternalAuth(InternalAuthenticationServiceException ex) {
+	public ResponseEntity<ApiResponse<Void>> handleInternalAuth(InternalAuthenticationServiceException ex,
+			HttpServletRequest request) {
 		Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
 		log.error("Authentication service failure: {}", cause.getMessage(), cause);
+		String ref = errorLogService.logError(ex, request);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse
-				.error("Authentication failed due to a server error", HttpStatus.INTERNAL_SERVER_ERROR.value()));
+				.errorWithRef("Authentication failed due to a server error. Reference: "+ ex.getMessage()+ " ::  "  + ref,
+						HttpStatus.INTERNAL_SERVER_ERROR.value(), ref));
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
@@ -63,34 +75,38 @@ public class GlobalException {
 				ApiResponse.error("Bad Request", HttpStatus.BAD_REQUEST.value()));
 
 	}
-	
-	@ExceptionHandler(    MethodArgumentNotValidException.class)
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ApiResponse<?>> handleBadRequest(
-		    MethodArgumentNotValidException ex) {
+			MethodArgumentNotValidException ex) {
 		return ResponseEntity.badRequest().body(
 				ApiResponse.error("Bad Request", HttpStatus.BAD_REQUEST.value()));
 
 	}
-	@ExceptionHandler(    ConstraintViolationException.class)
+
+	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ApiResponse<?>> handleBadRequest(
-		    ConstraintViolationException ex) {
+			ConstraintViolationException ex) {
 		return ResponseEntity.badRequest().body(
 				ApiResponse.error("Bad Request", HttpStatus.BAD_REQUEST.value()));
 
 	}
-	
-	@ExceptionHandler(    IllegalArgumentException.class)
+
+	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ApiResponse<?>> handleBadRequest(
-		    IllegalArgumentException ex) {
+			IllegalArgumentException ex) {
 		return ResponseEntity.badRequest().body(
 				ApiResponse.error("Bad Request", HttpStatus.BAD_REQUEST.value()));
 
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
+	public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex, HttpServletRequest request) {
 		log.error("Unhandled exception [{}]: {}", ex.getClass().getName(), ex.getMessage(), ex);
+		String ref = errorLogService.logError(ex, request);
+		
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(ApiResponse.error("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR.value()));
+				.body(ApiResponse.errorWithRef("An unexpected error occurred. Reference: "+ ex.getMessage() + " ::  " + ref,
+						HttpStatus.INTERNAL_SERVER_ERROR.value(), ref));
 	}
 }
