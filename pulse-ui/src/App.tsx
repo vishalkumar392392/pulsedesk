@@ -10,7 +10,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import { Login } from "./components/Login/Login";
 import Loader from "./components/Util/Loader";
 import { Modal } from "./components/Util/Modal";
-import { TicketForm } from "./components/Tickets/TicketFormBasics";
+import { TicketForm } from "./components/Tickets/TicketForm";
 
 function App() {
   return (

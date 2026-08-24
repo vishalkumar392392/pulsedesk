@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DropDown } from "../Util/DropDown";
-import type { FormData } from "./TicketFormBasics";
+import type { FormData } from "./TicketForm";
 import {
   Controller,
   useWatch,
@@ -15,19 +15,21 @@ const DROPDOWN_VALUES = ["High", "Medium", "Low"];
 
 interface TicketFormDetailsProps {
   control: Control<FormData>;
-  errors: FieldErrors<FormData>;
+  errors?: FieldErrors<FormData>;
+  setStep: (n: number) => void;
 }
 
 export const TicketFormDetails = ({
   control,
-  errors,
+  setStep,
 }: TicketFormDetailsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [description, assets] = useWatch({
     control,
     name: ["description", "assets"],
   });
-  const isDetailsFormValid = description?.length > 0 && assets?.length > 0;
+  const isDetailsFormValid =
+    description?.length > 0 && assets?.length > 0 && assets[0].length > 0;
 
   return (
     <div className="flex-1 rounded-xl border border-gray-300 p-4">
@@ -51,8 +53,8 @@ export const TicketFormDetails = ({
           <Controller
             name="description"
             control={control}
-            rules={{ required: "Description is required" }}
-            render={({ field, fieldState }) => (
+            rules={{ required: true }}
+            render={({ field }) => (
               <>
                 <div className="mt-4 mb-4">
                   <label className="mt-1 mr-4 flex">
@@ -61,18 +63,10 @@ export const TicketFormDetails = ({
                   <textarea
                     {...field}
                     rows={3}
-                    className={`mt-1 w-full rounded-md border p-2 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 ${
-                      fieldState.error
-                        ? "border-red-500 focus:ring-2 focus:ring-red-200"
-                        : "border-gray-300 focus:ring-2 focus:ring-blue-200"
-                    }`}
+                    className={`mt-1 w-full rounded-md border p-2 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200`}
                     placeholder="Description"
                   />
                 </div>
-
-                <p className="min-h-0.5 text-sm text-red-500">
-                  {errors.description?.message}
-                </p>
               </>
             )}
           />
@@ -136,6 +130,8 @@ export const TicketFormDetails = ({
         <div className="mt-4 flex justify-between">
           <button
             disabled={!isDetailsFormValid}
+            onClick={() => setStep(1)}
+
             className={`rounded border border-gray-300 px-2 py-1 ${!isDetailsFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
           >
             <div className="flex items-center">
@@ -145,6 +141,8 @@ export const TicketFormDetails = ({
           </button>
           <button
             disabled={!isDetailsFormValid}
+            onClick={() => setStep(3)}
+
             className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white ${!isDetailsFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
           >
             <div className="flex items-center">Next {<GrFormNextLink />}</div>

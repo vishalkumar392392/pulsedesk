@@ -1,5 +1,5 @@
 import { Controller, useWatch, type Control } from "react-hook-form";
-import type { FormData } from "./TicketFormBasics";
+import type { FormData } from "./TicketForm";
 interface TicketFormReviewProps {
   control: Control<FormData>;
 }
@@ -45,6 +45,7 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
+                  className="accent-pulse-green"
                   checked={field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
                 />
