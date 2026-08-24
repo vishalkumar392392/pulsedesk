@@ -1,22 +1,24 @@
 import { Controller } from "react-hook-form";
-import type { Control } from "react-hook-form";
+import {
+  type Control,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form";
 import { IoMdArrowDropdown } from "react-icons/io";
 
-interface FormData {
-  value: string;
-}
-
-interface DropDownProps {
+interface DropDownProps<TFormValues extends FieldValues> {
   data: boolean;
   setData: (data: boolean) => void;
-  control: Control<FormData>;
+  control: Control<TFormValues>;
   values: Array<string>;
   label?: string;
   placeholder?: string;
   onSelect?: (value: string) => void;
+  name: FieldPath<TFormValues>;
+  required?: boolean;
 }
 
-export const DropDown = ({
+export const DropDown = <TFormValues extends FieldValues>({
   data,
   setData,
   control,
@@ -24,11 +26,16 @@ export const DropDown = ({
   label = "",
   placeholder = "",
   onSelect,
-}: DropDownProps) => {
+  name,
+  required = false,
+}: DropDownProps<TFormValues>) => {
   return (
     <Controller
-      name="value"
+      name={name}
       control={control}
+      rules={{
+        required: required,
+      }}
       render={({ field }) => (
         <>
           <div className="relative">

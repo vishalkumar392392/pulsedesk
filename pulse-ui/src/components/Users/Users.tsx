@@ -85,6 +85,7 @@ export const Users = () => {
           values={DROPDOWN_VALUES}
           label="Role"
           onSelect={() => setPage(0)}
+          name="value"
         />
       </form>
       <br />

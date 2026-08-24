@@ -4,3 +4,5 @@ pulsedesk/.metadata/
 .DS_Store
 pulsedesk-dbschema.sql
 pulsedesk-seed-users.sql
+pulsedesk-complete-schema.sql
+pulsedesk-schema-migration-v2.sql
