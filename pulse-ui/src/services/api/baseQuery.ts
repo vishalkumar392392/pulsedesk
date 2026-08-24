@@ -60,9 +60,26 @@ export const baseQueryWithLoader: BaseQueryFn<
     //   // Success response (2xx)
     //   const response = result.data as ApiResponse<unknown>;
     // }
-
+    console.log("result: ", result);
     if (result.error) {
       const error = result.error as FetchBaseQueryError;
+      if (
+        error.status === 401 &&
+        typeof error.data === "object" &&
+        error.data !== null &&
+        isApiResponse(error.data)
+      ) {
+        api.dispatch(
+          showErrorModal({
+            open: true,
+            title: "Session Expired. Please Login",
+            message:
+              "Authentication Failed. Authentication is required to access this resource.",
+            errorRef: error.data.errorRef,
+            statusCode: error.status,
+          }),
+        );
+      }
       if (
         error.status === 500 &&
         typeof error.data === "object" &&

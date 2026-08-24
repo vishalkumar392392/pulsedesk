@@ -2,12 +2,14 @@ import { useAppDispatch, useAppSelector } from "../../hooks";
 import { MdErrorOutline } from "react-icons/md";
 import { MdContentCopy } from "react-icons/md";
 import { resetError } from "../../redux/errorSlice";
+import { useNavigate } from "react-router";
 
 export const Modal = () => {
-  const { message, open, title, errorRef } = useAppSelector(
+  const { message, open, title, errorRef, statusCode } = useAppSelector(
     (state) => state.error,
   );
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const copyRef = () => {
     if (errorRef) navigator.clipboard.writeText(errorRef);
@@ -50,7 +52,12 @@ export const Modal = () => {
           )}
 
           <button
-            onClick={() => dispatch(resetError())}
+            onClick={() => {
+              dispatch(resetError());
+              if (statusCode === 401) {
+                navigate("/login");
+              }
+            }}
             className="bg-blaze-haze-600 hover:bg-blaze-haze-700 mt-2 cursor-pointer rounded-xl px-5 py-2 text-white"
           >
             OK
