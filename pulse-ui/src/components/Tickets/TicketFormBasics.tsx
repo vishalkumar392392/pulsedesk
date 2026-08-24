@@ -1,23 +1,26 @@
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { DropDown } from "../Util/DropDown";
 import { GrFormNextLink } from "react-icons/gr";
 import { TicketFormDetails } from "./TicketFormDetails";
+import { TicketFormReview } from "./TicketFormReview";
 
 export interface FormData {
   title: string;
   category: string;
   priority: string;
   description: string;
-  assests: string[];
+  assets: string[];
+  acceptTerms: boolean;
 }
 const DROPDOWN_VALUES = ["Network", "Hardware", "Software", "Access", "Other"];
 export const TicketForm = () => {
   const [isOpen, setIsOpen] = useState(false);
+
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<FormData>({
     mode: "onChange",
     defaultValues: {
@@ -25,14 +28,43 @@ export const TicketForm = () => {
       category: "Network",
       priority: "High",
       description: "",
-      assests: [],
+      assets: [""],
+      acceptTerms: false,
     },
+  });
+  const [title] = useWatch({
+    control,
+    name: ["title"],
   });
 
   const onSubmit = () => {};
+  const isBasicFormValid = !(title && title.length > 3);
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex justify-between gap-6">
+      <div className="mb-6 flex items-center gap-6">
+        <div className="flex gap-1">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-400">
+            1
+          </div>
+          Basics
+        </div>
+        <hr className="w-6 border-gray-400" />
+        <div className="flex gap-1">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-400">
+            2
+          </div>
+          Details
+        </div>
+        <hr className="w-6 border-gray-400" />
+
+        <div className="flex gap-1">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-400">
+            3
+          </div>
+          Review
+        </div>
+      </div>
+      <div className="flex items-start gap-6">
         <div className="flex-1 rounded-xl border border-gray-300 p-4">
           <div className="font-medium text-gray-500">
             STEP 1 . BASICS - DONE
@@ -53,7 +85,7 @@ export const TicketForm = () => {
                   <input
                     {...field}
                     type="text"
-                    className={`mt-1 w-[75%] rounded-md p-1 transition-colors outline-none ${
+                    className={`mt-1 w-[75%] rounded-md p-1 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 ${
                       fieldState.error
                         ? "border-red-500 focus:ring-2 focus:ring-red-200"
                         : "border-gray-300 focus:ring-2 focus:ring-blue-200"
@@ -84,19 +116,15 @@ export const TicketForm = () => {
           </div>
           <div className="flex justify-end">
             <button
-              disabled={!isValid}
-              className={`bg-pulse-green disabled:bg-pulse-green rounded p-1 text-white ${!isValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
+              disabled={isBasicFormValid}
+              className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white ${isBasicFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
             >
-              <div className="flex items-center">
-                Login {<GrFormNextLink />}
-              </div>
+              <div className="flex items-center">Next {<GrFormNextLink />}</div>
             </button>
           </div>
         </div>
         <TicketFormDetails control={control} errors={errors} />
-        <div className="flex-1">
-          <div>STEP 3 . REVIEW - UPCOMING</div>
-        </div>
+        <TicketFormReview control={control} />
       </div>
     </form>
   );
