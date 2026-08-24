@@ -29,7 +29,7 @@ export const TicketFormDetails = ({
     name: ["description", "assets"],
   });
   const isDetailsFormValid =
-    description?.length > 0 && assets?.length > 0 && assets[0].length > 0;
+    description?.length >= 20 && assets?.length > 0 && assets[0].length > 0;
 
   return (
     <div className="flex-1 rounded-xl border border-gray-300 p-4">
@@ -53,7 +53,7 @@ export const TicketFormDetails = ({
           <Controller
             name="description"
             control={control}
-            rules={{ required: true }}
+            rules={{ required: true, minLength: 20 }}
             render={({ field }) => (
               <>
                 <div className="mt-4 mb-4">
@@ -143,7 +143,7 @@ export const TicketFormDetails = ({
             disabled={!isDetailsFormValid}
             onClick={() => setStep(3)}
 
-            className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white ${!isDetailsFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
+            className={`rounded px-2 py-1 text-white ${!isDetailsFormValid ? "bg-pulse-green-100 cursor-not-allowed" : "bg-pulse-green disabled:bg-pulse-green cursor-pointer"} my-3`}
           >
             <div className="flex items-center">Next {<GrFormNextLink />}</div>
           </button>

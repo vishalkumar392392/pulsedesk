@@ -58,7 +58,7 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
       <div className="flex justify-center">
         <button
           disabled={!acceptTerms}
-          className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white ${!acceptTerms ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
+          className={`rounded px-2 py-1 text-white ${!acceptTerms ? "bg-pulse-green-100 cursor-not-allowed" : "bg-pulse-green disabled:bg-pulse-green cursor-pointer"} my-3`}
         >
           <div className="flex items-center">Submit</div>
         </button>
