@@ -21,7 +21,7 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
       <div className="flex flex-col gap-2">
         <div className="flex justify-between">
           <div className="text-gray-600">Title</div>
-          <div className="min-w-0 text-right break-words">{title}</div>
+          <div className="min-w-0 text-right wrap-break-word">{title}</div>
         </div>
         <hr className="border-gray-300" />
 
