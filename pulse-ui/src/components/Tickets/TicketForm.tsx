@@ -4,6 +4,7 @@ import { TicketFormBasics } from "./TicketFormBasics";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { TiTickOutline } from "react-icons/ti";
+import { useCreateTicketMutation } from "../../services/tickets/ticketApi";
 
 export interface FormData {
   title: string;
@@ -31,8 +32,13 @@ export const TicketForm = () => {
   });
 
   const [step, setStep] = useState(1);
+  const [createTicket] = useCreateTicketMutation();
 
-  const onSubmit = () => {};
+  const onSubmit = async (data: FormData) => {
+    console.log("data: ", data);
+    const response = await createTicket(data).unwrap();
+    console.log("response: ", response);
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="mb-6 flex items-center gap-6">
