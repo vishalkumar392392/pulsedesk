@@ -31,4 +31,11 @@ public class AssetServiceImpl implements AssetService {
 		return modal;
 	}
 
+	@Override
+	public List<AssetsModal> getAssetsByEmail(String email) {
+		List<AssetsEntity> assets = assetsRepository.getAssetsByEmail(email);
+		return assets.stream().map(AssetServiceImpl::getAssetModal).collect(Collectors.toList());
+
+	}
+
 }

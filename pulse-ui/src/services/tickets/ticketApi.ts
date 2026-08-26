@@ -1,13 +1,12 @@
 import { baseApi } from "../api/baseApi";
 import type { ApiResponse } from "../api/baseQuery";
 
-interface TicketCreationRequest {
+export interface TicketCreationRequest {
   title: string;
   category: string;
   priority: string;
   description: string;
-  assets: string[];
-  acceptTerms: boolean;
+  affectedAssetIds: number[];
 }
 
 export const ticketApi = baseApi.injectEndpoints({

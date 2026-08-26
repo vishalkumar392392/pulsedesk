@@ -80,6 +80,7 @@ export const TicketFormBasics = ({
         </div>
         <div className="flex justify-end">
           <button
+            type="button"
             disabled={isBasicFormValid}
             onClick={() => setStep(2)}
             className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white ${isBasicFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}

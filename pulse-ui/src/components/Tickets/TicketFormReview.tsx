@@ -8,6 +8,9 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
     control,
     name: ["title", "priority", "assets", "acceptTerms"],
   });
+  const selectedAssets = (assets ?? []).filter(
+    (asset) => asset.assetId !== null,
+  );
 
   return (
     <div className="flex-1 rounded-xl border border-gray-300 p-4">
@@ -30,8 +33,13 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
 
         <div className="flex justify-between">
           <div className="text-gray-600">Assets</div>
-          <div>{assets.length} attached </div>
+          <div>{selectedAssets.length} attached</div>
         </div>
+        {selectedAssets.map((asset) => (
+          <div key={asset.assetId} className="text-right text-sm text-gray-500">
+            {asset.searchText}
+          </div>
+        ))}
       </div>
       <div className="mt-4 flex justify-center text-gray-600">
         <Controller

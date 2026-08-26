@@ -1,4 +1,4 @@
-package com.pulsedesk.controller.assets;
+package com.pulsedesk.controller;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pulsedesk.modal.ApiResponse;
 import com.pulsedesk.modal.AssetsModal;
 import com.pulsedesk.service.AssetService;
-
+import java.security.Principal;
 @RestController
 @RequestMapping("/assets")
 public class AssetController {
@@ -23,6 +23,15 @@ public class AssetController {
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<AssetsModal>>> getAssets() {
 		List<AssetsModal> assets = assetService.getAssets();
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(assets, "Fetched assets successfully", HttpStatus.OK.value()));
+	}
+	
+	@GetMapping("/mine")
+	public ResponseEntity<ApiResponse<List<AssetsModal>>> getEmployeeAssets(Principal principal) {
+		
+		String email = principal.getName();
+		List<AssetsModal> assets = assetService.getAssetsByEmail(email);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(assets, "Fetched assets successfully", HttpStatus.OK.value()));
 	}

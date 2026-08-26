@@ -6,18 +6,24 @@ import { useState } from "react";
 import { TiTickOutline } from "react-icons/ti";
 import { useCreateTicketMutation } from "../../services/tickets/ticketApi";
 
+export interface AffectedAssetFormValue {
+  assetId: number | null;
+  searchText: string;
+}
+
 export interface FormData {
   title: string;
   category: string;
   priority: string;
   description: string;
-  assets: string[];
+  assets: AffectedAssetFormValue[];
   acceptTerms: boolean;
 }
 export const TicketForm = () => {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     mode: "onChange",
@@ -26,7 +32,7 @@ export const TicketForm = () => {
       category: "Network",
       priority: "High",
       description: "",
-      assets: [""],
+      assets: [{ assetId: null, searchText: "" }],
       acceptTerms: false,
     },
   });
@@ -35,8 +41,20 @@ export const TicketForm = () => {
   const [createTicket] = useCreateTicketMutation();
 
   const onSubmit = async (data: FormData) => {
-    console.log("data: ", data);
-    const response = await createTicket(data).unwrap();
+    console.log("createTicket data: ", data);
+    const payload = {
+      title: data.title.trim(),
+      category: data.category.toUpperCase(),
+      priority: data.priority.toUpperCase(),
+      description: data.description.trim(),
+      affectedAssetIds: data.assets.flatMap(({ assetId }) =>
+        assetId === null ? [] : [assetId],
+      ),
+    };
+    console.log("createTicket payload: ", payload);
+
+    return;
+    const response = await createTicket(payload).unwrap();
     console.log("response: ", response);
   };
   return (
@@ -99,6 +117,7 @@ export const TicketForm = () => {
             control={control}
             errors={errors}
             setStep={setStep}
+            setValue={setValue}
           />
         </div>
         <div

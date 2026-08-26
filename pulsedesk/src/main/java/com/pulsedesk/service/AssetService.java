@@ -8,4 +8,6 @@ public interface AssetService {
 
 	List<AssetsModal>  getAssets();
 
+	List<AssetsModal> getAssetsByEmail(String email);
+
 }
