@@ -13,7 +13,7 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
   );
 
   return (
-    <div className="flex-1 rounded-xl border border-gray-300 p-4">
+    <div className="w-full rounded-xl border border-gray-300 p-4">
       <div className="mb-4 font-medium text-gray-500">
         STEP 3 . REVIEW - UPCOMING
       </div>
@@ -21,7 +21,7 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
       <div className="flex flex-col gap-2">
         <div className="flex justify-between">
           <div className="text-gray-600">Title</div>
-          <div>{title}</div>
+          <div className="min-w-0 text-right break-words">{title}</div>
         </div>
         <hr className="border-gray-300" />
 
@@ -35,12 +35,12 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
           <div className="text-gray-600">Assets</div>
           <div>{selectedAssets.length} attached</div>
         </div>
-        {selectedAssets.map((asset) => (
-          <div key={asset.assetId} className="text-right text-sm text-gray-500">
-            {asset.searchText}
-          </div>
-        ))}
       </div>
+      {selectedAssets.map((asset) => (
+        <div key={asset.assetId} className="mt-2 flex text-sm text-gray-500">
+          {asset.searchText}
+        </div>
+      ))}
       <div className="mt-4 flex justify-center text-gray-600">
         <Controller
           name="acceptTerms"

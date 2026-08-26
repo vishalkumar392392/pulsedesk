@@ -30,8 +30,8 @@ export const TicketFormBasics = ({
   const isBasicFormValid = !(title && title.length > 3);
 
   return (
-    <div>
-      <div className="flex-1 rounded-xl border border-gray-300 p-4">
+    <div className="w-full">
+      <div className="w-full rounded-xl border border-gray-300 p-4">
         <div className="font-medium text-gray-500">STEP 1 . BASICS - DONE</div>
         <Controller
           name="title"

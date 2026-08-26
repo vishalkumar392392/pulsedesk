@@ -58,7 +58,7 @@ export const TicketForm = () => {
     console.log("response: ", response);
   };
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
       <div className="mb-6 flex items-center gap-6">
         <div className="flex gap-1">
           <div
@@ -100,9 +100,9 @@ export const TicketForm = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-start gap-6">
+      <div className="grid w-full grid-cols-1 items-start gap-6 xl:grid-cols-3">
         <div
-          className={`${step != 1 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step != 1 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
         >
           <TicketFormBasics
             control={control}
@@ -111,7 +111,7 @@ export const TicketForm = () => {
           />
         </div>
         <div
-          className={`${step != 2 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step != 2 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
         >
           <TicketFormDetails
             control={control}
@@ -121,7 +121,7 @@ export const TicketForm = () => {
           />
         </div>
         <div
-          className={`${step != 3 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step != 3 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
         >
           <TicketFormReview control={control} />
         </div>

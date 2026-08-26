@@ -91,7 +91,7 @@ export const TicketFormDetails = ({
   };
 
   return (
-    <div className="flex-1 rounded-xl border border-gray-300 p-4">
+    <div className="w-full rounded-xl border border-gray-300 p-4">
       <div className="font-medium text-gray-500">STEP 2 . DETAILS</div>
 
       <div className="mt-4">
