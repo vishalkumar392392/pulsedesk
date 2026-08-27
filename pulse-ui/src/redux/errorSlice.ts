@@ -7,6 +7,7 @@ interface InitialStateProps {
   type: string;
   errorRef: string;
   statusCode?: number;
+  redirectUrl?: string;
 }
 
 const initialState: InitialStateProps = {
@@ -16,6 +17,7 @@ const initialState: InitialStateProps = {
   type: "error",
   errorRef: "",
   statusCode: 0,
+  redirectUrl: "",
 };
 const errorSlice = createSlice({
   name: "error",
@@ -29,6 +31,15 @@ const errorSlice = createSlice({
       state.errorRef = action.payload.errorRef ?? "";
       state.statusCode = action.payload.statusCode;
     },
+    showModal: (state, action) => {
+      state.message = action.payload.message;
+      state.title = action.payload.title;
+      state.open = true;
+      state.type = "success";
+      state.errorRef = action.payload.errorRef ?? "";
+      state.statusCode = action.payload.statusCode;
+      state.redirectUrl = action.payload?.redirectUrl
+    },
     resetError: (state) => {
       state.message = "";
       state.type = "error";
@@ -38,5 +49,5 @@ const errorSlice = createSlice({
     },
   },
 });
-export const { showErrorModal, resetError } = errorSlice.actions;
+export const { showErrorModal, resetError, showModal } = errorSlice.actions;
 export default errorSlice.reducer;

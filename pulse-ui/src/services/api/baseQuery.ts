@@ -60,7 +60,6 @@ export const baseQueryWithLoader: BaseQueryFn<
     //   // Success response (2xx)
     //   const response = result.data as ApiResponse<unknown>;
     // }
-    console.log("result: ", result);
     if (result.error) {
       const error = result.error as FetchBaseQueryError;
       if (

@@ -3,11 +3,18 @@ import { MdErrorOutline } from "react-icons/md";
 import { MdContentCopy } from "react-icons/md";
 import { resetError } from "../../redux/errorSlice";
 import { useNavigate } from "react-router";
+import { MdOutlineDone } from "react-icons/md";
 
+const STATUS_CODES = [201, 200];
 export const Modal = () => {
-  const { message, open, title, errorRef, statusCode } = useAppSelector(
-    (state) => state.error,
-  );
+  const {
+    message,
+    open,
+    title,
+    errorRef,
+    statusCode = 0,
+    redirectUrl,
+  } = useAppSelector((state) => state.error);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -19,12 +26,20 @@ export const Modal = () => {
     open && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-md">
         <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl bg-white p-10 shadow-2xl">
-          <MdErrorOutline
-            fontSize={70}
-            color="red"
-            className="rounded-full bg-red-100"
-          />
-          <div className="text-3xl font-bold">{title}</div>
+          {STATUS_CODES.includes(statusCode) ? (
+            <MdOutlineDone
+              fontSize={70}
+              color="green"
+              className="rounded-full bg-green-100"
+            />
+          ) : (
+            <MdErrorOutline
+              fontSize={70}
+              color="red"
+              className="rounded-full bg-red-100"
+            />
+          )}
+          <div className="text-2xl font-bold">{title}</div>
 
           <div className="text-center text-gray-600">{message}</div>
 
@@ -56,6 +71,9 @@ export const Modal = () => {
               dispatch(resetError());
               if (statusCode === 401) {
                 navigate("/login");
+              }
+              if (redirectUrl) {
+                navigate(redirectUrl);
               }
             }}
             className="bg-blaze-haze-600 hover:bg-blaze-haze-700 mt-2 cursor-pointer rounded-xl px-5 py-2 text-white"

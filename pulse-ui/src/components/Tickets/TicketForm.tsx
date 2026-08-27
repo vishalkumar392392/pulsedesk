@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { TiTickOutline } from "react-icons/ti";
 import { useCreateTicketMutation } from "../../services/tickets/ticketApi";
+import { useDispatch } from "react-redux";
+import { showModal } from "../../redux/errorSlice";
 
 export interface AffectedAssetFormValue {
   assetId: number | null;
@@ -40,6 +42,8 @@ export const TicketForm = () => {
   const [step, setStep] = useState(1);
   const [createTicket] = useCreateTicketMutation();
 
+  const dispatch = useDispatch();
+
   const onSubmit = async (data: FormData) => {
     console.log("createTicket data: ", data);
     const payload = {
@@ -51,11 +55,20 @@ export const TicketForm = () => {
         assetId === null ? [] : [assetId],
       ),
     };
-    console.log("createTicket payload: ", payload);
 
-    return;
     const response = await createTicket(payload).unwrap();
-    console.log("response: ", response);
+    if (response?.statusCode === 201) {
+      dispatch(
+        showModal({
+          open: true,
+          title: "Ticket Created successfully",
+          statusCode: 201,
+          redirectUrl: "/users",
+          message:
+            "Your issue will be resolved shortly. Please except to receive an update in 24 hours.",
+        }),
+      );
+    }
   };
   return (
     <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
