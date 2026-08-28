@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { DropDown } from "../../Util/DropDown";
 
 const PRIORITY_DROPDOWN_VALUES: Array<string> = [
@@ -29,8 +29,6 @@ export const TicketPriorityDropdown = ({
       value: "All",
     },
   });
-  const priority = useWatch({ control, name: "value", defaultValue: "" });
-  setPriority(priority);
   return (
     <div className="my-2">
       <form>
@@ -40,7 +38,10 @@ export const TicketPriorityDropdown = ({
           control={control}
           values={PRIORITY_DROPDOWN_VALUES}
           label="Priority"
-          onSelect={() => setPage(0)}
+          onSelect={(value) => {
+            setPage(0);
+            setPriority(value);
+          }}
           name="value"
         />
       </form>

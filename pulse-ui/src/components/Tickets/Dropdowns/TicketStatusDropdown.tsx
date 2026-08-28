@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { DropDown } from "../../Util/DropDown";
 
 const STATUS_DROPDOWN_VALUES: Array<string> = [
@@ -30,8 +30,6 @@ export const TicketStatusDropdown = ({
       value: "All",
     },
   });
-  const status = useWatch({ control, name: "value", defaultValue: "" });
-  setStatus(status);
   return (
     <div>
       <form>
@@ -41,7 +39,10 @@ export const TicketStatusDropdown = ({
           control={control}
           values={STATUS_DROPDOWN_VALUES}
           label="Status"
-          onSelect={() => setPage(0)}
+          onSelect={(value) => {
+            setPage(0);
+            setStatus(value);
+          }}
           name="value"
         />
       </form>
