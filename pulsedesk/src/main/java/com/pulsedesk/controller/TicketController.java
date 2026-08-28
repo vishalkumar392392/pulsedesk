@@ -1,7 +1,6 @@
 package com.pulsedesk.controller;
 
 import java.security.Principal;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,9 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pulsedesk.modal.ApiResponse;
+import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.TicketModal;
 import com.pulsedesk.service.TicketService;
 
@@ -32,14 +33,22 @@ public class TicketController {
 				.body(ApiResponse.success(modal, "Ticket Created Successfully", HttpStatus.CREATED.value()));
 
 	}
-	
-	@GetMapping("/mine")
-	public ResponseEntity<ApiResponse<List<TicketModal>>> getTickets( Principal principal) {
 
-		List<TicketModal> modal = ticketService.getTickets(principal.getName());
+	@GetMapping("/mine")
+	public ResponseEntity<ApiResponse<PageResponse<TicketModal>>> getTickets(
+			Principal principal,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "25") int size,
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) String priority,
+			@RequestParam(defaultValue = "createdAt") String sort,
+			@RequestParam(defaultValue = "desc") String direction) {
+
+		PageResponse<TicketModal> tickets = ticketService.getTickets(
+				principal.getName(), page, size, status, priority, sort, direction);
 
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(ApiResponse.success(modal, "Fetched tickets Successfully", HttpStatus.OK.value()));
+				.body(ApiResponse.success(tickets, "Fetched tickets successfully", HttpStatus.OK.value()));
 
 	}
 

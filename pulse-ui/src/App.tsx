@@ -10,7 +10,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import { Login } from "./components/Login/Login";
 import Loader from "./components/Util/Loader";
 import { Modal } from "./components/Util/Modal";
-import { TicketForm } from "./components/Tickets/TicketForm";
+import { Tickets } from "./components/Tickets/Tickets";
 
 function App() {
   return (
@@ -21,7 +21,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/tickets" element={<TicketForm />} />
+          <Route path="/tickets" element={<Tickets />} />
           <Route path="/assets" element={<Assets />} />
           <Route path="/users" element={<Users />} />
           <Route path="/reports" element={<Reports />} />

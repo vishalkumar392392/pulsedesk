@@ -3,7 +3,7 @@ package com.pulsedesk.enums;
 public enum TicketStatus {
 
 	OPEN,
-	INPROGRESS,
+	IN_PROGRESS,
 	RESOLVED,
 	CLOSED
 }

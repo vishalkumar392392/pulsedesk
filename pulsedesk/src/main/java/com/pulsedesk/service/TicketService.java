@@ -1,13 +1,13 @@
 package com.pulsedesk.service;
 
-import java.util.List;
-
+import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.TicketModal;
 
 public interface TicketService {
 
 	TicketModal createTicket(TicketModal ticketModal, String email);
 
-	List<TicketModal> getTickets(String name);
+	PageResponse<TicketModal> getTickets(String email, int page, int size, String status, String priority,
+			String sort, String direction);
 
 }
