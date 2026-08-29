@@ -19,13 +19,11 @@ export const ROUTES: RouteProp = {
 };
 
 export const titleCase = (input: string) => {
-  return (
-    input.charAt(0).toUpperCase() +
-    input
-      .split("")
-      .filter((_, index) => index != 0)
-      .map((ch) => ch)
-      .toString()
-      .replaceAll(",", "")
-  );
+  return input
+    .trim()
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 };

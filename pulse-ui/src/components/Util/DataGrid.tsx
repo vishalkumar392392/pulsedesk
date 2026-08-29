@@ -2,6 +2,7 @@ import { useState } from "react";
 import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 import { TableDropDown } from "./TableDropDown";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import { titleCase } from "../../util/helper";
 
 export interface DataGridColumn<T> {
   key: keyof T | string;
@@ -32,6 +33,7 @@ interface DataGridProps<T> {
   pagination: PaginationProps;
   rowKey: keyof T;
   onSortChange?: (sort: SortState) => void;
+  totalElements?: number;
 }
 
 export function DataGrid<T>({
@@ -40,6 +42,7 @@ export function DataGrid<T>({
   pagination,
   rowKey,
   onSortChange,
+  totalElements = 0,
 }: DataGridProps<T>) {
   const {
     page,
@@ -68,9 +71,18 @@ export function DataGrid<T>({
     onSortChange?.(next);
   };
 
+  const renderCell = (row: T, column: DataGridColumn<T>) => {
+    if (column.render) return column.render(row);
+
+    const value = row[column.key as keyof T];
+    return typeof value === "string"
+      ? titleCase(value)
+      : (value as React.ReactNode);
+  };
+
   return (
     <div>
-      <table className="min-w-full table-auto border-gray-300">
+      <table className="min-w-full table-auto border-gray-300 text-sm">
         <thead>
           <tr className="font-semibold">
             {columns.map((col, i) => (
@@ -85,21 +97,21 @@ export function DataGrid<T>({
                   col.sortable ? "cursor-pointer select-none" : ""
                 }`}
               >
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-gray-500">
                   {col.header}
                   {col.sortable &&
                     (sortState.key === String(col.key) &&
                     sortState.direction === "desc" ? (
                       <IoMdArrowDropdown
                         fontSize={25}
-                        className="text-green-600"
+                        className="text-blaze-haze-700"
                       />
                     ) : (
                       <IoMdArrowDropup
                         fontSize={25}
                         className={
                           sortState.key === String(col.key)
-                            ? "text-green-600"
+                            ? "text-blaze-haze-700"
                             : "text-gray-300"
                         }
                       />
@@ -117,9 +129,7 @@ export function DataGrid<T>({
                   key={String(col.key)}
                   className="border-y border-gray-300 p-4"
                 >
-                  {col.render
-                    ? col.render(row)
-                    : (row[col.key as keyof T] as React.ReactNode)}
+                  {renderCell(row, col)}
                 </td>
               ))}
             </tr>
@@ -127,52 +137,54 @@ export function DataGrid<T>({
         </tbody>
       </table>
 
-      <div className="my-4 flex items-center justify-center gap-4">
-        <div
-          className={`rounded-md border border-gray-300 ${
-            page - 1 < 0 ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-          }`}
-        >
-          <GoChevronLeft
-            fontSize={28}
-            color="gray"
-            onClick={() => {
-              if (page - 1 < 0) return;
-              onPageChange(page - 1);
-            }}
-          />
-        </div>
+      {totalElements >= 10 && (
+        <div className="my-4 flex items-center justify-center gap-4">
+          <div
+            className={`rounded-md border border-gray-300 ${
+              page - 1 < 0 ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+            }`}
+          >
+            <GoChevronLeft
+              fontSize={28}
+              color="gray"
+              onClick={() => {
+                if (page - 1 < 0) return;
+                onPageChange(page - 1);
+              }}
+            />
+          </div>
 
-        <span className="text-gray-600">
-          Page {page + 1} of {totalPages}
-        </span>
+          <span className="text-gray-600">
+            Page {page + 1} of {totalPages}
+          </span>
 
-        <div
-          className={`rounded-md border border-gray-300 ${
-            page + 1 >= (totalPages ?? 0)
-              ? "cursor-not-allowed opacity-50"
-              : "cursor-pointer"
-          }`}
-        >
-          <GoChevronRight
-            fontSize={28}
-            color="gray"
-            onClick={() => {
-              if ((totalPages ?? 0) <= page + 1) return;
-              onPageChange(page + 1);
-            }}
-          />
-        </div>
+          <div
+            className={`rounded-md border border-gray-300 ${
+              page + 1 >= (totalPages ?? 0)
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer"
+            }`}
+          >
+            <GoChevronRight
+              fontSize={28}
+              color="gray"
+              onClick={() => {
+                if ((totalPages ?? 0) <= page + 1) return;
+                onPageChange(page + 1);
+              }}
+            />
+          </div>
 
-        <div className="text-gray-600">
-          Rows:{" "}
-          <TableDropDown
-            options={pageSizeOptions}
-            defaultValue={pageSize}
-            onChange={onPageSizeChange}
-          />
+          <div className="text-gray-600">
+            Rows:{" "}
+            <TableDropDown
+              options={pageSizeOptions}
+              defaultValue={pageSize}
+              onChange={onPageSizeChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

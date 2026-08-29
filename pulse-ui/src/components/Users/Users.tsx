@@ -35,7 +35,7 @@ const USER_COLUMNS: DataGridColumn<User>[] = [
     header: "STATUS",
     render: (user) => (
       <span className="bg-pulse-green-100 rounded-4xl px-2 py-1 text-sm">
-        {user.status}
+        {titleCase(user.status)}
       </span>
     ),
   },
