@@ -1,6 +1,7 @@
 package com.pulsedesk.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,17 @@ public class TicketController {
 
 		PageResponse<TicketModal> tickets = ticketService.getTickets(
 				principal.getName(), page, size, status, priority, sort, direction);
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(tickets, "Fetched tickets successfully", HttpStatus.OK.value()));
+
+	}
+	
+	@GetMapping("/all")
+	public ResponseEntity<ApiResponse<List<TicketModal>>> getAllTickets(
+			) {
+
+		List<TicketModal> tickets = ticketService.getAllTickets();
 
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(tickets, "Fetched tickets successfully", HttpStatus.OK.value()));

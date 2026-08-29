@@ -1,5 +1,7 @@
 package com.pulsedesk.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -77,5 +79,8 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 			@Param("sort") String sort,
 			@Param("direction") String direction,
 			Pageable pageable);
+
+	@Query(value = "select * from tickets", nativeQuery = true)
+	List<TicketEntity> getAllTickets();
 
 }

@@ -1,5 +1,8 @@
 package com.pulsedesk.service.impl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -24,23 +27,18 @@ import com.pulsedesk.service.TicketService;
 public class TicketServiceImpl implements TicketService {
 	private static final Set<String> VALID_STATUSES = Set.of("OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED");
 	private static final Set<String> VALID_PRIORITIES = Set.of("LOW", "MEDIUM", "HIGH");
-	private static final Set<String> VALID_SORT_FIELDS = Set.of(
-			"id", "title", "status", "priority", "assigneeId", "createdAt");
+	private static final Set<String> VALID_SORT_FIELDS = Set.of("id", "title", "status", "priority", "assigneeId",
+			"createdAt");
 
 	@Autowired
 	private TicketRepository ticketRepository;
-	
+
 	@Override
 	@Transactional
 	public TicketModal createTicket(TicketModal ticketModal, String email) {
 		String assetIdsJson = toAssetIdsJson(ticketModal);
-		UserEntity user = ticketRepository.createTicket(
-				ticketModal.getTitle(),
-				ticketModal.getDescription(),
-				ticketModal.getCategory(),
-				ticketModal.getPriority(),
-				email,
-				assetIdsJson);
+		UserEntity user = ticketRepository.createTicket(ticketModal.getTitle(), ticketModal.getDescription(),
+				ticketModal.getCategory(), ticketModal.getPriority(), email, assetIdsJson);
 		ticketModal.setRequesterId(String.valueOf(user.getId()));
 		return ticketModal;
 	}
@@ -50,13 +48,9 @@ public class TicketServiceImpl implements TicketService {
 			return null;
 		}
 
-		return ticketModal.getAffectedAssetIds().stream()
-				.filter(Objects::nonNull)
-				.distinct()
-				.map(String::valueOf)
+		return ticketModal.getAffectedAssetIds().stream().filter(Objects::nonNull).distinct().map(String::valueOf)
 				.collect(Collectors.joining(",", "[", "]"));
 	}
-
 
 	@Override
 	@Transactional(readOnly = true)
@@ -70,22 +64,12 @@ public class TicketServiceImpl implements TicketService {
 		String normalizedDirection = "asc".equalsIgnoreCase(direction) ? "asc" : "desc";
 		Pageable pageable = PageRequest.of(currentPage, pageSize);
 
-		Page<TicketEntity> tickets = ticketRepository.getTickets(
-				email,
-				normalizedStatus,
-				normalizedPriority,
-				normalizedSort,
-				normalizedDirection,
-				pageable);
+		Page<TicketEntity> tickets = ticketRepository.getTickets(email, normalizedStatus, normalizedPriority,
+				normalizedSort, normalizedDirection, pageable);
 		Page<TicketModal> ticketModels = tickets.map(TicketServiceImpl::getTicketModal);
 
-		return new PageResponse<>(
-				ticketModels.getContent(),
-				ticketModels.getNumber(),
-				ticketModels.getSize(),
-				ticketModels.getTotalElements(),
-				ticketModels.getTotalPages(),
-				ticketModels.isFirst(),
+		return new PageResponse<>(ticketModels.getContent(), ticketModels.getNumber(), ticketModels.getSize(),
+				ticketModels.getTotalElements(), ticketModels.getTotalPages(), ticketModels.isFirst(),
 				ticketModels.isLast());
 	}
 
@@ -109,16 +93,18 @@ public class TicketServiceImpl implements TicketService {
 		modal.setCategory(ticketEntity.getCategory());
 		modal.setPriority(ticketEntity.getPriority());
 		modal.setStatus(ticketEntity.getStatus());
-		modal.setRequesterId(ticketEntity.getRequesterId() == null
-				? null
-				: String.valueOf(ticketEntity.getRequesterId()));
-		modal.setAssigneeId(ticketEntity.getAssigneeId() == null
-				? null
-				: String.valueOf(ticketEntity.getAssigneeId()));
-		modal.setCreatedAt(ticketEntity.getCreatedAt() == null
-				? null
-				: ticketEntity.getCreatedAt().toString());
+		modal.setRequesterId(
+				ticketEntity.getRequesterId() == null ? null : String.valueOf(ticketEntity.getRequesterId()));
+		modal.setAssigneeId(ticketEntity.getAssigneeId() == null ? null : String.valueOf(ticketEntity.getAssigneeId()));
+		modal.setCreatedAt(ticketEntity.getCreatedAt() == null ? null
+				: String.valueOf(ChronoUnit.DAYS.between(ticketEntity.getCreatedAt().toLocalDate(), LocalDate.now()))+ "d ago");
 		return modal;
+	}
+
+	@Override
+	public List<TicketModal> getAllTickets() {
+		List<TicketEntity> tickets =  ticketRepository.getAllTickets();
+		return tickets.stream().map(TicketServiceImpl::getTicketModal).collect(Collectors.toList());
 	}
 
 }
