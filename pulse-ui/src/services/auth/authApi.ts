@@ -1,3 +1,4 @@
+import type { User } from "../../types/user";
 import { baseApi } from "../api/baseApi";
 
 export interface LoginRequest {
@@ -17,6 +18,7 @@ export interface LoginResponse {
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
+  user: User;
 }
 
 export const authApi = baseApi.injectEndpoints({

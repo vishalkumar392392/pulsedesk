@@ -31,6 +31,7 @@ export const Login = () => {
       response.data.accessToken,
       response.data.refreshToken,
       data.rememberMe,
+      response.data.user
     );
     navigate("/dashboard");
   };
