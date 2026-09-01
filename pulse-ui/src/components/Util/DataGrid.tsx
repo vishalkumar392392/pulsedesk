@@ -91,7 +91,7 @@ export function DataGrid<T>({
                 onClick={
                   col.sortable ? () => handleSort(String(col.key)) : undefined
                 }
-                className={`border-t-0 border-b border-gray-300 bg-gray-100 p-4 ${
+                className={`bg-table-header border-t-0 border-b border-gray-300 p-3 ${
                   i === 0 ? "rounded-tl-lg" : ""
                 } ${i === columns.length - 1 ? "rounded-tr-lg" : ""} ${
                   col.sortable ? "cursor-pointer select-none" : ""
@@ -127,7 +127,7 @@ export function DataGrid<T>({
               {columns.map((col) => (
                 <td
                   key={String(col.key)}
-                  className="border-y border-gray-300 p-4"
+                  className="border-y border-gray-300 p-3"
                 >
                   {renderCell(row, col)}
                 </td>

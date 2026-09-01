@@ -45,7 +45,6 @@ export const TicketForm = () => {
   const dispatch = useDispatch();
 
   const onSubmit = async (data: FormData) => {
-    console.log("createTicket data: ", data);
     const payload = {
       title: data.title.trim(),
       category: data.category.toUpperCase(),
@@ -63,7 +62,7 @@ export const TicketForm = () => {
           open: true,
           title: "Ticket Created successfully",
           statusCode: 201,
-          redirectUrl: "/users",
+          redirectUrl: "/tickets",
           message:
             "Your issue will be resolved shortly. Please except to receive an update in 24 hours.",
         }),

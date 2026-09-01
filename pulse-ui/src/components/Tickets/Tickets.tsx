@@ -9,6 +9,7 @@ import {
 import { TicketStatusDropdown } from "./Dropdowns/TicketStatusDropdown";
 import { TicketPriorityDropdown } from "./Dropdowns/TicketPriorityDropdown";
 import { useGetUserTicketsQuery } from "../../services/tickets/ticketApi";
+import { useNavigate } from "react-router";
 
 export const Tickets = () => {
   const statusStyle = (status: string) => {
@@ -111,11 +112,19 @@ export const Tickets = () => {
     direction: sort.direction,
   });
   const tickets: Ticket[] = data?.content || [];
-
+  const navigate = useNavigate();
   return (
     <div>
       <TicketStatusDropdown setPage={setPage} setStatus={setStatus} />
       <TicketPriorityDropdown setPage={setPage} setPriority={setPriority} />
+      <div className="flex justify-end">
+        <button
+          onClick={() => navigate("/tickets/create")}
+          className={`bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white`}
+        >
+          + New Ticket
+        </button>
+      </div>
       <br />
       <DataGrid
         columns={TICKET_COLUMNS}
