@@ -4,19 +4,37 @@ import { useLoginMutation } from "../../services/auth/authApi";
 import { authStorage } from "../../services/auth/authStorage";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { getStoredUser } from "../../util/helper";
+import { isApiResponse } from "../../services/api/baseQuery";
 
 interface FormData {
   email: string;
   password: string;
   rememberMe: boolean;
 }
+
+const getLoginErrorMessage = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "data" in error &&
+    isApiResponse(error.data)
+  ) {
+    return error.data.message;
+  }
+
+  return "Unable to log in. Please try again.";
+};
+
 export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    clearErrors,
+    resetField,
+    setError,
+    formState: { errors, isSubmitting, isValid },
   } = useForm<FormData>({
     mode: "onChange",
     defaultValues: {
@@ -35,15 +53,22 @@ export const Login = () => {
       : "/dashboard";
 
   const onSubmit = async (data: FormData) => {
-    const response = await login(data).unwrap();
-    // console.log(response);
-    authStorage.saveTokens(
-      response.data.accessToken,
-      response.data.refreshToken,
-      data.rememberMe,
-      response.data.user,
-    );
-    navigate(destination, { replace: true });
+    try {
+      const response = await login(data).unwrap();
+      authStorage.saveTokens(
+        response.data.accessToken,
+        response.data.refreshToken,
+        data.rememberMe,
+        response.data.user,
+      );
+      navigate(destination, { replace: true });
+    } catch (error) {
+      resetField("password");
+      setError("root", {
+        type: "server",
+        message: getLoginErrorMessage(error),
+      });
+    }
   };
 
   if (authStorage.getAccessToken() && getStoredUser()) {
@@ -76,6 +101,10 @@ export const Login = () => {
             </label>
             <input
               {...field}
+              onChange={(event) => {
+                clearErrors("root");
+                field.onChange(event);
+              }}
               type="email"
               className={`w-full rounded-md border p-2 transition-colors outline-none ${
                 fieldState.error
@@ -107,7 +136,10 @@ export const Login = () => {
             </label>
             <input
               {...field}
-              maxLength={10}
+              onChange={(event) => {
+                clearErrors("root");
+                field.onChange(event);
+              }}
               type="password"
               className={`w-full rounded-md border p-2 transition-colors outline-none ${
                 fieldState.error
@@ -141,12 +173,21 @@ export const Login = () => {
         )}
       />
 
+      {errors.root?.message && (
+        <div
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          role="alert"
+        >
+          {errors.root.message}
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={!isValid}
-        className={`bg-pulse-green disabled:bg-pulse-green rounded p-2 text-white ${!isValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
+        disabled={!isValid || isSubmitting}
+        className={`bg-pulse-green disabled:bg-pulse-green rounded p-2 text-white ${!isValid || isSubmitting ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
       >
-        Login
+        {isSubmitting ? "Logging in…" : "Login"}
       </button>
     </form>
   );

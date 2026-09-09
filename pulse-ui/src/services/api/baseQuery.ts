@@ -40,6 +40,12 @@ const baseQuery = fetchBaseQuery({
   },
 });
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isLoginRequest = (args: string | FetchArgs) => {
+  const url = typeof args === "string" ? args : args.url;
+  return url.replace(/^\/+/, "").split("?")[0] === "auth/login";
+};
+
 export const baseQueryWithLoader: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -64,6 +70,7 @@ export const baseQueryWithLoader: BaseQueryFn<
       const error = result.error as FetchBaseQueryError;
       if (
         error.status === 401 &&
+        !isLoginRequest(args) &&
         typeof error.data === "object" &&
         error.data !== null &&
         isApiResponse(error.data)
