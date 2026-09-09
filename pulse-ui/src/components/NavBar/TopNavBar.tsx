@@ -1,12 +1,12 @@
 import { Outlet } from "react-router";
-import { TextInput } from "../Util/TextInput";
 import { LoggedInUser } from "../Util/LoggedInUser";
+import { PageBreadcrumb } from "./PageBreadcrumb";
 
 const TopNavBar = () => {
   return (
     <div className="flex-1">
       <div className="flex w-full items-center justify-between py-10">
-        <TextInput />
+        <PageBreadcrumb />
         <div>
           <div></div>
           <div>
