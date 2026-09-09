@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pulsedesk.modal.ApiResponse;
 import com.pulsedesk.modal.AssetsModal;
 import com.pulsedesk.service.AssetService;
 import java.security.Principal;
+
 @RestController
 @RequestMapping("/assets")
 public class AssetController {
@@ -26,12 +28,20 @@ public class AssetController {
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(assets, "Fetched assets successfully", HttpStatus.OK.value()));
 	}
-	
+
 	@GetMapping("/mine")
 	public ResponseEntity<ApiResponse<List<AssetsModal>>> getEmployeeAssets(Principal principal) {
-		
+
 		String email = principal.getName();
 		List<AssetsModal> assets = assetService.getAssetsByEmail(email);
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(assets, "Fetched assets successfully", HttpStatus.OK.value()));
+	}
+
+	@GetMapping("/all")
+	public ResponseEntity<ApiResponse<List<AssetsModal>>> getAllAssets(@RequestParam(required = false) String status,
+			@RequestParam(required = false) String type) {
+		List<AssetsModal> assets = assetService.getAllAssets(status, type);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(assets, "Fetched assets successfully", HttpStatus.OK.value()));
 	}

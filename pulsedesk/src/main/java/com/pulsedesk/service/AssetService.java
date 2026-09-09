@@ -10,4 +10,6 @@ public interface AssetService {
 
 	List<AssetsModal> getAssetsByEmail(String email);
 
+	List<AssetsModal> getAllAssets(String status, String type);
+
 }

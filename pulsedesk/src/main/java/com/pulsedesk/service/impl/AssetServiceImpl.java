@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pulsedesk.entites.AssetsEntity;
+import com.pulsedesk.entites.AssetsUserEntity;
 import com.pulsedesk.modal.AssetsModal;
 import com.pulsedesk.repository.AssetsRepository;
+import com.pulsedesk.repository.AssetsUserRepository;
 import com.pulsedesk.service.AssetService;
 
 @Service
@@ -18,6 +20,9 @@ public class AssetServiceImpl implements AssetService {
 	@Autowired
 	private AssetsRepository assetsRepository;
 
+	@Autowired
+	private AssetsUserRepository assetsUserRepository;
+	
 	@Override
 	public List<AssetsModal> getAssets() {
 
@@ -30,6 +35,12 @@ public class AssetServiceImpl implements AssetService {
 		BeanUtils.copyProperties(entity, modal);
 		return modal;
 	}
+	
+	private static AssetsModal getAssetUserModal(AssetsUserEntity entity) {
+		AssetsModal modal = new AssetsModal();
+		BeanUtils.copyProperties(entity, modal);
+		return modal;
+	}
 
 	@Override
 	public List<AssetsModal> getAssetsByEmail(String email) {
@@ -37,5 +48,13 @@ public class AssetServiceImpl implements AssetService {
 		return assets.stream().map(AssetServiceImpl::getAssetModal).collect(Collectors.toList());
 
 	}
+
+	@Override
+	public List<AssetsModal> getAllAssets(String status, String type) {
+		List<AssetsUserEntity> assets = assetsUserRepository.getAllAssets(status, type);
+		return assets.stream().map(AssetServiceImpl::getAssetUserModal).collect(Collectors.toList());
+	}
+
+	
 
 }
