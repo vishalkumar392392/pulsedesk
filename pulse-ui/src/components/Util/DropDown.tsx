@@ -53,7 +53,7 @@ export const DropDown = <TFormValues extends FieldValues>({
               />
             </button>
             {data && (
-              <ul className="absolute z-10 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg">
+              <ul className="absolute z-30 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg">
                 {values.map((value) => (
                   <li
                     key={value}

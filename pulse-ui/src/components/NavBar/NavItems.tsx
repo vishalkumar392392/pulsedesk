@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { getBrowserStorage } from "../../util/helper";
 
 export const NavItems = ({
   isHamburgerMenuClicked = true,
@@ -10,10 +11,11 @@ export const NavItems = ({
   setIsHamburgerMenuClicked?: (isClicked: boolean) => void;
   ROUTES: Record<string, React.ReactNode>;
 }) => {
-  const [selectedMenu, setSelectedMenu] = useState<string>("Dashboard");
+  const defaultMenu =
+    getBrowserStorage().getItem("selectedMenu") ?? "Dashboard";
+  const [selectedMenu, setSelectedMenu] = useState<string>(defaultMenu);
 
   const navigate = useNavigate();
-
   return (
     <div>
       {isHamburgerMenuClicked === true && (
@@ -25,8 +27,13 @@ export const NavItems = ({
                   key={key}
                   onClick={() => {
                     setSelectedMenu(key);
+                    getBrowserStorage().setItem("selectedMenu", key);
                     setIsHamburgerMenuClicked(!isHamburgerMenuClicked);
                     if (key === "Logout") {
+                      getBrowserStorage().removeItem("selectedMenu");
+                      getBrowserStorage().removeItem("accessToken");
+                      getBrowserStorage().removeItem("refreshToken");
+                      getBrowserStorage().removeItem("user");
                       navigate("/login");
                       return;
                     }

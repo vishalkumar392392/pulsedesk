@@ -6,6 +6,14 @@ export interface Asset {
   model: string;
   tag: string;
   type: string;
+  assignedTo?: string;
+  status?: string;
+  purchasedAt?: string;
+  coverageUntil?: string;
+}
+interface GetUsersParams {
+  status?: string;
+  type?: string;
 }
 
 export const assetApi = baseApi.injectEndpoints({
@@ -14,7 +22,20 @@ export const assetApi = baseApi.injectEndpoints({
       query: () => "assets/mine",
       providesTags: ["Assets"],
     }),
+    getAllAssets: builder.query<Asset[], GetUsersParams>({
+      query: ({ status = "", type = "" }) => {
+        status = status === "All" ? "" : status;
+        type = type === "All" ? "" : type;
+        const params = new URLSearchParams();
+
+        if (type) params.set("type", type);
+        if (status) params.set("status", status.replaceAll(" ", "_"));
+        return `/assets/all?${params.toString()}`;
+      },
+      transformResponse: (response: ApiResponse<Asset[]>) => response.data,
+      providesTags: ["Assets"],
+    }),
   }),
 });
 
-export const { useGetAssetsQuery } = assetApi;
+export const { useGetAssetsQuery, useGetAllAssetsQuery } = assetApi;

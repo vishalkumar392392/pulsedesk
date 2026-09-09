@@ -1,18 +1,4 @@
-import type { User } from "../../types/user";
-import { titleCase } from "../../util/helper";
-
-const getStoredUser = (): User | null => {
-  const storedUser =
-    localStorage.getItem("user") ?? sessionStorage.getItem("user");
-
-  if (!storedUser) return null;
-
-  try {
-    return JSON.parse(storedUser) as User;
-  } catch {
-    return null;
-  }
-};
+import { formatName, getStoredUser, titleCase } from "../../util/helper";
 
 export const LoggedInUser = () => {
   const user = getStoredUser();
@@ -23,17 +9,6 @@ export const LoggedInUser = () => {
       .map((item: string) => item.charAt(0))
       .join("")
       .toUpperCase();
-  };
-  const formatName = (name: string) => {
-    const nameParts = name.trim().split(/\s+/).filter(Boolean);
-    if (nameParts.length === 0) return "";
-
-    const firstName = titleCase(nameParts[0]);
-    const lastInitial = nameParts.at(-1)?.charAt(0).toUpperCase();
-
-    return nameParts.length > 1 && lastInitial
-      ? `${firstName} ${lastInitial}.`
-      : firstName;
   };
 
   if (!user) return null;

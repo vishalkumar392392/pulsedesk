@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Ticket } from "../../types/ticket";
-import { titleCase } from "../../util/helper";
+import { priorityStyle, statusStyle, titleCase } from "../../util/helper";
 import {
   DataGrid,
   type DataGridColumn,
@@ -12,37 +12,6 @@ import { useGetUserTicketsQuery } from "../../services/tickets/ticketApi";
 import { useNavigate } from "react-router";
 
 export const Tickets = () => {
-  const statusStyle = (status: string) => {
-    const baseStyle =
-      "inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold";
-
-    switch (status) {
-      case "OPEN":
-        return `${baseStyle} bg-blue-50 text-blue-700`;
-      case "IN_PROGRESS":
-        return `${baseStyle} bg-amber-50 text-amber-700`;
-      case "RESOLVED":
-        return `${baseStyle} bg-emerald-50 text-emerald-700`;
-      case "CLOSED":
-        return `${baseStyle} border border-gray-300 bg-gray-50 text-gray-600`;
-      default:
-        return `${baseStyle} bg-gray-100 text-gray-700`;
-    }
-  };
-
-  const priorityStyle = (priority: string) => {
-    switch (priority) {
-      case "HIGH":
-        return "bg-red-600";
-      case "MEDIUM":
-        return "bg-amber-600";
-      case "LOW":
-        return "bg-slate-600";
-      default:
-        return "bg-gray-400";
-    }
-  };
-
   const TICKET_COLUMNS: DataGridColumn<Ticket>[] = [
     {
       key: "id",
