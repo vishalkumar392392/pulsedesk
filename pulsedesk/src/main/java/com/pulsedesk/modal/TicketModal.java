@@ -26,6 +26,8 @@ public class TicketModal {
 	private String requesterId;
 	private List<Integer> affectedAssetIds;
 	private String createdAt;
+	private String createdAtTimestamp;
+	private String resolvedAt;
 	private String assigneeId;
 
 }

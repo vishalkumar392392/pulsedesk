@@ -32,6 +32,8 @@ public class TicketEntity {
 	private Integer requesterId;
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
+	@Column(name = "resolved_at")
+	private LocalDateTime resolvedAt;
 	@Column(name = "assignee_id")
 	private Integer assigneeId;
 

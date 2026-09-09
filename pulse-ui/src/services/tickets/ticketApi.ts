@@ -29,8 +29,10 @@ export interface TicketsResponse {
 
 export const ticketApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getTickets: builder.query({
-      query: () => "tickets",
+    getTickets: builder.query<Ticket[], void>({
+      query: () => "/ticket/all",
+      transformResponse: (response: ApiResponse<Ticket[]>) => response.data,
+      providesTags: ["Tickets"],
     }),
     getUserTickets: builder.query<TicketsResponse, GetUsersParams>({
       query: ({

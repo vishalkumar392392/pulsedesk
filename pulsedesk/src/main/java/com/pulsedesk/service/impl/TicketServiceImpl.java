@@ -96,6 +96,10 @@ public class TicketServiceImpl implements TicketService {
 		modal.setRequesterId(
 				ticketEntity.getRequesterId() == null ? null : String.valueOf(ticketEntity.getRequesterId()));
 		modal.setAssigneeId(ticketEntity.getAssigneeId() == null ? null : String.valueOf(ticketEntity.getAssigneeId()));
+		modal.setCreatedAtTimestamp(
+				ticketEntity.getCreatedAt() == null ? null : ticketEntity.getCreatedAt().toString());
+		modal.setResolvedAt(
+				ticketEntity.getResolvedAt() == null ? null : ticketEntity.getResolvedAt().toString());
 		modal.setCreatedAt(ticketEntity.getCreatedAt() == null ? null
 				: String.valueOf(ChronoUnit.DAYS.between(ticketEntity.getCreatedAt().toLocalDate(), LocalDate.now()))+ "d ago");
 		return modal;

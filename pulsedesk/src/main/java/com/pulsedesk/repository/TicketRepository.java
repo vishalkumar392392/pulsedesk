@@ -41,6 +41,7 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 			    t.status,
 			    t.requester_id,
 			    t.assignee_id,
+			    t.resolved_at,
 			    t.created_at
 			FROM tickets t
 			JOIN users u ON u.user_id = t.requester_id
