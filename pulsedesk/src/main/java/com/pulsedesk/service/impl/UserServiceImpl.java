@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Locale;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +13,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pulsedesk.entites.AllUsersEntity;
 import com.pulsedesk.entites.RoleEntity;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
+import com.pulsedesk.exception.UserNotFoundException;
 import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.RegisterRequest;
 import com.pulsedesk.modal.UserModel;
+import com.pulsedesk.modal.UpdateUserRequest;
 import com.pulsedesk.repository.GetAllUsersRepository;
 import com.pulsedesk.repository.RoleRepository;
 import com.pulsedesk.repository.UserRepository;
@@ -96,6 +100,62 @@ public class UserServiceImpl implements UserService {
 		BeanUtils.copyProperties(user, userResponse);
 		roleRepository.findById(user.getRoleId()).ifPresent(role -> userResponse.setRole(role.getName()));
 		return userResponse;
+	}
+
+	@Override
+	@Transactional
+	public UserModel updateUser(Integer id, UpdateUserRequest request) {
+		if (request == null) {
+			throw new BadUserRequestException("User update request is required");
+		}
+
+		String name = requireValue(request.getName(), "Name");
+		String email = requireValue(request.getEmail(), "Email").toLowerCase(Locale.ROOT);
+		String roleName = requireValue(request.getRole(), "Role").toLowerCase(Locale.ROOT);
+		String statusValue = requireValue(request.getStatus(), "Status").toUpperCase(Locale.ROOT);
+
+		if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+			throw new BadUserRequestException("Invalid email address");
+		}
+
+		UserEntity user = userRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+		boolean emailBelongsToAnotherUser = userRepository.findByEmail(email).stream()
+				.anyMatch(existingUser -> !existingUser.getId().equals(id));
+		if (emailBelongsToAnotherUser) {
+			throw new BadUserRequestException("Email is already registered to another user");
+		}
+
+		RoleEntity role = roleRepository.findByName(roleName)
+				.orElseThrow(() -> new BadUserRequestException(
+						"Invalid role '" + request.getRole() + "'. Allowed: admin, employee, agent"));
+
+		Status status;
+		try {
+			status = Status.valueOf(statusValue);
+		} catch (IllegalArgumentException exception) {
+			throw new BadUserRequestException(
+					"Invalid status '" + request.getStatus() + "'. Allowed: ACTIVE, INACTIVE");
+		}
+
+		user.setName(name);
+		user.setEmail(email);
+		user.setRoleId(role.getId());
+		user.setStatus(status);
+		UserEntity savedUser = userRepository.save(user);
+
+		UserModel model = new UserModel();
+		BeanUtils.copyProperties(savedUser, model);
+		model.setRole(role.getName());
+		return model;
+	}
+
+	private static String requireValue(String value, String fieldName) {
+		if (value == null || value.isBlank()) {
+			throw new BadUserRequestException(fieldName + " is required");
+		}
+		return value.trim();
 	}
 
 	@Override

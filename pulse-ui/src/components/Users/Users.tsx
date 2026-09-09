@@ -9,9 +9,17 @@ import {
   type DataGridColumn,
   type SortState,
 } from "../Util/DataGrid";
+import { EditUserModal } from "./EditUserModal";
 const DROPDOWN_VALUES: Array<string> = ["All", "Employee", "Agent"];
 
-const USER_COLUMNS: DataGridColumn<User>[] = [
+const userStatusStyle = (status: User["status"]) =>
+  status === "ACTIVE"
+    ? "bg-pulse-green-100 text-emerald-800"
+    : "border border-gray-300 bg-gray-50 text-gray-600";
+
+const getUserColumns = (
+  onEdit: (user: User) => void,
+): DataGridColumn<User>[] => [
   {
     key: "name",
     header: "NAME",
@@ -34,7 +42,9 @@ const USER_COLUMNS: DataGridColumn<User>[] = [
     key: "status",
     header: "STATUS",
     render: (user) => (
-      <span className="bg-pulse-green-100 rounded-4xl px-2 py-1 text-sm">
+      <span
+        className={`rounded-4xl px-2 py-1 text-sm ${userStatusStyle(user.status)}`}
+      >
         {titleCase(user.status)}
       </span>
     ),
@@ -42,10 +52,14 @@ const USER_COLUMNS: DataGridColumn<User>[] = [
   {
     key: "id",
     header: "",
-    render: () => (
-      <span className="cursor-pointer rounded-md border border-gray-300 px-2 py-1">
+    render: (user) => (
+      <button
+        type="button"
+        onClick={() => onEdit(user)}
+        className="cursor-pointer rounded-md border border-gray-300 px-2 py-1 hover:bg-gray-50"
+      >
         Edit
-      </span>
+      </button>
     ),
   },
 ];
@@ -54,6 +68,7 @@ interface FormData {
 }
 export const Users = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const { control } = useForm<FormData>({
     mode: "onChange",
@@ -74,9 +89,16 @@ export const Users = () => {
     direction: sort.direction,
   });
   const users: User[] = data?.content || [];
+  const userColumns = getUserColumns(setEditingUser);
 
   return (
     <div>
+      {editingUser && (
+        <EditUserModal
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+        />
+      )}
       <form>
         <DropDown
           data={isOpen}
@@ -90,7 +112,7 @@ export const Users = () => {
       </form>
       <br />
       <DataGrid
-        columns={USER_COLUMNS}
+        columns={userColumns}
         data={users}
         rowKey="id"
         onSortChange={setSort}

@@ -7,12 +7,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.pulsedesk.modal.ApiResponse;
 import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.UserModel;
+import com.pulsedesk.modal.UpdateUserRequest;
 import com.pulsedesk.service.UserService;
 
 @RestController
@@ -48,6 +51,15 @@ public class UserController {
 		UserModel user = userService.getByUserEmail(email);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(user, "User Fetched Successfully", HttpStatus.OK.value()));
+	}
+
+	@PutMapping("/{userId}")
+	@PreAuthorize("hasAuthority('admin')")
+	public ResponseEntity<ApiResponse<UserModel>> updateUser(@PathVariable Integer userId,
+			@RequestBody UpdateUserRequest request) {
+		UserModel user = userService.updateUser(userId, request);
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(user, "User Updated Successfully", HttpStatus.OK.value()));
 	}
 
 }

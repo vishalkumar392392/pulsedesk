@@ -18,6 +18,14 @@ export interface GetUsersParams {
   direction?: string | null;
 }
 
+export interface UpdateUserRequest {
+  id: number;
+  name: string;
+  email: string;
+  role: User["role"];
+  status: User["status"];
+}
+
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query<UsersResponse, GetUsersParams>({
@@ -43,7 +51,19 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Users"],
     }),
+    updateUser: builder.mutation<ApiResponse<User>, UpdateUserRequest>({
+      query: ({ id, ...user }) => ({
+        url: `/user/${id}`,
+        method: "PUT",
+        body: user,
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useCreateUserMutation } = userApi;
+export const {
+  useGetUsersQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+} = userApi;
