@@ -21,8 +21,10 @@ import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.enums.Status;
 import com.pulsedesk.exception.BadUserRequestException;
 import com.pulsedesk.exception.UserNotFoundException;
+import com.pulsedesk.modal.ChangePasswordRequest;
 import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.RegisterRequest;
+import com.pulsedesk.modal.UpdateProfileRequest;
 import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.modal.UpdateUserRequest;
 import com.pulsedesk.repository.GetAllUsersRepository;
@@ -151,11 +153,77 @@ public class UserServiceImpl implements UserService {
 		return model;
 	}
 
+	@Override
+	@Transactional
+	public UserModel updateCurrentUserProfile(String email, UpdateProfileRequest request) {
+		if (request == null) {
+			throw new BadUserRequestException("Profile update request is required");
+		}
+
+		String name = requireValue(request.getName(), "Name");
+		if (name.length() < 2) {
+			throw new BadUserRequestException("Name must contain at least 2 characters");
+		}
+
+		UserEntity user = getCurrentUser(email);
+		user.setName(name);
+		return toUserModel(userRepository.save(user));
+	}
+
+	@Override
+	@Transactional
+	public void changeCurrentUserPassword(String email, ChangePasswordRequest request) {
+		if (request == null) {
+			throw new BadUserRequestException("Password update request is required");
+		}
+
+		String currentPassword = requirePassword(request.getCurrentPassword(), "Current password");
+		String newPassword = requirePassword(request.getNewPassword(), "New password");
+		String confirmPassword = requirePassword(request.getConfirmPassword(), "Confirm password");
+
+		if (newPassword.length() < 6) {
+			throw new BadUserRequestException("New password must be at least 6 characters");
+		}
+		if (!newPassword.equals(confirmPassword)) {
+			throw new BadUserRequestException("New password and confirmation do not match");
+		}
+
+		UserEntity user = getCurrentUser(email);
+		if (!encoder.matches(currentPassword, user.getPwd())) {
+			throw new BadUserRequestException("Current password is incorrect");
+		}
+		if (encoder.matches(newPassword, user.getPwd())) {
+			throw new BadUserRequestException("New password must be different from the current password");
+		}
+
+		user.setPwd(encoder.encode(newPassword));
+		userRepository.save(user);
+	}
+
+	private UserEntity getCurrentUser(String email) {
+		return userRepository.findByEmail(email).stream().findFirst()
+				.orElseThrow(() -> new UserNotFoundException("User not found for the authenticated account"));
+	}
+
+	private UserModel toUserModel(UserEntity user) {
+		UserModel model = new UserModel();
+		BeanUtils.copyProperties(user, model);
+		roleRepository.findById(user.getRoleId()).ifPresent(role -> model.setRole(role.getName()));
+		return model;
+	}
+
 	private static String requireValue(String value, String fieldName) {
 		if (value == null || value.isBlank()) {
 			throw new BadUserRequestException(fieldName + " is required");
 		}
 		return value.trim();
+	}
+
+	private static String requirePassword(String value, String fieldName) {
+		if (value == null || value.isBlank()) {
+			throw new BadUserRequestException(fieldName + " is required");
+		}
+		return value;
 	}
 
 	@Override

@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.exception.BadUserRequestException;
+import com.pulsedesk.modal.ChangePasswordRequest;
 import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.RegisterRequest;
+import com.pulsedesk.modal.UpdateProfileRequest;
 import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.modal.UpdateUserRequest;
 
@@ -20,6 +22,10 @@ public interface UserService {
 	public UserModel getByUserEmail(String email);
 
 	UserModel updateUser(Integer id, UpdateUserRequest request);
+
+	UserModel updateCurrentUserProfile(String email, UpdateProfileRequest request);
+
+	void changeCurrentUserPassword(String email, ChangePasswordRequest request);
 
 	PageResponse<UserModel>  getAllUsers(int page, int size, String role, String sort, String direction
 

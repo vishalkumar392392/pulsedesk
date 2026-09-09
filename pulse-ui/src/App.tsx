@@ -12,6 +12,7 @@ import Loader from "./components/Util/Loader";
 import { Modal } from "./components/Util/Modal";
 import { Tickets } from "./components/Tickets/Tickets";
 import { TicketForm } from "./components/Tickets/TicketForm";
+import { Settings } from "./components/Settings/Settings";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/assets" element={<Assets />} />
           <Route path="/users" element={<Users />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/example" element={<UserForm />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>

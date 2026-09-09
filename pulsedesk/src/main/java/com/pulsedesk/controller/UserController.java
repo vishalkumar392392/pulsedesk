@@ -1,5 +1,7 @@
 package com.pulsedesk.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import com.pulsedesk.modal.ApiResponse;
+import com.pulsedesk.modal.ChangePasswordRequest;
 import com.pulsedesk.modal.PageResponse;
+import com.pulsedesk.modal.UpdateProfileRequest;
 import com.pulsedesk.modal.UserModel;
 import com.pulsedesk.modal.UpdateUserRequest;
 import com.pulsedesk.service.UserService;
@@ -60,6 +64,22 @@ public class UserController {
 		UserModel user = userService.updateUser(userId, request);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(ApiResponse.success(user, "User Updated Successfully", HttpStatus.OK.value()));
+	}
+
+	@PutMapping("/me/profile")
+	public ResponseEntity<ApiResponse<UserModel>> updateCurrentUserProfile(Principal principal,
+			@RequestBody UpdateProfileRequest request) {
+		UserModel user = userService.updateCurrentUserProfile(principal.getName(), request);
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(user, "Profile Updated Successfully", HttpStatus.OK.value()));
+	}
+
+	@PutMapping("/me/password")
+	public ResponseEntity<ApiResponse<Void>> changeCurrentUserPassword(Principal principal,
+			@RequestBody ChangePasswordRequest request) {
+		userService.changeCurrentUserPassword(principal.getName(), request);
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(ApiResponse.success(null, "Password Updated Successfully", HttpStatus.OK.value()));
 	}
 
 }

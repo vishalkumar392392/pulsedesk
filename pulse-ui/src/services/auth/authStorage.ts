@@ -31,6 +31,17 @@ export const authStorage = {
     );
   },
 
+  updateUser(user: User) {
+    const storage = localStorage.getItem("user")
+      ? localStorage
+      : sessionStorage;
+
+    if (!storage.getItem("user")) return;
+
+    storage.setItem("user", JSON.stringify(user));
+    window.dispatchEvent(new Event("pulsedesk:user-updated"));
+  },
+
   clear() {
     sessionStorage.clear();
     localStorage.clear();

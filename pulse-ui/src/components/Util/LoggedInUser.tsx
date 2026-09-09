@@ -1,7 +1,20 @@
+import { useEffect, useState } from "react";
 import { formatName, getStoredUser, titleCase } from "../../util/helper";
 
 export const LoggedInUser = () => {
-  const user = getStoredUser();
+  const [user, setUser] = useState(getStoredUser);
+
+  useEffect(() => {
+    const refreshUser = () => setUser(getStoredUser());
+
+    window.addEventListener("pulsedesk:user-updated", refreshUser);
+    window.addEventListener("storage", refreshUser);
+
+    return () => {
+      window.removeEventListener("pulsedesk:user-updated", refreshUser);
+      window.removeEventListener("storage", refreshUser);
+    };
+  }, []);
 
   const getIntials = (name: string) => {
     return name

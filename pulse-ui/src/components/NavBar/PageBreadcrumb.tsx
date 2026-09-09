@@ -19,7 +19,7 @@ const PAGE_CONTEXT: Record<string, string> = {
   dashboard: "Workspace overview",
   example: "Component preview",
   reports: "Performance insights",
-  settings: "Account preferences",
+  settings: "Account settings",
   tickets: "Support workspace",
   users: "Team directory",
 };

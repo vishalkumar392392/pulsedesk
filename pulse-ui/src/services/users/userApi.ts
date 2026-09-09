@@ -26,6 +26,16 @@ export interface UpdateUserRequest {
   status: User["status"];
 }
 
+export interface UpdateProfileRequest {
+  name: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query<UsersResponse, GetUsersParams>({
@@ -59,6 +69,21 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Users"],
     }),
+    updateProfile: builder.mutation<ApiResponse<User>, UpdateProfileRequest>({
+      query: (profile) => ({
+        url: "/user/me/profile",
+        method: "PUT",
+        body: profile,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    changePassword: builder.mutation<ApiResponse<null>, ChangePasswordRequest>({
+      query: (passwords) => ({
+        url: "/user/me/password",
+        method: "PUT",
+        body: passwords,
+      }),
+    }),
   }),
 });
 
@@ -66,4 +91,6 @@ export const {
   useGetUsersQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
 } = userApi;
