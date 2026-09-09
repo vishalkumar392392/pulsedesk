@@ -17,6 +17,8 @@ public interface AssetsUserRepository extends JpaRepository<AssetsUserEntity, In
 			    a.type,
 			    a.model,
 			    a.status,
+			    a.purchased_at,
+			    a.coverage_until,
 			    u.name
 			FROM assets a
 			JOIN users u ON u.user_id = a.assigned_to_id

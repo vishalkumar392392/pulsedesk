@@ -19,4 +19,11 @@ public class AssetsUserEntity {
 	private String status;
 	@Column(name = "name")
 	private String assignedTo;
+	
+	@Column(name = "purchased_at")
+	private String purchasedAt;
+	
+	@Column(name = "coverage_until")
+	private String coverageUntil;
+
 }
