@@ -2,7 +2,8 @@ import { Controller, useForm } from "react-hook-form";
 import { PulseIcon } from "../Util/PulseIcon";
 import { useLoginMutation } from "../../services/auth/authApi";
 import { authStorage } from "../../services/auth/authStorage";
-import { useNavigate } from "react-router";
+import { Navigate, useLocation, useNavigate } from "react-router";
+import { getStoredUser } from "../../util/helper";
 
 interface FormData {
   email: string;
@@ -11,6 +12,7 @@ interface FormData {
 }
 export const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     control,
     handleSubmit,
@@ -24,6 +26,14 @@ export const Login = () => {
     },
   });
   const [login] = useLoginMutation();
+  const requestedRoute = (location.state as { from?: unknown } | null)?.from;
+  const destination =
+    typeof requestedRoute === "string" &&
+    requestedRoute.startsWith("/") &&
+    !requestedRoute.startsWith("//")
+      ? requestedRoute
+      : "/dashboard";
+
   const onSubmit = async (data: FormData) => {
     const response = await login(data).unwrap();
     // console.log(response);
@@ -31,10 +41,15 @@ export const Login = () => {
       response.data.accessToken,
       response.data.refreshToken,
       data.rememberMe,
-      response.data.user
+      response.data.user,
     );
-    navigate("/dashboard");
+    navigate(destination, { replace: true });
   };
+
+  if (authStorage.getAccessToken() && getStoredUser()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

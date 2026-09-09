@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { Ticket } from "../../types/ticket";
-import { priorityStyle, statusStyle, titleCase } from "../../util/helper";
+import {
+  getStoredUser,
+  priorityStyle,
+  statusStyle,
+  titleCase,
+} from "../../util/helper";
 import {
   DataGrid,
   type DataGridColumn,
@@ -10,8 +15,10 @@ import { TicketStatusDropdown } from "./Dropdowns/TicketStatusDropdown";
 import { TicketPriorityDropdown } from "./Dropdowns/TicketPriorityDropdown";
 import { useGetUserTicketsQuery } from "../../services/tickets/ticketApi";
 import { useNavigate } from "react-router";
+import { normalizeRole } from "../../util/accessControl";
 
 export const Tickets = () => {
+  const isEmployee = normalizeRole(getStoredUser()?.role) === "employee";
   const TICKET_COLUMNS: DataGridColumn<Ticket>[] = [
     {
       key: "id",
@@ -66,6 +73,9 @@ export const Tickets = () => {
       ),
     },
   ];
+  const visibleColumns = isEmployee
+    ? TICKET_COLUMNS.filter((column) => column.key !== "assigneeId")
+    : TICKET_COLUMNS;
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState("10");
@@ -86,17 +96,19 @@ export const Tickets = () => {
     <div>
       <TicketStatusDropdown setPage={setPage} setStatus={setStatus} />
       <TicketPriorityDropdown setPage={setPage} setPriority={setPriority} />
-      <div className="flex justify-end">
-        <button
-          onClick={() => navigate("/tickets/create")}
-          className={`bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white`}
-        >
-          + New Ticket
-        </button>
-      </div>
+      {isEmployee && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => navigate("/tickets/create")}
+            className="bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white"
+          >
+            + New Ticket
+          </button>
+        </div>
+      )}
       <br />
       <DataGrid
-        columns={TICKET_COLUMNS}
+        columns={visibleColumns}
         data={tickets}
         totalElements={data?.totalElements}
         rowKey="id"

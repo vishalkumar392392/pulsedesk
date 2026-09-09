@@ -45,7 +45,6 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 			    t.created_at
 			FROM tickets t
 			JOIN users u ON u.user_id = t.requester_id
-			WHERE u.email = :email
 			  AND (:status IS NULL OR t.status = :status)
 			  AND (:priority IS NULL OR t.priority = :priority)
 			ORDER BY
@@ -74,7 +73,6 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 					""",
 			nativeQuery = true)
 	Page<TicketEntity> getTickets(
-			@Param("email") String email,
 			@Param("status") String status,
 			@Param("priority") String priority,
 			@Param("sort") String sort,

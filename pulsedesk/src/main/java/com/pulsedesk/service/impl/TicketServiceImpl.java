@@ -64,7 +64,7 @@ public class TicketServiceImpl implements TicketService {
 		String normalizedDirection = "asc".equalsIgnoreCase(direction) ? "asc" : "desc";
 		Pageable pageable = PageRequest.of(currentPage, pageSize);
 
-		Page<TicketEntity> tickets = ticketRepository.getTickets(email, normalizedStatus, normalizedPriority,
+		Page<TicketEntity> tickets = ticketRepository.getTickets( normalizedStatus, normalizedPriority,
 				normalizedSort, normalizedDirection, pageable);
 		Page<TicketModal> ticketModels = tickets.map(TicketServiceImpl::getTicketModal);
 
