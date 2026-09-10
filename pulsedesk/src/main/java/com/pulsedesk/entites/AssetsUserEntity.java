@@ -17,6 +17,8 @@ public class AssetsUserEntity {
 	private String type;
 	private String model;
 	private String status;
+	@Column(name = "assigned_to_id")
+	private Integer assignedToId;
 	@Column(name = "name")
 	private String assignedTo;
 	

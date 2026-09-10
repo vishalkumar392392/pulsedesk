@@ -83,7 +83,12 @@ export const Assets = () => {
             scrollHeight="32rem"
           />
         </div>
-        {selectedAsset && <AssetDetails asset={selectedAsset} />}
+        {selectedAsset && (
+          <AssetDetails
+            key={`${selectedAsset.id}-${selectedAsset.assignedToId ?? "unassigned"}`}
+            asset={selectedAsset}
+          />
+        )}
       </div>
     </div>
   );

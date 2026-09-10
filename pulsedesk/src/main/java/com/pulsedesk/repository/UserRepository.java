@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.pulsedesk.entites.UserEntity;
+import com.pulsedesk.enums.Status;
 
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
@@ -12,6 +13,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
 	UserEntity getByEmail(String email);
 
-	
+	List<UserEntity> findAllByStatusOrderByNameAsc(Status status);
 
 }

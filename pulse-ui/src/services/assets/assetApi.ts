@@ -6,11 +6,19 @@ export interface Asset {
   model: string;
   tag: string;
   type: string;
-  assignedTo?: string;
+  assignedToId?: number | null;
+  assignedTo?: string | null;
   status?: string;
   purchasedAt?: string;
   coverageUntil?: string;
 }
+
+export interface AssetAssignee {
+  id: number;
+  name: string;
+  email: string;
+}
+
 interface GetUsersParams {
   status?: string;
   type?: string;
@@ -35,7 +43,30 @@ export const assetApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<Asset[]>) => response.data,
       providesTags: ["Assets"],
     }),
+    getAssetAssignees: builder.query<AssetAssignee[], void>({
+      query: () => "/assets/assignees",
+      transformResponse: (response: ApiResponse<AssetAssignee[]>) =>
+        response.data,
+      providesTags: ["Users"],
+    }),
+    assignAsset: builder.mutation<
+      Asset,
+      { assetId: number; assignedToId: number | null }
+    >({
+      query: ({ assetId, assignedToId }) => ({
+        url: `/assets/${assetId}/assign`,
+        method: "PATCH",
+        body: { assignedToId },
+      }),
+      transformResponse: (response: ApiResponse<Asset>) => response.data,
+      invalidatesTags: ["Assets"],
+    }),
   }),
 });
 
-export const { useGetAssetsQuery, useGetAllAssetsQuery } = assetApi;
+export const {
+  useGetAssetsQuery,
+  useGetAllAssetsQuery,
+  useGetAssetAssigneesQuery,
+  useAssignAssetMutation,
+} = assetApi;

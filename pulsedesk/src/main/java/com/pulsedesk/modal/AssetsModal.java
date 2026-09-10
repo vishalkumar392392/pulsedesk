@@ -12,6 +12,7 @@ public class AssetsModal {
 	private String type;
 	private String model;
 	private String status;
+	private Integer assignedToId;
 	private String assignedTo;
 
 	private String purchasedAt;
