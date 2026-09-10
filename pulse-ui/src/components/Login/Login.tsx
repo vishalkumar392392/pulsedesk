@@ -5,6 +5,8 @@ import { authStorage } from "../../services/auth/authStorage";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { getStoredUser } from "../../util/helper";
 import { isApiResponse } from "../../services/api/baseQuery";
+import { useAppDispatch } from "../../hooks";
+import { baseApi } from "../../services/api/baseApi";
 
 interface FormData {
   email: string;
@@ -26,6 +28,7 @@ const getLoginErrorMessage = (error: unknown) => {
 };
 
 export const Login = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -61,6 +64,7 @@ export const Login = () => {
         data.rememberMe,
         response.data.user,
       );
+      dispatch(baseApi.util.resetApiState());
       navigate(destination, { replace: true });
     } catch (error) {
       resetField("password");

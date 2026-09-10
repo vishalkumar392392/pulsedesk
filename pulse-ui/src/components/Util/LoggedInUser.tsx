@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { formatName, getStoredUser, titleCase } from "../../util/helper";
+import { AUTH_USER_CHANGED_EVENT } from "../../services/auth/authStorage";
 
 export const LoggedInUser = () => {
   const [user, setUser] = useState(getStoredUser);
@@ -7,11 +8,11 @@ export const LoggedInUser = () => {
   useEffect(() => {
     const refreshUser = () => setUser(getStoredUser());
 
-    window.addEventListener("pulsedesk:user-updated", refreshUser);
+    window.addEventListener(AUTH_USER_CHANGED_EVENT, refreshUser);
     window.addEventListener("storage", refreshUser);
 
     return () => {
-      window.removeEventListener("pulsedesk:user-updated", refreshUser);
+      window.removeEventListener(AUTH_USER_CHANGED_EVENT, refreshUser);
       window.removeEventListener("storage", refreshUser);
     };
   }, []);

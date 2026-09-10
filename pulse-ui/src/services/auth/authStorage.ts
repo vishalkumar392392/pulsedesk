@@ -6,9 +6,14 @@ const USER = "user";
 const SELECTED_MENU = "selectedMenu";
 const AUTH_STORAGE_KEYS = [ACCESS_TOKEN, REFRESH_TOKEN, USER, SELECTED_MENU];
 export const AUTH_TOKENS_CHANGED_EVENT = "pulsedesk:tokens-updated";
+export const AUTH_USER_CHANGED_EVENT = "pulsedesk:user-updated";
 
 const notifyTokensChanged = () => {
   window.dispatchEvent(new Event(AUTH_TOKENS_CHANGED_EVENT));
+};
+
+const notifyUserChanged = () => {
+  window.dispatchEvent(new Event(AUTH_USER_CHANGED_EVENT));
 };
 
 export const authStorage = {
@@ -24,6 +29,7 @@ export const authStorage = {
     storage.setItem(ACCESS_TOKEN, accessToken);
     storage.setItem(REFRESH_TOKEN, refreshToken);
     storage.setItem(USER, JSON.stringify(user));
+    notifyUserChanged();
     notifyTokensChanged();
   },
 
@@ -58,7 +64,7 @@ export const authStorage = {
     if (!storage.getItem("user")) return;
 
     storage.setItem("user", JSON.stringify(user));
-    window.dispatchEvent(new Event("pulsedesk:user-updated"));
+    notifyUserChanged();
   },
 
   clear() {
@@ -68,7 +74,7 @@ export const authStorage = {
       }
     }
 
-    window.dispatchEvent(new Event("pulsedesk:user-updated"));
+    notifyUserChanged();
     notifyTokensChanged();
   },
 };
