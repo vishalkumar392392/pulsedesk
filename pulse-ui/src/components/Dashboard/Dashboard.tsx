@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { GoChevronRight } from "react-icons/go";
+import { Link } from "react-router";
 import { useGetUserTicketsQuery } from "../../services/tickets/ticketApi";
 import type { Ticket } from "../../types/ticket";
 import type { User } from "../../types/user";
@@ -97,26 +99,43 @@ export default function Dashboard() {
           <div className="font-semibold text-gray-700">RECENT TICKETS</div>
           {data?.content.map((row) => {
             return (
-              <div key={row.id}>
-                <div className="my-2 flex justify-start gap-6 border-b border-gray-400 p-1.5">
-                  <div className="text-gray-500">#{row.id}</div>
-                  <div className="font-light">{row.title}</div>
-                  <div>
-                    <span className="inline-flex items-center gap-2">
-                      <span
-                        className={`size-2 shrink-0 rounded-full ${priorityStyle(row.priority)}`}
-                        aria-hidden="true"
-                      />
-                      <span className="font-light text-gray-700">
-                        {titleCase(row.priority)}
-                      </span>
-                    </span>
-                  </div>
-                  <div className={statusStyle(row.status)}>{row.status}</div>
-                </div>
-              </div>
+              <Link
+                key={row.id}
+                to={`/tickets/${row.id}`}
+                aria-label={`Open ticket ${row.id}: ${row.title}`}
+                className="group my-1 flex items-center gap-5 rounded-lg border-b border-gray-300 px-2 py-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700"
+              >
+                <span className="w-12 shrink-0 text-gray-500">#{row.id}</span>
+                <span className="min-w-0 flex-1 truncate font-light">
+                  {row.title}
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-2">
+                  <span
+                    className={`size-2 shrink-0 rounded-full ${priorityStyle(row.priority)}`}
+                    aria-hidden="true"
+                  />
+                  <span className="font-light text-gray-700">
+                    {titleCase(row.priority)}
+                  </span>
+                </span>
+                <span className={`${statusStyle(row.status)} shrink-0`}>
+                  {row.status}
+                </span>
+                <GoChevronRight
+                  aria-hidden="true"
+                  className="shrink-0 text-xl text-gray-400 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-700"
+                />
+              </Link>
             );
           })}
+          <div className="mt-4 flex justify-end">
+            <Link
+              to="/tickets"
+              className="font-semibold text-teal-700 hover:text-teal-900 hover:underline"
+            >
+              View all tickets →
+            </Link>
+          </div>
         </div>
         <PriorityBreakdown tickets={data?.content ?? []} />
       </div>
