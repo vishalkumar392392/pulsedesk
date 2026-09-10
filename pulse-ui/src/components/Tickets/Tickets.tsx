@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Ticket } from "../../types/ticket";
 import {
+  formatName,
   getStoredUser,
   priorityStyle,
   statusStyle,
@@ -57,13 +58,16 @@ export const Tickets = () => {
       ),
     },
     {
-      key: "assigneeId",
+      key: "assigneeName",
       header: "ASSIGNEE",
-      render: (ticket) => (
-        <span className="bg-pulse-green-100 rounded-4xl px-2 py-1 text-sm">
-          {ticket.assigneeId}
-        </span>
-      ),
+      render: (ticket) =>
+        ticket.assigneeName ? (
+          <span className="bg-pulse-green-100 rounded-4xl px-2 py-1 text-sm">
+            {formatName(ticket.assigneeName)}
+          </span>
+        ) : (
+          <span className="text-sm text-gray-500">Unassigned</span>
+        ),
     },
     {
       key: "createdAt",
@@ -74,7 +78,7 @@ export const Tickets = () => {
     },
   ];
   const visibleColumns = isEmployee
-    ? TICKET_COLUMNS.filter((column) => column.key !== "assigneeId")
+    ? TICKET_COLUMNS.filter((column) => column.key !== "assigneeName")
     : TICKET_COLUMNS;
 
   const [page, setPage] = useState(0);

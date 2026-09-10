@@ -35,19 +35,22 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 
 	@Query(value = """
 			SELECT
-			    t.id,
-			    t.title,
-			    t.description,
-			    t.category,
-			    t.priority,
-			    t.status,
-			    t.requester_id,
-			    t.assignee_id,
-			    t.resolved_at,
-			    t.created_at
+			    t.id AS id,
+			    t.title AS title,
+			    t.description AS description,
+			    t.category AS category,
+			    t.priority AS priority,
+			    t.status AS status,
+			    t.requester_id AS requesterId,
+			    requester.name AS requesterName,
+			    t.assignee_id AS assigneeId,
+			    assignee.name AS assigneeName,
+			    t.resolved_at AS resolvedAt,
+			    t.created_at AS createdAt
 			FROM tickets t
-			JOIN users u ON u.user_id = t.requester_id
-			WHERE (:scopeToRequester = 0 OR u.email = :email)
+			JOIN users requester ON requester.user_id = t.requester_id
+			LEFT JOIN users assignee ON assignee.user_id = t.assignee_id
+			WHERE (:scopeToRequester = 0 OR requester.email = :email)
 			  AND (:status IS NULL OR t.status = :status)
 			  AND (:priority IS NULL OR t.priority = :priority)
 			ORDER BY
@@ -75,7 +78,7 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 					  AND (:priority IS NULL OR t.priority = :priority)
 					""",
 			nativeQuery = true)
-	Page<TicketEntity> getTickets(
+	Page<TicketDetailsProjection> getTickets(
 			@Param("email") String email,
 			@Param("scopeToRequester") int scopeToRequester,
 			@Param("status") String status,

@@ -119,7 +119,7 @@ public class TicketServiceImpl implements TicketService {
 
 		UserEntity user = getAuthenticatedUser(email);
 		int scopeToRequester = isEmployee(user) ? 1 : 0;
-		Page<TicketEntity> tickets = ticketRepository.getTickets(email, scopeToRequester, normalizedStatus,
+		Page<TicketDetailsProjection> tickets = ticketRepository.getTickets(email, scopeToRequester, normalizedStatus,
 				normalizedPriority, normalizedSort, normalizedDirection, pageable);
 		Page<TicketModal> ticketModels = tickets.map(TicketServiceImpl::getTicketModal);
 

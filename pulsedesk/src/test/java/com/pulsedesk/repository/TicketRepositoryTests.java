@@ -11,8 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.pulsedesk.entites.TicketEntity;
-
 @SpringBootTest
 class TicketRepositoryTests {
 
@@ -32,7 +30,7 @@ class TicketRepositoryTests {
 				LIMIT 1
 				""", String.class);
 
-		Page<TicketEntity> tickets = ticketRepository.getTickets(
+		Page<TicketDetailsProjection> tickets = ticketRepository.getTickets(
 				email, 1, null, null, "id", "asc", PageRequest.of(0, 1));
 
 		assertFalse(tickets.isEmpty());
@@ -41,10 +39,10 @@ class TicketRepositoryTests {
 		assertTrue(tickets.getTotalElements() >= 1);
 		assertTrue(tickets.getTotalPages() >= 1);
 
-		String status = tickets.getContent().get(0).getStatus().name();
-		Page<TicketEntity> filteredTickets = ticketRepository.getTickets(
+		String status = tickets.getContent().get(0).getStatus();
+		Page<TicketDetailsProjection> filteredTickets = ticketRepository.getTickets(
 				email, 1, status, null, "createdAt", "desc", PageRequest.of(0, 10));
 
-		assertTrue(filteredTickets.stream().allMatch(ticket -> ticket.getStatus().name().equals(status)));
+		assertTrue(filteredTickets.stream().allMatch(ticket -> ticket.getStatus().equals(status)));
 	}
 }
