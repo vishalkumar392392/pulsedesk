@@ -22,6 +22,8 @@ public interface TicketService {
 
 	TicketModal updateAssignee(Integer ticketId, Integer assigneeId, String email);
 
+	TicketModal autoAssign(Integer ticketId);
+
 	List<TicketAssigneeModal> getAssignableAgents();
 
 	List<TicketCommentModal> getComments(Integer ticketId, String email);

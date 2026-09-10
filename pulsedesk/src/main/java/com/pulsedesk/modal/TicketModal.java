@@ -31,5 +31,6 @@ public class TicketModal {
 	private String resolvedAt;
 	private String assigneeId;
 	private String assigneeName;
+	private Long ticketId;
 
 }

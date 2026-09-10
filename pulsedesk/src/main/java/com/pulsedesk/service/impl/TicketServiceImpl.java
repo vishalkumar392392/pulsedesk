@@ -1,17 +1,24 @@
 package com.pulsedesk.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pulsedesk.entites.RoleEntity;
 import com.pulsedesk.entites.TicketEntity;
 import com.pulsedesk.entites.UserEntity;
+import com.pulsedesk.entites.UserTicketEntity;
 import com.pulsedesk.enums.TicketStatus;
 import com.pulsedesk.exception.BadUserRequestException;
 import com.pulsedesk.exception.UserNotFoundException;
+import com.pulsedesk.kafka.event.TicketCreatedEvent;
 import com.pulsedesk.modal.PageResponse;
 import com.pulsedesk.modal.TicketAssigneeModal;
 import com.pulsedesk.modal.TicketCommentModal;
@@ -52,13 +61,38 @@ public class TicketServiceImpl implements TicketService {
 	@Autowired
 	private RoleRepository roleRepository;
 
+	@Autowired
+	private KafkaTemplate<String, TicketCreatedEvent> kafkaTemplate;
+
+	private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
 	@Override
 	@Transactional
 	public TicketModal createTicket(TicketModal ticketModal, String email) {
 		String assetIdsJson = toAssetIdsJson(ticketModal);
-		UserEntity user = ticketRepository.createTicket(ticketModal.getTitle(), ticketModal.getDescription(),
+		UserTicketEntity user = ticketRepository.createTicket(ticketModal.getTitle(), ticketModal.getDescription(),
 				ticketModal.getCategory(), ticketModal.getPriority(), email, assetIdsJson);
+		LOGGER.info("entity {}", user);
 		ticketModal.setRequesterId(String.valueOf(user.getId()));
+		ticketModal.setTicketId(user.getTicketId());
+		TicketCreatedEvent event = new TicketCreatedEvent();
+		UUID eventId = UUID.randomUUID();
+		event.setEventId(eventId);
+		event.setOccurredAt(LocalDateTime.now());
+		event.setPriority(ticketModal.getPriority());
+		event.setRequesterId(user.getId());
+		event.setTicketId(user.getTicketId());
+		event.setTitle(ticketModal.getTitle());
+
+		CompletableFuture<SendResult<String, TicketCreatedEvent>> future = kafkaTemplate.send("pulsedesk.ticket-events",
+				eventId.toString(), event);
+		future.whenComplete((result, exception) -> {
+			if (exception != null) {
+				LOGGER.error("Error occured: {}", exception);
+			} else {
+				LOGGER.info("******** Message sent successfully *********");
+			}
+		});
 		return ticketModal;
 	}
 
@@ -119,16 +153,16 @@ public class TicketServiceImpl implements TicketService {
 		modal.setAssigneeId(ticketEntity.getAssigneeId() == null ? null : String.valueOf(ticketEntity.getAssigneeId()));
 		modal.setCreatedAtTimestamp(
 				ticketEntity.getCreatedAt() == null ? null : ticketEntity.getCreatedAt().toString());
-		modal.setResolvedAt(
-				ticketEntity.getResolvedAt() == null ? null : ticketEntity.getResolvedAt().toString());
+		modal.setResolvedAt(ticketEntity.getResolvedAt() == null ? null : ticketEntity.getResolvedAt().toString());
 		modal.setCreatedAt(ticketEntity.getCreatedAt() == null ? null
-				: String.valueOf(ChronoUnit.DAYS.between(ticketEntity.getCreatedAt().toLocalDate(), LocalDate.now()))+ "d ago");
+				: String.valueOf(ChronoUnit.DAYS.between(ticketEntity.getCreatedAt().toLocalDate(), LocalDate.now()))
+						+ "d ago");
 		return modal;
 	}
 
 	@Override
 	public List<TicketModal> getAllTickets() {
-		List<TicketEntity> tickets =  ticketRepository.getAllTickets();
+		List<TicketEntity> tickets = ticketRepository.getAllTickets();
 		return tickets.stream().map(TicketServiceImpl::getTicketModal).collect(Collectors.toList());
 	}
 
@@ -169,11 +203,30 @@ public class TicketServiceImpl implements TicketService {
 	}
 
 	@Override
+	@Transactional
+	public TicketModal autoAssign(Integer ticketId) {
+		TicketDetailsProjection ticket = getTicketProjection(ticketId);
+		if (ticket.getAssigneeId() != null) {
+			return getTicketModal(ticket);
+		}
+
+		Integer agentId = ticketRepository.findLeastLoadedActiveAgentId()
+				.orElseThrow(() -> new BadUserRequestException("No active agent is available for assignment"));
+
+		int updatedRows = ticketRepository.autoAssignTicketIfUnassigned(ticketId, agentId);
+		TicketDetailsProjection updatedTicket = getTicketProjection(ticketId);
+		if (updatedRows == 0 && updatedTicket.getAssigneeId() == null) {
+			throw new BadUserRequestException("Ticket could not be auto-assigned");
+		}
+
+		return getTicketModal(updatedTicket);
+	}
+
+	@Override
 	@Transactional(readOnly = true)
 	public List<TicketAssigneeModal> getAssignableAgents() {
 		return ticketRepository.getAssignableAgents().stream()
-				.map(agent -> new TicketAssigneeModal(agent.getId(), agent.getName(), agent.getEmail()))
-				.toList();
+				.map(agent -> new TicketAssigneeModal(agent.getId(), agent.getName(), agent.getEmail())).toList();
 	}
 
 	@Override
@@ -234,8 +287,7 @@ public class TicketServiceImpl implements TicketService {
 		if ("employee".equalsIgnoreCase(role) && !user.getId().equals(ticket.getRequesterId())) {
 			throw new AccessDeniedException("You cannot access another user's ticket");
 		}
-		if (!"employee".equalsIgnoreCase(role) && !"agent".equalsIgnoreCase(role)
-				&& !"admin".equalsIgnoreCase(role)) {
+		if (!"employee".equalsIgnoreCase(role) && !"agent".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
 			throw new AccessDeniedException("Your role cannot access tickets");
 		}
 	}

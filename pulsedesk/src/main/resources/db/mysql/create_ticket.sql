@@ -63,7 +63,8 @@ BEGIN
         u.pwd,
         u.create_dt,
         u.status,
-        u.role_id
+        u.role_id,
+        v_ticket_id AS ticket_id
     FROM users u
     WHERE u.user_id = v_requester_id;
 END$$

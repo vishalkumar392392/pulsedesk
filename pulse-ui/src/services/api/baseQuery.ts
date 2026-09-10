@@ -29,7 +29,7 @@ export function isApiResponse(value: unknown): value is ApiResponse<unknown> {
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:8080/",
+  baseUrl: "http://localhost:80/",
   prepareHeaders: (headers, { endpoint }) => {
     const token = authStorage.getAccessToken();
     if (token && endpoint !== "login" && endpoint !== "refreshSession") {

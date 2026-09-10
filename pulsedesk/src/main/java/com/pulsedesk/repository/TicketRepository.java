@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.pulsedesk.entites.TicketEntity;
-import com.pulsedesk.entites.UserEntity;
+import com.pulsedesk.entites.UserTicketEntity;
 
 public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 
@@ -25,7 +25,7 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 				:assetIdsJson
 			)
 			""", nativeQuery = true)
-	UserEntity createTicket(
+	UserTicketEntity createTicket(
 			@Param("title") String title,
 			@Param("description") String description,
 			@Param("category") String category,
@@ -131,6 +131,21 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 			""", nativeQuery = true)
 	long countAssignableAgent(@Param("userId") Integer userId);
 
+	@Query(value = """
+			SELECT u.user_id
+			FROM users u
+			JOIN role r ON r.id = u.role_id
+			LEFT JOIN tickets t
+			       ON t.assignee_id = u.user_id
+			      AND t.status IN ('OPEN', 'IN_PROGRESS')
+			WHERE u.status = 'ACTIVE'
+			  AND LOWER(r.name) = 'agent'
+			GROUP BY u.user_id
+			ORDER BY COUNT(t.id) ASC, u.user_id ASC
+			LIMIT 1
+			""", nativeQuery = true)
+	Optional<Integer> findLeastLoadedActiveAgentId();
+
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
 			UPDATE tickets
@@ -154,5 +169,17 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Integer> {
 			WHERE id = :ticketId
 			""", nativeQuery = true)
 	int updateTicketAssignee(@Param("ticketId") Integer ticketId, @Param("assigneeId") Integer assigneeId);
+
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query(value = """
+			UPDATE tickets
+			SET assignee_id = :assigneeId,
+			    updated_at = CURRENT_TIMESTAMP(6),
+			    version = version + 1
+			WHERE id = :ticketId
+			  AND assignee_id IS NULL
+			""", nativeQuery = true)
+	int autoAssignTicketIfUnassigned(@Param("ticketId") Integer ticketId,
+			@Param("assigneeId") Integer assigneeId);
 
 }

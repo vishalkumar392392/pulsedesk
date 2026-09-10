@@ -60,5 +60,11 @@ class TicketServiceTests {
 
 		TicketModal unassigned = ticketService.updateAssignee(ticketId, null, supportEmail);
 		assertNull(unassigned.getAssigneeId());
+
+		TicketModal autoAssigned = ticketService.autoAssign(ticketId);
+		assertNotNull(autoAssigned.getAssigneeId());
+
+		TicketModal autoAssignedAgain = ticketService.autoAssign(ticketId);
+		assertEquals(autoAssigned.getAssigneeId(), autoAssignedAgain.getAssigneeId());
 	}
 }
