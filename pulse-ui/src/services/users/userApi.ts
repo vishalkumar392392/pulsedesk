@@ -26,6 +26,16 @@ export interface UpdateUserRequest {
   status: User["status"];
 }
 
+export interface CreateUserRequest {
+  name: string;
+  email: string;
+  mobileNumber: string;
+  pwd: string;
+  role: User["role"];
+}
+
+export type CreatedUser = Pick<User, "id" | "name" | "email">;
+
 export interface UpdateProfileRequest {
   name: string;
 }
@@ -53,12 +63,13 @@ export const userApi = baseApi.injectEndpoints({
         response.data,
       providesTags: ["Users"],
     }),
-    createUser: builder.mutation<User, User>({
+    createUser: builder.mutation<CreatedUser, CreateUserRequest>({
       query: (user) => ({
-        url: "users",
+        url: "/auth/register",
         method: "POST",
         body: user,
       }),
+      transformResponse: (response: ApiResponse<CreatedUser>) => response.data,
       invalidatesTags: ["Users"],
     }),
     updateUser: builder.mutation<ApiResponse<User>, UpdateUserRequest>({

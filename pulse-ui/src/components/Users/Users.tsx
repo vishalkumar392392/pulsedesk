@@ -10,6 +10,8 @@ import {
   type SortState,
 } from "../Util/DataGrid";
 import { EditUserModal } from "./EditUserModal";
+import { CreateUserModal } from "./CreateUserModal";
+import { IoAdd } from "react-icons/io5";
 const DROPDOWN_VALUES: Array<string> = ["All", "Employee", "Agent"];
 
 const userStatusStyle = (status: User["status"]) =>
@@ -68,6 +70,8 @@ interface FormData {
 }
 export const Users = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
+  const [createdUserName, setCreatedUserName] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const { control } = useForm<FormData>({
@@ -99,18 +103,48 @@ export const Users = () => {
           onClose={() => setEditingUser(null)}
         />
       )}
-      <form>
-        <DropDown
-          data={isOpen}
-          setData={setIsOpen}
-          control={control}
-          values={DROPDOWN_VALUES}
-          label="Role"
-          onSelect={() => setPage(0)}
-          name="value"
+      {isCreateUserOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateUserOpen(false)}
+          onCreated={(user) => {
+            setIsCreateUserOpen(false);
+            setCreatedUserName(user.name);
+            setPage(0);
+          }}
         />
-      </form>
-      <br />
+      )}
+      {createdUserName && (
+        <div
+          className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+          role="status"
+        >
+          {titleCase(createdUserName)} was created successfully.
+        </div>
+      )}
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <form className="min-w-0 flex-1">
+          <DropDown
+            data={isOpen}
+            setData={setIsOpen}
+            control={control}
+            values={DROPDOWN_VALUES}
+            label="Role"
+            onSelect={() => setPage(0)}
+            name="value"
+          />
+        </form>
+        <button
+          type="button"
+          onClick={() => {
+            setCreatedUserName("");
+            setIsCreateUserOpen(true);
+          }}
+          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white shadow-sm transition-colors"
+        >
+          <IoAdd aria-hidden="true" fontSize={20} />
+          Add user
+        </button>
+      </div>
       <DataGrid
         columns={userColumns}
         data={users}
