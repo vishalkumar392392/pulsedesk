@@ -2,6 +2,9 @@ import type { User } from "../../types/user";
 
 const ACCESS_TOKEN = "accessToken";
 const REFRESH_TOKEN = "refreshToken";
+const USER = "user";
+const SELECTED_MENU = "selectedMenu";
+const AUTH_STORAGE_KEYS = [ACCESS_TOKEN, REFRESH_TOKEN, USER, SELECTED_MENU];
 
 export const authStorage = {
   saveTokens(
@@ -13,9 +16,9 @@ export const authStorage = {
     this.clear();
 
     const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem("accessToken", accessToken);
-    storage.setItem("refreshToken", refreshToken);
-    storage.setItem("user", JSON.stringify(user));
+    storage.setItem(ACCESS_TOKEN, accessToken);
+    storage.setItem(REFRESH_TOKEN, refreshToken);
+    storage.setItem(USER, JSON.stringify(user));
   },
 
   getAccessToken() {
@@ -43,7 +46,12 @@ export const authStorage = {
   },
 
   clear() {
-    sessionStorage.clear();
-    localStorage.clear();
+    for (const storage of [localStorage, sessionStorage]) {
+      for (const key of AUTH_STORAGE_KEYS) {
+        storage.removeItem(key);
+      }
+    }
+
+    window.dispatchEvent(new Event("pulsedesk:user-updated"));
   },
 };

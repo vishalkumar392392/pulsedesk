@@ -4,6 +4,7 @@ import { MdContentCopy } from "react-icons/md";
 import { resetError } from "../../redux/errorSlice";
 import { useNavigate } from "react-router";
 import { MdOutlineDone } from "react-icons/md";
+import { authStorage } from "../../services/auth/authStorage";
 
 const STATUS_CODES = [201, 200];
 export const Modal = () => {
@@ -20,6 +21,20 @@ export const Modal = () => {
 
   const copyRef = () => {
     if (errorRef) navigator.clipboard.writeText(errorRef);
+  };
+
+  const closeModal = () => {
+    dispatch(resetError());
+
+    if (statusCode === 401) {
+      authStorage.clear();
+      navigate(redirectUrl || "/login", { replace: true });
+      return;
+    }
+
+    if (redirectUrl) {
+      navigate(redirectUrl);
+    }
   };
 
   return (
@@ -67,15 +82,8 @@ export const Modal = () => {
           )}
 
           <button
-            onClick={() => {
-              dispatch(resetError());
-              if (statusCode === 401) {
-                navigate("/login");
-              }
-              if (redirectUrl) {
-                navigate(redirectUrl);
-              }
-            }}
+            type="button"
+            onClick={closeModal}
             className="bg-blaze-haze-600 hover:bg-blaze-haze-700 mt-2 cursor-pointer rounded-xl px-5 py-2 text-white"
           >
             OK

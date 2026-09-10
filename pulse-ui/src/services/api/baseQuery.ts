@@ -79,6 +79,8 @@ export const baseQueryWithLoader: BaseQueryFn<
           showErrorModal({
             open: true,
             title: "Session Expired. Please Login",
+            redirectUrl: "/login",
+
             message:
               "Authentication Failed. Authentication is required to access this resource.",
             errorRef: error.data.errorRef,

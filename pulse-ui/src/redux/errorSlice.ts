@@ -28,6 +28,7 @@ const errorSlice = createSlice({
       state.title = action.payload.title;
       state.open = true;
       state.type = "error";
+      state.redirectUrl = action.payload.redirectUrl ?? "";
       state.errorRef = action.payload.errorRef ?? "";
       state.statusCode = action.payload.statusCode;
     },
@@ -38,7 +39,7 @@ const errorSlice = createSlice({
       state.type = "success";
       state.errorRef = action.payload.errorRef ?? "";
       state.statusCode = action.payload.statusCode;
-      state.redirectUrl = action.payload?.redirectUrl
+      state.redirectUrl = action.payload?.redirectUrl;
     },
     resetError: (state) => {
       state.message = "";
@@ -46,6 +47,8 @@ const errorSlice = createSlice({
       state.open = false;
       state.title = "";
       state.errorRef = "";
+      state.statusCode = 0;
+      state.redirectUrl = "";
     },
   },
 });
