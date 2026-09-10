@@ -19,6 +19,14 @@ export interface AssetAssignee {
   email: string;
 }
 
+export interface CreateAssetRequest {
+  tag: string;
+  type: string;
+  model: string;
+  purchasedAt: string;
+  coverageUntil: string | null;
+}
+
 interface GetUsersParams {
   status?: string;
   type?: string;
@@ -49,6 +57,15 @@ export const assetApi = baseApi.injectEndpoints({
         response.data,
       providesTags: ["Users"],
     }),
+    createAsset: builder.mutation<Asset, CreateAssetRequest>({
+      query: (asset) => ({
+        url: "/assets",
+        method: "POST",
+        body: asset,
+      }),
+      transformResponse: (response: ApiResponse<Asset>) => response.data,
+      invalidatesTags: ["Assets"],
+    }),
     assignAsset: builder.mutation<
       Asset,
       { assetId: number; assignedToId: number | null }
@@ -68,5 +85,6 @@ export const {
   useGetAssetsQuery,
   useGetAllAssetsQuery,
   useGetAssetAssigneesQuery,
+  useCreateAssetMutation,
   useAssignAssetMutation,
 } = assetApi;

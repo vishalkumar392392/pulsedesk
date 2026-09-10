@@ -46,4 +46,21 @@ public interface AssetsUserRepository extends JpaRepository<AssetsUserEntity, In
 			""", nativeQuery = true)
 	java.util.Optional<AssetsUserEntity> getAssetById(@Param("assetId") Integer assetId);
 
+	@Query(value = """
+			SELECT
+			    a.id,
+			    a.tag,
+			    a.type,
+			    a.model,
+			    a.status,
+			    a.assigned_to_id,
+			    a.purchased_at,
+			    a.coverage_until,
+			    u.name
+			FROM assets a
+			LEFT JOIN users u ON u.user_id = a.assigned_to_id
+			WHERE a.tag = :tag
+			""", nativeQuery = true)
+	java.util.Optional<AssetsUserEntity> getAssetByTag(@Param("tag") String tag);
+
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IoAdd } from "react-icons/io5";
 import {
   type Asset,
   useGetAllAssetsQuery,
@@ -9,6 +10,7 @@ import { AssetDetails } from "./AssetDetails";
 import { assetStatusStyle } from "./assetStyles";
 import { AssetStatusDropdown } from "./Dropdowns/AssetStatusDropdown";
 import { AssetTypeDropdown } from "./Dropdowns/AssetTypeDropdown";
+import { CreateAssetModal } from "./CreateAssetModal";
 
 export const Assets = () => {
   const ASSET_COLUMNS: DataGridColumn<Asset>[] = [
@@ -53,6 +55,8 @@ export const Assets = () => {
   ];
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
+  const [isCreateAssetOpen, setIsCreateAssetOpen] = useState(false);
+  const [createdAssetTag, setCreatedAssetTag] = useState("");
   const [selectedAssetId, setSelectedAssetId] = useState<number>();
   const { data } = useGetAllAssetsQuery({
     status: status,
@@ -63,6 +67,37 @@ export const Assets = () => {
 
   return (
     <div>
+      {isCreateAssetOpen && (
+        <CreateAssetModal
+          onClose={() => setIsCreateAssetOpen(false)}
+          onCreated={(asset) => {
+            setIsCreateAssetOpen(false);
+            setCreatedAssetTag(asset.tag);
+            setSelectedAssetId(asset.id);
+          }}
+        />
+      )}
+      {createdAssetTag && (
+        <div
+          className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+          role="status"
+        >
+          {createdAssetTag.toUpperCase()} was added to the inventory.
+        </div>
+      )}
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={() => {
+            setCreatedAssetTag("");
+            setIsCreateAssetOpen(true);
+          }}
+          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white shadow-sm transition-colors"
+        >
+          <IoAdd aria-hidden="true" fontSize={20} />
+          Add asset
+        </button>
+      </div>
       <AssetTypeDropdown setType={setType} />
       <AssetStatusDropdown setStatus={setStatus} />
       <br />

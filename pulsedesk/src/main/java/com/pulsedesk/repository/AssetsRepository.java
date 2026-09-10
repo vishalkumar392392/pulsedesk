@@ -1,5 +1,6 @@
 package com.pulsedesk.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,19 @@ public interface AssetsRepository extends JpaRepository<AssetsEntity, Integer> {
 
 	@Query(value = "select a.id, a.tag, a.type, a.model from assets a", nativeQuery = true)
 	List<AssetsEntity> getAssets();
+
+	@Query(value = "SELECT COUNT(*) FROM assets WHERE tag = :tag", nativeQuery = true)
+	long countByTag(@Param("tag") String tag);
+
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query(value = """
+			INSERT INTO assets
+			    (tag, type, model, assigned_to_id, status, purchased_at, coverage_until)
+			VALUES
+			    (:tag, :type, :model, NULL, 'IN_STOCK', :purchasedAt, :coverageUntil)
+			""", nativeQuery = true)
+	int createAsset(@Param("tag") String tag, @Param("type") String type, @Param("model") String model,
+			@Param("purchasedAt") LocalDate purchasedAt, @Param("coverageUntil") LocalDate coverageUntil);
 
 	@Query(value = """
 			SELECT
