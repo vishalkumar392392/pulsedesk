@@ -65,7 +65,9 @@ export default function Dashboard() {
   const [dashboardTimestamp] = useState(() => Date.now());
   const user: User | null = getStoredUser();
   const firstName = user?.name.trim().split(/\s+/)[0] ?? "";
-  const isEmployee = normalizeRole(user?.role) === "employee";
+  const role = normalizeRole(user?.role);
+  const isEmployee = role === "employee";
+  const isAgent = role === "agent";
 
   const { data } = useGetUserTicketsQuery({
     page: 0,
@@ -74,20 +76,40 @@ export default function Dashboard() {
     direction: "desc",
   });
   const tickets = data?.content ?? [];
-  const openCount = tickets.filter((ticket) => ticket.status === "OPEN").length;
-  const inProgressCount = tickets.filter(
+  const dashboardTickets = isAgent
+    ? tickets.filter((ticket) => ticket.assigneeId === String(user?.id))
+    : tickets;
+  const openCount = dashboardTickets.filter(
+    (ticket) => ticket.status === "OPEN",
+  ).length;
+  const inProgressCount = dashboardTickets.filter(
     (ticket) => ticket.status === "IN_PROGRESS",
   ).length;
-  const resolvedCount = tickets.filter(
+  const resolvedCount = dashboardTickets.filter(
     (ticket) => ticket.status === "RESOLVED",
   ).length;
-  const assignedToMeCount = tickets.filter(
+  const assignedToMeCount = dashboardTickets.filter(
     (ticket) => ticket.assigneeId === String(user?.id),
   ).length;
-  const overdueCount = tickets.filter((ticket) =>
+  const overdueCount = dashboardTickets.filter((ticket) =>
     isTicketOverdue(ticket, dashboardTimestamp),
   ).length;
-  const recentTickets = tickets.slice(0, 6);
+  const recentTickets = dashboardTickets.slice(0, 6);
+  const dashboardSubtitle = isEmployee
+    ? "Track your support requests and their latest status"
+    : isAgent
+      ? "Here's what is assigned to you today"
+      : "Here's what the team is working on today";
+  const recentTicketsHeading = isEmployee
+    ? "MY RECENT TICKETS"
+    : isAgent
+      ? "MY ASSIGNED TICKETS"
+      : "RECENT TICKETS";
+  const emptyTicketsMessage = isEmployee
+    ? "You haven't created any support tickets yet."
+    : isAgent
+      ? "No tickets are currently assigned to you."
+      : "No tickets are available.";
   const metrics: DashboardMetricProps[] = isEmployee
     ? [
         { label: "OPEN", value: openCount },
@@ -129,11 +151,7 @@ export default function Dashboard() {
           <div className="text-pulse-green text-xl font-bold">
             Welcome back{firstName ? `, ${titleCase(firstName)}` : ""}
           </div>
-          <div className="mt-2 text-gray-500">
-            {isEmployee
-              ? "Track your support requests and their latest status"
-              : "Here's what the team is working on today"}
-          </div>
+          <div className="mt-2 text-gray-500">{dashboardSubtitle}</div>
         </div>
         {isEmployee && (
           <Link
@@ -153,7 +171,7 @@ export default function Dashboard() {
       <div className="mt-8 grid grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
         <div className="min-w-0 rounded-xl border border-gray-300 p-4">
           <div className="font-semibold text-gray-700">
-            {isEmployee ? "MY RECENT TICKETS" : "RECENT TICKETS"}
+            {recentTicketsHeading}
           </div>
           {recentTickets.length > 0 ? (
             recentTickets.map((row) => (
@@ -188,9 +206,7 @@ export default function Dashboard() {
           ) : (
             <div className="flex min-h-48 flex-col items-center justify-center px-4 text-center">
               <p className="text-gray-500">
-                {isEmployee
-                  ? "You haven't created any support tickets yet."
-                  : "No tickets are available."}
+                {emptyTicketsMessage}
               </p>
               {isEmployee && (
                 <Link
@@ -228,7 +244,7 @@ export default function Dashboard() {
             </Link>
           </section>
         ) : (
-          <PriorityBreakdown tickets={tickets} />
+          <PriorityBreakdown tickets={dashboardTickets} />
         )}
       </div>
     </div>

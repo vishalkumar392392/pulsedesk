@@ -19,7 +19,7 @@ import com.pulsedesk.kafka.event.TicketCreatedEvent;
 public class KafkaProducerConfig {
 	
 	
-	@Value("${spring.kafka.producer.bootstrap-servers}")
+	@Value("${spring.kafka.bootstrap-servers}")
 	private String bootstrapServers;
 
 	@Value("${spring.kafka.producer.key-serializer}")
