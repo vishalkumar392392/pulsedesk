@@ -45,6 +45,7 @@ public class TicketController {
 	}
 
 	@GetMapping("/mine")
+	@PreAuthorize("hasAnyAuthority('employee', 'agent', 'admin')")
 	public ResponseEntity<ApiResponse<PageResponse<TicketModal>>> getTickets(
 			Principal principal,
 			@RequestParam(defaultValue = "0") int page,

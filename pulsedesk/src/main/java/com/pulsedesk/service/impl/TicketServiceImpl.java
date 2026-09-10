@@ -118,7 +118,13 @@ public class TicketServiceImpl implements TicketService {
 		Pageable pageable = PageRequest.of(currentPage, pageSize);
 
 		UserEntity user = getAuthenticatedUser(email);
-		int scopeToRequester = isEmployee(user) ? 1 : 0;
+		int scopeToRequester;
+		if (isEmployee(user)) {
+			scopeToRequester = 1;
+		} else {
+			requireSupportUser(user);
+			scopeToRequester = 0;
+		}
 		Page<TicketDetailsProjection> tickets = ticketRepository.getTickets(email, scopeToRequester, normalizedStatus,
 				normalizedPriority, normalizedSort, normalizedDirection, pageable);
 		Page<TicketModal> ticketModels = tickets.map(TicketServiceImpl::getTicketModal);
