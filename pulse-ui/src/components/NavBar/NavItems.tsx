@@ -1,10 +1,7 @@
 import { NavLink, useNavigate } from "react-router";
-import {
-  ROUTES as DEFAULT_ROUTES,
-  getBrowserStorage,
-  getStoredUser,
-} from "../../util/helper";
+import { ROUTES as DEFAULT_ROUTES, getStoredUser } from "../../util/helper";
 import { canViewNavigationItem } from "../../util/accessControl";
+import { authStorage } from "../../services/auth/authStorage";
 
 export const NavItems = ({
   isHamburgerMenuClicked = true,
@@ -22,11 +19,7 @@ export const NavItems = ({
   );
 
   const logout = () => {
-    const storage = getBrowserStorage();
-    storage.removeItem("selectedMenu");
-    storage.removeItem("accessToken");
-    storage.removeItem("refreshToken");
-    storage.removeItem("user");
+    authStorage.clear();
     setIsHamburgerMenuClicked(false);
     navigate("/login", { replace: true });
   };

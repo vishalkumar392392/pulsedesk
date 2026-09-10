@@ -14,6 +14,7 @@ import { Tickets } from "./components/Tickets/Tickets";
 import { TicketForm } from "./components/Tickets/TicketForm";
 import { Settings } from "./components/Settings/Settings";
 import { NotAuthorized } from "./components/Login/NotAuthorized";
+import { SessionExpiryWarning } from "./components/Login/SessionExpiryWarning";
 import { ProtectedRoute } from "./components/Routes/ProtectedRoute";
 import { ADMIN_ONLY, EMPLOYEE_ONLY, SUPPORT_ROLES } from "./util/accessControl";
 
@@ -21,6 +22,7 @@ function App() {
   return (
     <>
       <Modal />
+      <SessionExpiryWarning />
       <Loader />
       <Routes>
         <Route element={<ProtectedRoute />}>

@@ -5,6 +5,11 @@ const REFRESH_TOKEN = "refreshToken";
 const USER = "user";
 const SELECTED_MENU = "selectedMenu";
 const AUTH_STORAGE_KEYS = [ACCESS_TOKEN, REFRESH_TOKEN, USER, SELECTED_MENU];
+export const AUTH_TOKENS_CHANGED_EVENT = "pulsedesk:tokens-updated";
+
+const notifyTokensChanged = () => {
+  window.dispatchEvent(new Event(AUTH_TOKENS_CHANGED_EVENT));
+};
 
 export const authStorage = {
   saveTokens(
@@ -19,6 +24,7 @@ export const authStorage = {
     storage.setItem(ACCESS_TOKEN, accessToken);
     storage.setItem(REFRESH_TOKEN, refreshToken);
     storage.setItem(USER, JSON.stringify(user));
+    notifyTokensChanged();
   },
 
   getAccessToken() {
@@ -32,6 +38,16 @@ export const authStorage = {
       localStorage.getItem(REFRESH_TOKEN) ??
       sessionStorage.getItem(REFRESH_TOKEN)
     );
+  },
+
+  updateTokens(accessToken: string, refreshToken: string) {
+    const storage = localStorage.getItem(ACCESS_TOKEN)
+      ? localStorage
+      : sessionStorage;
+
+    storage.setItem(ACCESS_TOKEN, accessToken);
+    storage.setItem(REFRESH_TOKEN, refreshToken);
+    notifyTokensChanged();
   },
 
   updateUser(user: User) {
@@ -53,5 +69,6 @@ export const authStorage = {
     }
 
     window.dispatchEvent(new Event("pulsedesk:user-updated"));
+    notifyTokensChanged();
   },
 };

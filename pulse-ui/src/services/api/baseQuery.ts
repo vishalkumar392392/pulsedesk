@@ -30,9 +30,9 @@ export function isApiResponse(value: unknown): value is ApiResponse<unknown> {
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:8080/",
-  prepareHeaders: (headers) => {
+  prepareHeaders: (headers, { endpoint }) => {
     const token = authStorage.getAccessToken();
-    if (token) {
+    if (token && endpoint !== "login" && endpoint !== "refreshSession") {
       headers.set("Authorization", `Bearer ${token}`);
     }
     headers.set("Content-Type", "application/json");
@@ -41,9 +41,10 @@ const baseQuery = fetchBaseQuery({
 });
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isLoginRequest = (args: string | FetchArgs) => {
+const handlesAuthErrorLocally = (args: string | FetchArgs) => {
   const url = typeof args === "string" ? args : args.url;
-  return url.replace(/^\/+/, "").split("?")[0] === "auth/login";
+  const path = url.replace(/^\/+/, "").split("?")[0];
+  return path === "auth/login" || path === "auth/refreshToken";
 };
 
 export const baseQueryWithLoader: BaseQueryFn<
@@ -70,7 +71,7 @@ export const baseQueryWithLoader: BaseQueryFn<
       const error = result.error as FetchBaseQueryError;
       if (
         error.status === 401 &&
-        !isLoginRequest(args) &&
+        !handlesAuthErrorLocally(args) &&
         typeof error.data === "object" &&
         error.data !== null &&
         isApiResponse(error.data)

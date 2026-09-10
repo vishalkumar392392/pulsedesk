@@ -1,5 +1,6 @@
 import type { User } from "../../types/user";
 import { baseApi } from "../api/baseApi";
+import type { ApiResponse } from "../api/baseQuery";
 
 export interface LoginRequest {
   email: string;
@@ -21,6 +22,12 @@ export interface AuthTokens {
   user: User;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export type RefreshedTokens = Pick<AuthTokens, "accessToken" | "refreshToken">;
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
@@ -30,7 +37,16 @@ export const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
     }),
+    refreshSession: builder.mutation<RefreshedTokens, RefreshTokenRequest>({
+      query: (request) => ({
+        url: "auth/refreshToken",
+        method: "POST",
+        body: request,
+      }),
+      transformResponse: (response: ApiResponse<RefreshedTokens>) =>
+        response.data,
+    }),
   }),
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useRefreshSessionMutation } = authApi;

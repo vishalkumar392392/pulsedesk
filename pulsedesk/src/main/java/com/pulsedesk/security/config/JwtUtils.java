@@ -19,8 +19,8 @@ public class JwtUtils {
 	private static final String ACCESS_TOKEN = "access";
 	private static final String REFRESH_TOKEN = "refresh";
 
-	// Access token: 10 hours
-	private static final long ACCESS_TOKEN_EXPIRY_MS = 1000L * 60 * 60 * 10;
+	// Access token: 15 minutes
+	private static final long ACCESS_TOKEN_EXPIRY_MS = 1000L * 60 * 15;
 
 	// Refresh token: 7 days
 	private static final long REFRESH_TOKEN_EXPIRY_MS = 1000L * 60 * 60 * 24 * 7;
