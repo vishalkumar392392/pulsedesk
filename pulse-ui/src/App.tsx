@@ -12,11 +12,12 @@ import Loader from "./components/Util/Loader";
 import { Modal } from "./components/Util/Modal";
 import { Tickets } from "./components/Tickets/Tickets";
 import { TicketForm } from "./components/Tickets/TicketForm";
+import { TicketDetails } from "./components/Tickets/TicketDetails";
 import { Settings } from "./components/Settings/Settings";
 import { NotAuthorized } from "./components/Login/NotAuthorized";
 import { SessionExpiryWarning } from "./components/Login/SessionExpiryWarning";
 import { ProtectedRoute } from "./components/Routes/ProtectedRoute";
-import { ADMIN_ONLY, EMPLOYEE_ONLY, SUPPORT_ROLES } from "./util/accessControl";
+import { ADMIN_ONLY, SUPPORT_ROLES } from "./util/accessControl";
 
 function App() {
   return (
@@ -30,12 +31,11 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
+            <Route path="/tickets/:ticketId" element={<TicketDetails />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/not-authorized" element={<NotAuthorized />} />
 
-            <Route element={<ProtectedRoute allowedRoles={EMPLOYEE_ONLY} />}>
-              <Route path="/tickets/create" element={<TicketForm />} />
-            </Route>
+            <Route path="/tickets/create" element={<TicketForm />} />
 
             <Route element={<ProtectedRoute allowedRoles={SUPPORT_ROLES} />}>
               <Route path="/assets" element={<Assets />} />

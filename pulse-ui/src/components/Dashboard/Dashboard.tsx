@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useGetUserTicketsQuery } from "../../services/tickets/ticketApi";
+import type { Ticket } from "../../types/ticket";
 import type { User } from "../../types/user";
 import {
   getStoredUser,
@@ -8,7 +10,34 @@ import {
 } from "../../util/helper";
 import { PriorityBreakdown } from "./PriorityBreakdown";
 
+const SLA_BUSINESS_DAYS = 3;
+
+const addBusinessDays = (timestamp: string, businessDays: number) => {
+  const dueAt = new Date(timestamp);
+  if (Number.isNaN(dueAt.getTime())) return null;
+
+  let daysAdded = 0;
+  while (daysAdded < businessDays) {
+    dueAt.setDate(dueAt.getDate() + 1);
+    const dayOfWeek = dueAt.getDay();
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) daysAdded += 1;
+  }
+
+  return dueAt;
+};
+
+const isTicketOverdue = (ticket: Ticket, now: number) => {
+  if (ticket.status !== "OPEN" && ticket.status !== "IN_PROGRESS") {
+    return false;
+  }
+  if (!ticket.createdAtTimestamp) return false;
+
+  const dueAt = addBusinessDays(ticket.createdAtTimestamp, SLA_BUSINESS_DAYS);
+  return dueAt !== null && now > dueAt.getTime();
+};
+
 export default function Dashboard() {
+  const [dashboardTimestamp] = useState(() => Date.now());
   const user: User | null = getStoredUser();
   const firstName = user?.name.trim().split(/\s+/)[0] ?? "";
 
@@ -17,7 +46,11 @@ export default function Dashboard() {
     pageSize: 1000,
     sort: "asc",
   });
-  console.log("data: ", data);
+  const overdueCount =
+    data?.content.filter((ticket) =>
+      isTicketOverdue(ticket, dashboardTimestamp),
+    ).length ?? 0;
+
   return (
     <div>
       <div>
@@ -43,9 +76,14 @@ export default function Dashboard() {
             }
           </div>
         </div>
-        <div className="w-[25%] rounded-xl border border-gray-300 px-4 pt-3 pb-4">
+        <div
+          className="w-[25%] rounded-xl border border-gray-300 px-4 pt-3 pb-4"
+          title="Open or in-progress tickets older than 3 business days"
+        >
           <div className="text-gray-600">OVERDUE</div>
-          <div className="font-lightpy-2 py-2 text-3xl text-red-600">2</div>
+          <div className="py-2 text-3xl font-light text-red-600">
+            {overdueCount}
+          </div>
         </div>
         <div className="w-[25%] rounded-xl border border-gray-300 px-4 pt-3 pb-4">
           <div className="text-gray-600">RESOLVED</div>

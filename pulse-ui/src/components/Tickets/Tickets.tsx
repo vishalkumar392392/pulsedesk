@@ -96,22 +96,21 @@ export const Tickets = () => {
     <div>
       <TicketStatusDropdown setPage={setPage} setStatus={setStatus} />
       <TicketPriorityDropdown setPage={setPage} setPriority={setPriority} />
-      {isEmployee && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => navigate("/tickets/create")}
-            className="bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white"
-          >
-            + New Ticket
-          </button>
-        </div>
-      )}
+      <div className="flex justify-end">
+        <button
+          onClick={() => navigate("/tickets/create")}
+          className="bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white"
+        >
+          + New Ticket
+        </button>
+      </div>
       <br />
       <DataGrid
         columns={visibleColumns}
         data={tickets}
         totalElements={data?.totalElements}
         rowKey="id"
+        onRowClick={(ticket) => navigate(`/tickets/${ticket.id}`)}
         onSortChange={setSort}
         pagination={{
           page,

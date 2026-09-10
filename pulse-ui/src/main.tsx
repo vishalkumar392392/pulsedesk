@@ -4,7 +4,7 @@ import { BrowserAgent } from "@newrelic/browser-agent/loaders/browser-agent";
 
 const options = {
   info: {
-    applicationID: 1120556152,
+    applicationID: "1120556152",
     beacon: "bam.nr-data.net",
     errorBeacon: "bam.nr-data.net",
     licenseKey: "NRJS-317e2c91ba6684cf827",

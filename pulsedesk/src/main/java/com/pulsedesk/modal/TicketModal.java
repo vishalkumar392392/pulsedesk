@@ -24,10 +24,12 @@ public class TicketModal {
 	private TicketStatus status;
 	@Column(name = "requester_id")
 	private String requesterId;
+	private String requesterName;
 	private List<Integer> affectedAssetIds;
 	private String createdAt;
 	private String createdAtTimestamp;
 	private String resolvedAt;
 	private String assigneeId;
+	private String assigneeName;
 
 }

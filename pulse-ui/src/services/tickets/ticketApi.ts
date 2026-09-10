@@ -1,4 +1,4 @@
-import type { Ticket } from "../../types/ticket";
+import type { Ticket, TicketAssignee } from "../../types/ticket";
 import { baseApi } from "../api/baseApi";
 import type { ApiResponse } from "../api/baseQuery";
 
@@ -58,6 +58,41 @@ export const ticketApi = baseApi.injectEndpoints({
         response.data,
       providesTags: ["Tickets"],
     }),
+    getTicket: builder.query<Ticket, number>({
+      query: (ticketId) => `/ticket/${ticketId}`,
+      transformResponse: (response: ApiResponse<Ticket>) => response.data,
+      providesTags: ["Tickets"],
+    }),
+    getTicketAssignees: builder.query<TicketAssignee[], void>({
+      query: () => "/ticket/assignees",
+      transformResponse: (response: ApiResponse<TicketAssignee[]>) =>
+        response.data,
+      providesTags: ["Users"],
+    }),
+    updateTicketStatus: builder.mutation<
+      Ticket,
+      { ticketId: number; status: Ticket["status"] }
+    >({
+      query: ({ ticketId, status }) => ({
+        url: `/ticket/${ticketId}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      transformResponse: (response: ApiResponse<Ticket>) => response.data,
+      invalidatesTags: ["Tickets"],
+    }),
+    updateTicketAssignee: builder.mutation<
+      Ticket,
+      { ticketId: number; assigneeId: number | null }
+    >({
+      query: ({ ticketId, assigneeId }) => ({
+        url: `/ticket/${ticketId}/assignee`,
+        method: "PATCH",
+        body: { assigneeId },
+      }),
+      transformResponse: (response: ApiResponse<Ticket>) => response.data,
+      invalidatesTags: ["Tickets"],
+    }),
     createTicket: builder.mutation<ApiResponse<unknown>, TicketCreationRequest>(
       {
         query: (ticket) => ({
@@ -73,5 +108,9 @@ export const ticketApi = baseApi.injectEndpoints({
 export const {
   useGetTicketsQuery,
   useGetUserTicketsQuery,
+  useGetTicketQuery,
+  useGetTicketAssigneesQuery,
+  useUpdateTicketStatusMutation,
+  useUpdateTicketAssigneeMutation,
   useCreateTicketMutation,
 } = ticketApi;

@@ -33,7 +33,7 @@ class TicketRepositoryTests {
 				""", String.class);
 
 		Page<TicketEntity> tickets = ticketRepository.getTickets(
-				 null, null, "id", "asc", PageRequest.of(0, 1));
+				email, 1, null, null, "id", "asc", PageRequest.of(0, 1));
 
 		assertFalse(tickets.isEmpty());
 		assertEquals(0, tickets.getNumber());
@@ -43,7 +43,7 @@ class TicketRepositoryTests {
 
 		String status = tickets.getContent().get(0).getStatus().name();
 		Page<TicketEntity> filteredTickets = ticketRepository.getTickets(
-				 status, null, "createdAt", "desc", PageRequest.of(0, 10));
+				email, 1, status, null, "createdAt", "desc", PageRequest.of(0, 10));
 
 		assertTrue(filteredTickets.stream().allMatch(ticket -> ticket.getStatus().name().equals(status)));
 	}
