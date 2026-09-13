@@ -39,7 +39,7 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
 });
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const handlesAuthErrorLocally = (args: string | FetchArgs) => {
   const url = typeof args === "string" ? args : args.url;
@@ -55,9 +55,9 @@ export const baseQueryWithLoader: BaseQueryFn<
   api.dispatch(showLoader()); // Before request
 
   // Only for testing
-  if (import.meta.env.DEV) {
-    await delay(500);
-  }
+  // if (import.meta.env.DEV) {
+  //   await delay(500);
+  // }
   try {
     const result = await baseQuery(args, api, extraOptions);
     //          ↑
