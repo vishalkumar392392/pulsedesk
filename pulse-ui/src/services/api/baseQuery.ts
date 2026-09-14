@@ -32,8 +32,13 @@ export function isApiResponse(value: unknown): value is ApiResponse<unknown> {
   );
 }
 
+const configuredApiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:80";
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:80/",
+  baseUrl: configuredApiBaseUrl.endsWith("/")
+    ? configuredApiBaseUrl
+    : `${configuredApiBaseUrl}/`,
   prepareHeaders: (headers, { endpoint }) => {
     const token = authStorage.getAccessToken();
     if (token && endpoint !== "login" && endpoint !== "refreshSession") {

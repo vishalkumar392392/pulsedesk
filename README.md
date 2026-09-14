@@ -63,13 +63,34 @@ cd pulsedesk-assignment-service
 
 ## Frontend
 
-The frontend currently sends API requests to `http://localhost:80`.
+Frontend configuration is stored in `pulse-ui/.env`:
+
+```dotenv
+VITE_APP_PORT=3000
+VITE_API_BASE_URL=http://localhost:80
+```
+
+`VITE_APP_PORT` controls the Vite development-server port. `VITE_API_BASE_URL` controls the Spring Boot API URL used by RTK Query. Copy `pulse-ui/.env.example` when creating configuration for another environment.
+
+Vite mode files provide environment-specific API URLs:
+
+| Vite mode | File | API URL |
+| --- | --- | --- |
+| Local | `.env` | `http://localhost:80` |
+| Development | `.env.development` | `https://api-dev.pulsedeskapp.com` |
+| UAT | `.env.uat` | `https://api-uat.pulsedeskapp.com` |
+| Production | `.env.production` | `https://api.pulsedeskapp.com` |
 
 ```bash
 cd pulse-ui
 npm ci
-npm run dev
+npm run dev:local   # Local API
+npm run dev         # Development API
+npm run dev:uat     # UAT API
+npm run dev:prod    # Production API
 ```
+
+Environment-specific production bundles can be created with `npm run build:dev`, `npm run build:uat`, or `npm run build:prod`. Jenkins maps its `dev`, `uat`, and `prod` deployment parameters to the matching Vite mode automatically.
 
 Use the URL printed by Vite to open the application.
 

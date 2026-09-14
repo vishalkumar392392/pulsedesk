@@ -1,0 +1,576 @@
+pipeline {
+    agent {
+        node {
+            label 'Maven'
+        }
+    }
+
+    /*
+     * We are doing checkout explicitly because
+     * the branch is selected using gitParameter.
+     */
+    options {
+        skipDefaultCheckout(true)
+    }
+
+    /***********************
+     * PARAMETERS (UI)
+     ***********************/
+    parameters {
+        gitParameter(
+            name: 'BRANCH',
+            type: 'PT_BRANCH',
+            defaultValue: 'main',
+            branchFilter: 'origin/(.*)',
+            description: 'Select Git branch'
+        )
+
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'uat', 'prod'],
+            description: 'Deployment environment'
+        )
+
+        choice(
+            name: 'ACTION',
+            choices: ['BUILD_ONLY', 'BUILD_AND_DEPLOY'],
+            description: 'Build only or build and deploy'
+        )
+
+        string(
+            name: 'RELEASE_VERSION',
+            defaultValue: '',
+            description: 'Optional release version. Example: 1.0.5'
+        )
+    }
+
+    /***********************
+     * ENVIRONMENT VARS
+     ***********************/
+    environment {
+        AWS_REGION = "us-east-2"
+
+        APP_NAME = "pulsedesk-ui"
+
+        /*
+         * React application location
+         * inside the Git repository.
+         */
+        FRONTEND_DIR = "pulse-ui"
+
+        /*
+         * If RELEASE_VERSION is empty,
+         * Jenkins BUILD_NUMBER will be used.
+         */
+        BUILD_VERSION = "${BUILD_NUMBER}"
+
+        /*
+         * S3 buckets
+         */
+        DEV_S3_BUCKET  = "pulsedesk-frontend-dev"
+        UAT_S3_BUCKET  = "pulsedesk-frontend-uat"
+        PROD_S3_BUCKET = "pulsedesk-frontend-prod"
+
+        /*
+         * CloudFront distributions
+         *
+         * Currently you created the DEV distribution.
+         * Replace UAT/PROD IDs after creating those
+         * distributions.
+         */
+        DEV_CLOUDFRONT_ID  = "E37K79G8LTP0PR"
+        UAT_CLOUDFRONT_ID  = "REPLACE_UAT_CLOUDFRONT_ID"
+        PROD_CLOUDFRONT_ID = "REPLACE_PROD_CLOUDFRONT_ID"
+
+        /*
+         * Backend API URLs
+         */
+        DEV_API_URL  = "https://api-dev.pulsedeskapp.com"
+        UAT_API_URL  = "https://api-uat.pulsedeskapp.com"
+        PROD_API_URL = "https://api.pulsedeskapp.com"
+    }
+
+    stages {
+
+        /***********************
+         * VALIDATION
+         ***********************/
+        stage('Validate Parameters') {
+            steps {
+                script {
+
+                    if (
+                        params.ENVIRONMENT == 'prod' &&
+                        params.BRANCH != 'main'
+                    ) {
+                        error "PROD deployment is allowed only from main branch"
+                    }
+
+                    if (
+                        params.ENVIRONMENT == 'uat' &&
+                        !params.BRANCH.startsWith('release/')
+                    ) {
+                        error "UAT deployment should use release/* branch"
+                    }
+
+                    echo """
+                    ===================================
+                    PulseDesk Frontend Pipeline
+                    ===================================
+                    Branch      : ${params.BRANCH}
+                    Environment : ${params.ENVIRONMENT}
+                    Action      : ${params.ACTION}
+                    ===================================
+                    """
+                }
+            }
+        }
+
+        /***********************
+         * CHECKOUT
+         ***********************/
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+
+                    branches: [[
+                        name: "*/${params.BRANCH}"
+                    ]],
+
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/vishalkumar392392/pulsedesk.git'
+                    ]]
+                ])
+            }
+        }
+
+        /***********************
+         * INSTALL
+         ***********************/
+        stage('Install Dependencies') {
+            steps {
+                dir("${FRONTEND_DIR}") {
+                    sh 'npm ci'
+                }
+            }
+        }
+
+        /***********************
+         * LINT
+         ***********************/
+        stage('Lint') {
+            steps {
+                dir("${FRONTEND_DIR}") {
+                    sh 'npm run lint'
+                }
+            }
+        }
+
+        /***********************
+         * TEST
+         ***********************/
+        stage('Test') {
+            steps {
+                dir("${FRONTEND_DIR}") {
+
+                    sh '''
+                        if npm run | grep -q "test"; then
+                            npm test -- --run
+                        else
+                            echo "No test script configured. Skipping tests."
+                        fi
+                    '''
+                }
+            }
+        }
+
+        /***********************
+         * SONARQUBE
+         ***********************/
+        stage('Code Quality - SonarQube') {
+
+            environment {
+                scannerHome = tool 'eventcart-sonar-scanner'
+            }
+
+            steps {
+                dir("${FRONTEND_DIR}") {
+
+                    withSonarQubeEnv(
+                        installationName: 'sonarqube-server-local',
+                        credentialsId: 'sonarqubeLocalhost'
+                    ) {
+
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=pulsedesk-ui \
+                            -Dsonar.projectName=PulseDesk-UI \
+                            -Dsonar.sources=src \
+                            -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
+                }
+            }
+        }
+
+        /***********************
+         * QUALITY GATE
+         ***********************/
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+
+                    script {
+
+                        def qg = waitForQualityGate()
+
+                        if (qg.status != 'OK') {
+
+                            error """
+                            Pipeline aborted due to
+                            SonarQube Quality Gate failure:
+                            ${qg.status}
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        /***********************
+         * BUILD
+         ***********************/
+        stage('Build React App') {
+            steps {
+                dir("${FRONTEND_DIR}") {
+                    script {
+                        def viteMode = [
+                            dev: 'development',
+                            uat: 'uat',
+                            prod: 'production'
+                        ][params.ENVIRONMENT]
+
+                        sh "npm run build -- --mode ${viteMode}"
+                    }
+                }
+            }
+        }
+
+        /***********************
+         * CREATE ARTIFACT
+         ***********************/
+        stage('Prepare Artifact') {
+            steps {
+                script {
+
+                    def version =
+                        params.RELEASE_VERSION?.trim()
+
+                    if (!version) {
+                        version = env.BUILD_VERSION
+                    }
+
+                    env.ARTIFACT_VERSION = version
+
+                    env.ARTIFACT_NAME =
+                        "${env.APP_NAME}-${version}.tar.gz"
+
+                    dir("${FRONTEND_DIR}") {
+
+                        sh """
+                            tar -czf \
+                            ${env.ARTIFACT_NAME} \
+                            dist/
+                        """
+                    }
+
+                    echo """
+                    Artifact created:
+                    ${env.ARTIFACT_NAME}
+                    """
+                }
+            }
+        }
+
+        /***********************
+         * ARCHIVE ARTIFACT
+         ***********************/
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts(
+                    artifacts:
+                        "${FRONTEND_DIR}/*.tar.gz",
+                    fingerprint: true
+                )
+            }
+        }
+
+        /***********************
+         * ENV CONFIG
+         ***********************/
+        stage('Prepare Environment Config') {
+
+            when {
+                expression {
+                    params.ACTION == 'BUILD_AND_DEPLOY'
+                }
+            }
+
+            steps {
+                script {
+
+                    switch (params.ENVIRONMENT) {
+
+                        case 'dev':
+
+                            env.S3_BUCKET =
+                                env.DEV_S3_BUCKET
+
+                            env.CLOUDFRONT_ID =
+                                env.DEV_CLOUDFRONT_ID
+
+                            env.API_BASE_URL =
+                                env.DEV_API_URL
+
+                            break
+
+                        case 'uat':
+
+                            env.S3_BUCKET =
+                                env.UAT_S3_BUCKET
+
+                            env.CLOUDFRONT_ID =
+                                env.UAT_CLOUDFRONT_ID
+
+                            env.API_BASE_URL =
+                                env.UAT_API_URL
+
+                            break
+
+                        case 'prod':
+
+                            env.S3_BUCKET =
+                                env.PROD_S3_BUCKET
+
+                            env.CLOUDFRONT_ID =
+                                env.PROD_CLOUDFRONT_ID
+
+                            env.API_BASE_URL =
+                                env.PROD_API_URL
+
+                            break
+
+                        default:
+
+                            error """
+                            Unsupported environment:
+                            ${params.ENVIRONMENT}
+                            """
+                    }
+
+                    echo """
+                    Deployment configuration
+
+                    Environment : ${params.ENVIRONMENT}
+                    S3 Bucket   : ${env.S3_BUCKET}
+                    API URL     : ${env.API_BASE_URL}
+                    """
+                }
+            }
+        }
+
+        /***********************
+         * PROD APPROVAL
+         ***********************/
+        stage('Production Approval') {
+
+            when {
+                allOf {
+
+                    expression {
+                        params.ACTION ==
+                            'BUILD_AND_DEPLOY'
+                    }
+
+                    expression {
+                        params.ENVIRONMENT == 'prod'
+                    }
+                }
+            }
+
+            steps {
+                input(
+                    message:
+                        "Deploy PulseDesk UI version ${env.ARTIFACT_VERSION} to PROD?",
+                    ok: 'Deploy'
+                )
+            }
+        }
+
+        /***********************
+         * RUNTIME CONFIG
+         ***********************/
+        stage('Generate Runtime Config') {
+
+            when {
+                expression {
+                    params.ACTION == 'BUILD_AND_DEPLOY'
+                }
+            }
+
+            steps {
+
+                dir("${FRONTEND_DIR}") {
+
+                    sh '''
+                        cat > dist/config.json <<EOF
+{
+  "apiBaseUrl": "${API_BASE_URL}"
+}
+EOF
+                    '''
+                }
+
+                echo "Runtime configuration generated."
+            }
+        }
+
+        /***********************
+         * DEPLOY TO S3
+         ***********************/
+        stage('Deploy to S3') {
+
+            when {
+                expression {
+                    params.ACTION == 'BUILD_AND_DEPLOY'
+                }
+            }
+
+            steps {
+
+                dir("${FRONTEND_DIR}") {
+
+                    sh '''
+                        aws s3 sync \
+                            dist/ \
+                            s3://${S3_BUCKET}/ \
+                            --delete \
+                            --region ${AWS_REGION}
+                    '''
+                }
+            }
+        }
+
+        /***********************
+         * CACHE CONFIG
+         ***********************/
+        stage('Set Cache Headers') {
+
+            when {
+                expression {
+                    params.ACTION == 'BUILD_AND_DEPLOY'
+                }
+            }
+
+            steps {
+
+                dir("${FRONTEND_DIR}") {
+
+                    sh '''
+                        aws s3 cp \
+                            dist/index.html \
+                            s3://${S3_BUCKET}/index.html \
+                            --content-type "text/html" \
+                            --cache-control "no-cache,no-store,must-revalidate" \
+                            --region ${AWS_REGION}
+
+                        aws s3 cp \
+                            dist/config.json \
+                            s3://${S3_BUCKET}/config.json \
+                            --content-type "application/json" \
+                            --cache-control "no-cache,no-store,must-revalidate" \
+                            --region ${AWS_REGION}
+                    '''
+                }
+            }
+        }
+
+        /***********************
+         * CLOUDFRONT
+         ***********************/
+        stage('CloudFront Invalidation') {
+
+            when {
+                expression {
+                    params.ACTION == 'BUILD_AND_DEPLOY'
+                }
+            }
+
+            steps {
+
+                sh '''
+                    aws cloudfront create-invalidation \
+                        --distribution-id ${CLOUDFRONT_ID} \
+                        --paths \
+                        "/index.html" \
+                        "/config.json"
+                '''
+            }
+        }
+
+        /***********************
+         * SUMMARY
+         ***********************/
+        stage('Deployment Summary') {
+
+            when {
+                expression {
+                    params.ACTION == 'BUILD_AND_DEPLOY'
+                }
+            }
+
+            steps {
+
+                echo """
+                ==========================================
+                PulseDesk Frontend Deployment Successful
+                ==========================================
+
+                Version:
+                ${env.ARTIFACT_VERSION}
+
+                Branch:
+                ${params.BRANCH}
+
+                Environment:
+                ${params.ENVIRONMENT}
+
+                S3 Bucket:
+                ${env.S3_BUCKET}
+
+                CloudFront:
+                ${env.CLOUDFRONT_ID}
+
+                ==========================================
+                """
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo """
+            ✅ PulseDesk frontend pipeline
+            completed successfully.
+            """
+        }
+
+        failure {
+            echo """
+            ❌ PulseDesk frontend pipeline failed.
+            """
+        }
+    }
+}
