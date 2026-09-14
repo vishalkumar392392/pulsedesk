@@ -78,7 +78,7 @@ pipeline {
          * Replace UAT/PROD IDs after creating those
          * distributions.
          */
-        DEV_CLOUDFRONT_ID  = "E37K79G8LTP0PR"
+        DEV_CLOUDFRONT_ID  = "E37K79G8LTPUPR"
         UAT_CLOUDFRONT_ID  = "REPLACE_UAT_CLOUDFRONT_ID"
         PROD_CLOUDFRONT_ID = "REPLACE_PROD_CLOUDFRONT_ID"
 
