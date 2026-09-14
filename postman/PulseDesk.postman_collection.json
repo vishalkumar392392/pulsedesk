@@ -1,0 +1,869 @@
+{
+  "info": {
+    "_postman_id": "6a1cc6a7-8166-4afb-9240-91785c51db5f",
+    "name": "PulseDesk API",
+    "description": "Import this collection together with the PulseDesk Local environment. Select the environment, update loginEmail/loginPassword, and run Auth > Login first. All protected requests inherit the collection-level Authorization: Bearer {{accessToken}} configuration. Successful login, create, and list requests automatically save useful tokens and resource IDs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:80", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "loginEmail", "value": "admin@pd.com", "type": "string" },
+    { "key": "loginPassword", "value": "password", "type": "string" },
+    { "key": "currentUserId", "value": "1", "type": "string" },
+    { "key": "page", "value": "0", "type": "string" },
+    { "key": "pageSize", "value": "25", "type": "string" },
+    { "key": "ticketId", "value": "1", "type": "string" },
+    { "key": "assigneeId", "value": "1", "type": "string" },
+    { "key": "ticketStatus", "value": "IN_PROGRESS", "type": "string" },
+    { "key": "ticketStatusFilter", "value": "OPEN", "type": "string" },
+    { "key": "ticketPriorityFilter", "value": "HIGH", "type": "string" },
+    { "key": "ticketSort", "value": "createdAt", "type": "string" },
+    { "key": "sortDirection", "value": "desc", "type": "string" },
+    { "key": "userId", "value": "1", "type": "string" },
+    { "key": "userEmail", "value": "admin@pd.com", "type": "string" },
+    { "key": "userRoleFilter", "value": "employee", "type": "string" },
+    { "key": "userSort", "value": "name", "type": "string" },
+    { "key": "assetId", "value": "1", "type": "string" },
+    { "key": "assetAssigneeId", "value": "1", "type": "string" },
+    { "key": "assetStatusFilter", "value": "IN_STOCK", "type": "string" },
+    { "key": "assetTypeFilter", "value": "LAPTOP", "type": "string" },
+    { "key": "notificationId", "value": "1", "type": "string" },
+    { "key": "commentId", "value": "1", "type": "string" },
+    { "key": "unreadOnly", "value": "false", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "JWT authentication. Login and refresh requests do not send a Bearer token.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const response = pm.response.json();",
+                  "  const data = response.data;",
+                  "  pm.environment.set('accessToken', data.accessToken);",
+                  "  pm.environment.set('refreshToken', data.refreshToken);",
+                  "  pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "  if (data.user && data.user.id) {",
+                  "    pm.environment.set('currentUserId', String(data.user.id));",
+                  "    pm.collectionVariables.set('currentUserId', String(data.user.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates a user. The test script saves accessToken, refreshToken, and currentUserId in both the selected environment and the collection fallback variables."
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.environment.set('accessToken', data.accessToken);",
+                  "  pm.environment.set('refreshToken', data.refreshToken);",
+                  "  pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refreshToken",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refreshToken"]
+            },
+            "description": "Generates and saves a new access/refresh token pair."
+          }
+        },
+        {
+          "name": "Register User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const user = pm.response.json().data;",
+                  "  pm.environment.set('userId', String(user.id));",
+                  "  pm.environment.set('userEmail', user.email);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Employee\",\n  \"email\": \"postman.employee+{{$timestamp}}@example.com\",\n  \"mobileNumber\": \"9999999999\",\n  \"pwd\": \"password\",\n  \"role\": \"employee\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Admin only. Creates a user and saves the returned userId and userEmail. Valid roles: admin, agent, employee."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "User management. List, lookup, and update operations require an admin token; profile/password endpoints work for the current authenticated user.",
+      "item": [
+        {
+          "name": "List Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const users = pm.response.json().data.content || [];",
+                  "  if (users.length) {",
+                  "    pm.environment.set('userId', String(users[0].id));",
+                  "    pm.environment.set('userEmail', users[0].email);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/all?page={{page}}&size={{pageSize}}&sort={{userSort}}&direction={{sortDirection}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "all"],
+              "query": [
+                { "key": "page", "value": "{{page}}", "description": "Zero-based page number" },
+                { "key": "size", "value": "{{pageSize}}", "description": "Page size, maximum 100" },
+                { "key": "role", "value": "{{userRoleFilter}}", "description": "Optional: admin, agent, or employee", "disabled": true },
+                { "key": "sort", "value": "{{userSort}}", "description": "name, email, role, status, or create_dt" },
+                { "key": "direction", "value": "{{sortDirection}}", "description": "asc or desc" }
+              ]
+            },
+            "description": "Admin only. Returns a paginated user list and saves the first returned user's identifiers."
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/id/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "id", ":userId"],
+              "variable": [
+                { "key": "userId", "value": "{{userId}}", "description": "PulseDesk user ID" }
+              ]
+            },
+            "description": "Admin only."
+          }
+        },
+        {
+          "name": "Get User by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/email/:email",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "email", ":email"],
+              "variable": [
+                { "key": "email", "value": "{{userEmail}}", "description": "User email address" }
+              ]
+            },
+            "description": "Admin only. Postman URL-encodes the email path variable."
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Postman User\",\n  \"email\": \"{{userEmail}}\",\n  \"role\": \"employee\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", ":userId"],
+              "variable": [
+                { "key": "userId", "value": "{{userId}}", "description": "User ID to update" }
+              ]
+            },
+            "description": "Admin only. Valid status values: ACTIVE, INACTIVE. Valid roles: admin, agent, employee."
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Profile Name\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/me/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "me", "profile"]
+            },
+            "description": "Updates the authenticated user's display name."
+          }
+        },
+        {
+          "name": "Change My Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password\",\n  \"newPassword\": \"new-password\",\n  \"confirmPassword\": \"new-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/me/password",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "me", "password"]
+            },
+            "description": "Changes the authenticated user's password. Update loginPassword after this request if you intend to log in again."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "description": "Ticket creation, lookup, assignment, status, and comment operations.",
+      "item": [
+        {
+          "name": "Create Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const ticket = pm.response.json().data;",
+                  "  const id = ticket.ticketId || ticket.id;",
+                  "  if (id) pm.environment.set('ticketId', String(id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"VPN connection is unavailable\",\n  \"description\": \"The VPN client cannot establish a connection after several retries.\",\n  \"category\": \"NETWORK\",\n  \"priority\": \"HIGH\",\n  \"affectedAssetIds\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ticket/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", "create"]
+            },
+            "description": "All authenticated roles. Saves the created ticketId. Categories: NETWORK, HARDWARE, SOFTWARE, ACCESS, OTHER. Priorities: LOW, MEDIUM, HIGH."
+          }
+        },
+        {
+          "name": "List My Tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const tickets = pm.response.json().data.content || [];",
+                  "  if (tickets.length) pm.environment.set('ticketId', String(tickets[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ticket/mine?page={{page}}&size={{pageSize}}&sort={{ticketSort}}&direction={{sortDirection}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", "mine"],
+              "query": [
+                { "key": "page", "value": "{{page}}", "description": "Zero-based page number" },
+                { "key": "size", "value": "{{pageSize}}", "description": "Page size, maximum 100" },
+                { "key": "status", "value": "{{ticketStatusFilter}}", "description": "Optional: OPEN, IN_PROGRESS, RESOLVED, CLOSED", "disabled": true },
+                { "key": "priority", "value": "{{ticketPriorityFilter}}", "description": "Optional: LOW, MEDIUM, HIGH", "disabled": true },
+                { "key": "sort", "value": "{{ticketSort}}", "description": "id, title, status, priority, assigneeId, or createdAt" },
+                { "key": "direction", "value": "{{sortDirection}}", "description": "asc or desc" }
+              ]
+            },
+            "description": "Employees receive only tickets they requested. Agents and admins receive the support-visible ticket set. Saves the first ticketId."
+          }
+        },
+        {
+          "name": "List All Tickets (Support)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const tickets = pm.response.json().data || [];",
+                  "  if (tickets.length) pm.environment.set('ticketId', String(tickets[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ticket/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", "all"]
+            },
+            "description": "Agent or admin. Returns an unpaginated ticket list."
+          }
+        },
+        {
+          "name": "List Assignable Agents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const agents = pm.response.json().data || [];",
+                  "  if (agents.length) pm.environment.set('assigneeId', String(agents[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ticket/assignees",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", "assignees"]
+            },
+            "description": "Agent or admin. Saves the first active agent as assigneeId."
+          }
+        },
+        {
+          "name": "Get Ticket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ticket/:ticketId",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", ":ticketId"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Employees can access only tickets they requested."
+          }
+        },
+        {
+          "name": "Update Ticket Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{ticketStatus}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ticket/:ticketId/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", ":ticketId", "status"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Agent or admin. Valid values: OPEN, IN_PROGRESS, RESOLVED, CLOSED."
+          }
+        },
+        {
+          "name": "Assign Ticket",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": {{assigneeId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ticket/:ticketId/assignee",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", ":ticketId", "assignee"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Agent or admin. assigneeId must identify an active agent."
+          }
+        },
+        {
+          "name": "Unassign Ticket",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ticket/:ticketId/assignee",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", ":ticketId", "assignee"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Agent or admin. Removes the current ticket assignee."
+          }
+        },
+        {
+          "name": "List Ticket Comments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const comments = pm.response.json().data || [];",
+                  "  if (comments.length) pm.environment.set('commentId', String(comments[comments.length - 1].id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ticket/:ticketId/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", ":ticketId", "comments"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Returns ticket comments oldest first and saves the most recent commentId."
+          }
+        },
+        {
+          "name": "Add Ticket Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"This is a comment created from Postman.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ticket/:ticketId/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", ":ticketId", "comments"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Adds a comment and atomically creates a notification for the other ticket participant. Maximum body length: 4000 characters."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "description": "Asset inventory and assignment endpoints.",
+      "item": [
+        {
+          "name": "List Assets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets"]
+            },
+            "description": "Returns the general asset list for an authenticated user."
+          }
+        },
+        {
+          "name": "List My Assets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets/mine",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets", "mine"]
+            },
+            "description": "Returns assets assigned to the authenticated user."
+          }
+        },
+        {
+          "name": "List All Assets (Support)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const assets = pm.response.json().data || [];",
+                  "  if (assets.length) pm.environment.set('assetId', String(assets[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets", "all"],
+              "query": [
+                { "key": "status", "value": "{{assetStatusFilter}}", "description": "Optional: IN_USE, IN_STOCK, IN_REPAIR, RETIRED", "disabled": true },
+                { "key": "type", "value": "{{assetTypeFilter}}", "description": "Optional: LAPTOP, MONITOR, PHONE, KEYBOARD, DOCK, LICENSE", "disabled": true }
+              ]
+            },
+            "description": "Agent or admin. Saves the first returned assetId."
+          }
+        },
+        {
+          "name": "List Asset Assignees",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const users = pm.response.json().data || [];",
+                  "  if (users.length) pm.environment.set('assetAssigneeId', String(users[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets/assignees",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets", "assignees"]
+            },
+            "description": "Agent or admin. Saves the first active user as assetAssigneeId."
+          }
+        },
+        {
+          "name": "Create Asset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const asset = pm.response.json().data;",
+                  "  if (asset.id) pm.environment.set('assetId', String(asset.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tag\": \"POSTMAN-{{$timestamp}}\",\n  \"type\": \"LAPTOP\",\n  \"model\": \"Postman Test Laptop\",\n  \"purchasedAt\": \"2026-09-14\",\n  \"coverageUntil\": \"2027-09-14\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assets",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets"]
+            },
+            "description": "Agent or admin. Saves the created assetId. Valid types: LAPTOP, MONITOR, PHONE, KEYBOARD, DOCK, LICENSE."
+          }
+        },
+        {
+          "name": "Assign Asset",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignedToId\": {{assetAssigneeId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assets/:assetId/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets", ":assetId", "assign"],
+              "variable": [
+                { "key": "assetId", "value": "{{assetId}}", "description": "Asset ID" }
+              ]
+            },
+            "description": "Agent or admin. Assigns the asset to an active user."
+          }
+        },
+        {
+          "name": "Unassign Asset",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignedToId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assets/:assetId/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["assets", ":assetId", "assign"],
+              "variable": [
+                { "key": "assetId", "value": "{{assetId}}", "description": "Asset ID" }
+              ]
+            },
+            "description": "Agent or admin. Removes the current asset assignment."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "description": "All operations are automatically scoped to the authenticated user.",
+      "item": [
+        {
+          "name": "List Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const notifications = pm.response.json().data.content || [];",
+                  "  if (notifications.length) {",
+                  "    pm.environment.set('notificationId', String(notifications[0].id));",
+                  "    pm.environment.set('ticketId', String(notifications[0].ticketId));",
+                  "    pm.environment.set('commentId', String(notifications[0].commentId));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page={{page}}&size={{pageSize}}&unreadOnly={{unreadOnly}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "page", "value": "{{page}}", "description": "Zero-based page number" },
+                { "key": "size", "value": "{{pageSize}}", "description": "Page size, maximum 100" },
+                { "key": "unreadOnly", "value": "{{unreadOnly}}", "description": "true to return unread notifications only" }
+              ]
+            },
+            "description": "Returns notifications newest first and saves notificationId, ticketId, and commentId from the first result."
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread-count"]
+            },
+            "description": "Returns the authenticated user's unread notification count."
+          }
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId", "read"],
+              "variable": [
+                { "key": "notificationId", "value": "{{notificationId}}", "description": "Notification ID owned by the current user" }
+              ]
+            },
+            "description": "Returns 204. Returns 404 if the notification is not owned by the authenticated user."
+          }
+        },
+        {
+          "name": "Mark Ticket Notifications Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/ticket/:ticketId/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "ticket", ":ticketId", "read"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Ticket ID" }
+              ]
+            },
+            "description": "Returns 204. Marks the authenticated user's comment notifications for this ticket as read."
+          }
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            },
+            "description": "Returns 204. Marks all notifications owned by the authenticated user as read."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Internal",
+      "description": "Service-to-service operation used by the Kafka assignment consumer.",
+      "item": [
+        {
+          "name": "Auto-assign Ticket",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/internal/tickets/:ticketId/auto-assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["internal", "tickets", ":ticketId", "auto-assign"],
+              "variable": [
+                { "key": "ticketId", "value": "{{ticketId}}", "description": "Unassigned ticket ID" }
+              ]
+            },
+            "description": "Used by pulsedesk-assignment-service. The current security configuration permits this endpoint without a Bearer token."
+          }
+        }
+      ]
+    }
+  ]
+}
