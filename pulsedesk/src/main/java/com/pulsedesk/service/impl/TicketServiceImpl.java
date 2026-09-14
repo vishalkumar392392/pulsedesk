@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pulsedesk.entites.RoleEntity;
+import com.pulsedesk.entites.TicketCommentEntity;
 import com.pulsedesk.entites.TicketEntity;
 import com.pulsedesk.entites.UserEntity;
 import com.pulsedesk.entites.UserTicketEntity;
@@ -41,6 +42,7 @@ import com.pulsedesk.repository.TicketDetailsProjection;
 import com.pulsedesk.repository.TicketRepository;
 import com.pulsedesk.repository.UserRepository;
 import com.pulsedesk.service.TicketService;
+import com.pulsedesk.service.NotificationService;
 
 @Service
 public class TicketServiceImpl implements TicketService {
@@ -60,6 +62,9 @@ public class TicketServiceImpl implements TicketService {
 
 	@Autowired
 	private RoleRepository roleRepository;
+
+	@Autowired
+	private NotificationService notificationService;
 
 	@Autowired
 	private KafkaTemplate<String, TicketCreatedEvent> kafkaTemplate;
@@ -259,9 +264,15 @@ public class TicketServiceImpl implements TicketService {
 		if (commentBody.length() > 4000) {
 			throw new BadUserRequestException("Comment cannot exceed 4000 characters");
 		}
-		if (ticketCommentRepository.createComment(ticketId, author.getId(), commentBody) != 1) {
-			throw new BadUserRequestException("Unable to create comment");
-		}
+		TicketCommentEntity comment = new TicketCommentEntity();
+		comment.setTicketId(ticketId);
+		comment.setAuthorId(author.getId());
+		comment.setBody(commentBody);
+		comment.setCreatedAt(LocalDateTime.now());
+		comment = ticketCommentRepository.save(comment);
+
+		notificationService.createCommentNotification(ticketId, ticket.getTitle(), comment.getId(), author.getId(),
+				author.getName(), ticket.getRequesterId(), ticket.getAssigneeId());
 	}
 
 	private TicketDetailsProjection getTicketProjection(Integer ticketId) {

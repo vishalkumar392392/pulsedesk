@@ -3,7 +3,6 @@ package com.pulsedesk.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,11 +25,4 @@ public interface TicketCommentRepository extends JpaRepository<TicketCommentEnti
 			""", nativeQuery = true)
 	List<TicketCommentProjection> getComments(@Param("ticketId") Integer ticketId);
 
-	@Modifying(clearAutomatically = true, flushAutomatically = true)
-	@Query(value = """
-			INSERT INTO comments (ticket_id, author_id, body, created_at)
-			VALUES (:ticketId, :authorId, :body, CURRENT_TIMESTAMP(6))
-			""", nativeQuery = true)
-	int createComment(@Param("ticketId") Integer ticketId, @Param("authorId") Integer authorId,
-			@Param("body") String body);
 }

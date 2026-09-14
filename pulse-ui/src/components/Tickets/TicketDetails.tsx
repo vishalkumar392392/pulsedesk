@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 import {
   useGetTicketAssigneesQuery,
   useGetTicketQuery,
@@ -21,6 +21,7 @@ import {
   titleCase,
 } from "../../util/helper";
 import { hasRoleAccess, SUPPORT_ROLES } from "../../util/accessControl";
+import { useMarkTicketNotificationsReadMutation } from "../../services/notifications/notificationApi";
 
 const STATUS_OPTIONS: Ticket["status"][] = [
   "OPEN",
@@ -73,6 +74,7 @@ const formatRelativeTime = (value: string) => {
 };
 
 export const TicketDetails = () => {
+  const location = useLocation();
   const { ticketId: ticketIdParam } = useParams<{ ticketId: string }>();
   const ticketId = Number(ticketIdParam);
   const isValidTicketId = Number.isInteger(ticketId) && ticketId > 0;
@@ -104,12 +106,39 @@ export const TicketDetails = () => {
     useUpdateTicketAssigneeMutation();
   const [createComment, { isLoading: isPostingComment }] =
     useCreateTicketCommentMutation();
+  const [markTicketNotificationsRead] =
+    useMarkTicketNotificationsReadMutation();
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<CommentFormValues>({ defaultValues: { body: "" } });
+
+  useEffect(() => {
+    if (!isValidTicketId || isLoadingComments || isCommentsError) return;
+
+    void markTicketNotificationsRead(ticketId)
+      .unwrap()
+      .catch(() => undefined);
+
+    if (!location.hash.startsWith("#comment-")) return;
+    const animationFrame = window.requestAnimationFrame(() => {
+      const comment = document.getElementById(location.hash.slice(1));
+      comment?.scrollIntoView({ behavior: "smooth", block: "center" });
+      comment?.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [
+    comments.length,
+    isCommentsError,
+    isLoadingComments,
+    isValidTicketId,
+    location.hash,
+    markTicketNotificationsRead,
+    ticketId,
+  ]);
 
   const handleStatusChange = async (status: Ticket["status"]) => {
     if (!ticket) return;
@@ -335,7 +364,15 @@ export const TicketDetails = () => {
             {comments.map((comment) => (
               <article
                 key={comment.id}
-                className="border-b border-gray-200 py-5 first:pt-2 last:border-b-0 last:pb-0"
+                id={`comment-${comment.id}`}
+                tabIndex={
+                  location.hash === `#comment-${comment.id}` ? -1 : undefined
+                }
+                className={`border-b border-gray-200 py-5 transition-colors first:pt-2 last:border-b-0 last:pb-0 ${
+                  location.hash === `#comment-${comment.id}`
+                    ? "rounded-lg bg-teal-50 px-3 outline-none"
+                    : ""
+                }`}
               >
                 <p className="font-bold">
                   {formatName(comment.authorName)}

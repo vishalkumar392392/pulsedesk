@@ -17,6 +17,10 @@ export interface ApiResponse<T> {
   errorRef: string;
 }
 
+export interface BaseQueryExtraOptions {
+  suppressGlobalLoader?: boolean;
+}
+
 export function isApiResponse(value: unknown): value is ApiResponse<unknown> {
   return (
     typeof value === "object" &&
@@ -50,9 +54,13 @@ const handlesAuthErrorLocally = (args: string | FetchArgs) => {
 export const baseQueryWithLoader: BaseQueryFn<
   string | FetchArgs,
   unknown,
-  FetchBaseQueryError
+  FetchBaseQueryError,
+  BaseQueryExtraOptions
 > = async (args, api, extraOptions) => {
-  api.dispatch(showLoader()); // Before request
+  const shouldShowGlobalLoader = !extraOptions?.suppressGlobalLoader;
+  if (shouldShowGlobalLoader) {
+    api.dispatch(showLoader());
+  }
 
   // Only for testing
   // if (import.meta.env.DEV) {
@@ -108,6 +116,8 @@ export const baseQueryWithLoader: BaseQueryFn<
     }
     return result;
   } finally {
-    api.dispatch(hideLoader()); // After request
+    if (shouldShowGlobalLoader) {
+      api.dispatch(hideLoader());
+    }
   }
 };

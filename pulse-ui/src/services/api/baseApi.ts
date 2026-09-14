@@ -6,7 +6,7 @@ export const baseApi = createApi({
 
   baseQuery: baseQueryWithLoader,
 
-  tagTypes: ["Users", "Tickets", "Assets", "Comments", "Auth"],
+  tagTypes: ["Users", "Tickets", "Assets", "Comments", "Notifications", "Auth"],
 
   endpoints: () => ({}),
 });
