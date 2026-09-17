@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsedesk
+  namespace: ${NAMESPACE}
+  labels:
+    app: pulsedesk
+
+spec:
+  replicas: ${REPLICAS}
+
+  selector:
+    matchLabels:
+      app: pulsedesk
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+
+  template:
+    metadata:
+      labels:
+        app: pulsedesk
+
+    spec:
+      serviceAccountName: backend-sa
+
+      containers:
+        - name: pulsedesk
+          image: ${IMAGE_URI}
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: ${SPRING_PROFILE}
+
+            - name: SPRING_CONFIG_IMPORT
+              value: optional:configtree:/mnt/secrets/
+
+          resources:
+            requests:
+              cpu: ${REQUEST_CPU}
+              memory: ${REQUEST_MEMORY}
+            limits:
+              cpu: ${LIMIT_CPU}
+              memory: ${LIMIT_MEMORY}
+
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets
+              readOnly: true
+
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: aws-secrets
