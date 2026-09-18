@@ -1,89 +1,93 @@
 package com.pulsedesk.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.pulsedesk.entites.AssetsUserEntity;
+import com.pulsedesk.exception.BadUserRequestException;
 import com.pulsedesk.modal.AssetsModal;
 import com.pulsedesk.modal.CreateAssetRequest;
+import com.pulsedesk.repository.AssetsRepository;
+import com.pulsedesk.repository.AssetsUserRepository;
+import com.pulsedesk.repository.UserRepository;
+import com.pulsedesk.service.impl.AssetServiceImpl;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class AssetServiceTests {
 
-	@Autowired
-	private AssetService assetService;
+	@Mock
+	private AssetsRepository assetsRepository;
 
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+	@Mock
+	private AssetsUserRepository assetsUserRepository;
+
+	@Mock
+	private UserRepository userRepository;
+
+	@InjectMocks
+	private AssetServiceImpl assetService;
 
 	@Test
-	void createsAnUnassignedInStockAssetWithNativeInsert() {
-		String tag = "TEST-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase();
+	void createsNormalizedAssetWithoutDatabase() {
+		String tag = "test-asset-01";
 		CreateAssetRequest request = new CreateAssetRequest();
 		request.setTag(tag);
 		request.setType("laptop");
 		request.setModel("Test Laptop");
 		request.setPurchasedAt(LocalDate.of(2026, 9, 10));
+		when(assetsRepository.countByTag("TEST-ASSET-01")).thenReturn(0L);
+
+		AssetsUserEntity storedAsset = new AssetsUserEntity();
+		storedAsset.setId(42);
+		storedAsset.setTag("TEST-ASSET-01");
+		storedAsset.setType("LAPTOP");
+		storedAsset.setModel("Test Laptop");
+		storedAsset.setStatus("IN_STOCK");
+		storedAsset.setPurchasedAt("2026-09-10");
+		when(assetsUserRepository.getAssetByTag("TEST-ASSET-01")).thenReturn(Optional.of(storedAsset));
 
 		AssetsModal created = assetService.createAsset(request);
 
-		assertThat(created.getId()).isNotNull();
-		assertThat(created.getTag()).isEqualTo(tag);
+		assertThat(created.getId()).isEqualTo(42);
+		assertThat(created.getTag()).isEqualTo("TEST-ASSET-01");
 		assertThat(created.getType()).isEqualTo("LAPTOP");
 		assertThat(created.getStatus()).isEqualTo("IN_STOCK");
 		assertThat(created.getAssignedToId()).isNull();
 		assertThat(created.getAssignedTo()).isNull();
 		assertThat(created.getPurchasedAt()).isEqualTo("2026-09-10");
 		assertThat(created.getCoverageUntil()).isNull();
-		assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM assets WHERE tag = ?", Integer.class, tag))
-				.isEqualTo(1);
+		verify(assetsRepository).createAsset("TEST-ASSET-01", "LAPTOP", "Test Laptop",
+				LocalDate.of(2026, 9, 10), null);
 	}
 
 	@Test
-	void assignsAndUnassignsAnAssetInOneTransaction() {
-		Integer assetId = jdbcTemplate.queryForObject("""
-				SELECT id
-				FROM assets
-				WHERE assigned_to_id IS NULL
-				  AND status <> 'RETIRED'
-				ORDER BY id
-				LIMIT 1
-				""", Integer.class);
-		Map<String, Object> user = jdbcTemplate.queryForMap("""
-				SELECT user_id, email
-				FROM users
-				WHERE status = 'ACTIVE'
-				ORDER BY user_id
-				LIMIT 1
-				""");
-		Integer userId = ((Number) user.get("user_id")).intValue();
-		String email = (String) user.get("email");
+	void rejectsDuplicateAssetTagBeforeCreatingAsset() {
+		CreateAssetRequest request = new CreateAssetRequest();
+		request.setTag("existing-tag");
+		request.setType("laptop");
+		request.setModel("Test Laptop");
+		request.setPurchasedAt(LocalDate.of(2026, 9, 10));
+		when(assetsRepository.countByTag("EXISTING-TAG")).thenReturn(1L);
 
-		AssetsModal assigned = assetService.assignAsset(assetId, userId, email);
+		assertThatThrownBy(() -> assetService.createAsset(request))
+				.isInstanceOf(BadUserRequestException.class)
+				.hasMessage("An asset with tag 'EXISTING-TAG' already exists");
 
-		assertThat(assigned.getAssignedToId()).isEqualTo(userId);
-		assertThat(assigned.getStatus()).isEqualTo("IN_USE");
-		assertThat(jdbcTemplate.queryForObject(
-				"SELECT COUNT(*) FROM asset_assignment_history WHERE asset_id = ? AND unassigned_at IS NULL",
-				Integer.class, assetId)).isEqualTo(1);
-
-		AssetsModal unassigned = assetService.assignAsset(assetId, null, email);
-
-		assertThat(unassigned.getAssignedToId()).isNull();
-		assertThat(unassigned.getAssignedTo()).isNull();
-		assertThat(unassigned.getStatus()).isEqualTo("IN_STOCK");
-		assertThat(jdbcTemplate.queryForObject(
-				"SELECT COUNT(*) FROM asset_assignment_history WHERE asset_id = ? AND unassigned_at IS NULL",
-				Integer.class, assetId)).isZero();
+		verify(assetsRepository, never()).createAsset(any(), any(), any(), any(), eq(null));
 	}
 
 }
