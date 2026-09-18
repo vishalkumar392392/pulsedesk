@@ -1,4 +1,5 @@
 pipeline {
+
     agent {
         node {
             label 'Maven'
@@ -9,6 +10,7 @@ pipeline {
      * PARAMETERS (UI)
      ***********************/
     parameters {
+
         gitParameter(
             name: 'BRANCH',
             type: 'PT_BRANCH',
@@ -60,103 +62,339 @@ pipeline {
         )
     }
 
+
     /***********************
-     * ENVIRONMENT VARS
+     * ENVIRONMENT VARIABLES
      ***********************/
     environment {
+
         PATH = "/opt/maven/bin:$PATH"
 
         AWS_ACCOUNT_ID = "735235878184"
         AWS_REGION     = "us-east-2"
 
+        /*
+         * Backend application directory inside
+         * the GitHub repository.
+         */
+        BACKEND_DIR = "pulsedesk"
+
+        /*
+         * Docker image
+         */
         IMAGE_TAG = "${BUILD_NUMBER}"
+
         IMAGE_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${params.IMAGE_NAME}:${IMAGE_TAG}"
 
+        /*
+         * Kubernetes
+         */
         NAMESPACE = "${params.ENVIRONMENT}"
+
         SPRING_PROFILE = "${params.ENVIRONMENT}"
     }
 
+
     stages {
 
-        stage('Build & Test') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
 
-        stage('Code Quality - SonarQube') {
-            environment {
-                scannerHome = tool 'eventcart-sonar-scanner'
-            }
+        /***********************
+         * 1. BUILD & TEST
+         ***********************/
+        stage('Build & Test') {
+
             steps {
-                withSonarQubeEnv(
-                    installationName: 'sonarqube-server-local',
-                    credentialsId: 'sonarqubeLocalhost'
-                ) {
-                    sh "${scannerHome}/bin/sonar-scanner"
+
+                dir("${BACKEND_DIR}") {
+
+                    sh '''
+                        echo "=========================================="
+                        echo "Building PulseDesk Backend"
+                        echo "=========================================="
+
+                        mvn clean install
+
+                        echo "=========================================="
+                        echo "Build & Test completed successfully"
+                        echo "=========================================="
+                    '''
                 }
             }
         }
 
-        stage('Quality Gate') {
+
+        /***********************
+         * 2. SONARQUBE
+         ***********************/
+        stage('Code Quality - SonarQube') {
+
+            environment {
+
+                scannerHome = tool 'eventcart-sonar-scanner'
+            }
+
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
+
+                dir("${BACKEND_DIR}") {
+
+                    withSonarQubeEnv(
+                        installationName: 'sonarqube-server-local',
+                        credentialsId: 'sonarqubeLocalhost'
+                    ) {
+
+                        sh '''
+                            echo "=========================================="
+                            echo "Running SonarQube Analysis"
+                            echo "=========================================="
+
+                            ${scannerHome}/bin/sonar-scanner
+
+                            echo "=========================================="
+                            echo "SonarQube Analysis completed"
+                            echo "=========================================="
+                        '''
+                    }
+                }
+            }
+        }
+
+
+        /***********************
+         * 3. QUALITY GATE
+         ***********************/
+        stage('Quality Gate') {
+
+            steps {
+
+                timeout(
+                    time: 10,
+                    unit: 'MINUTES'
+                ) {
+
                     script {
+
                         def qg = waitForQualityGate()
+
                         if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+
+                            error(
+                                "Pipeline aborted due to quality gate failure: ${qg.status}"
+                            )
                         }
                     }
                 }
             }
         }
 
-        stage('Build & Push Docker Image') {
-            steps {
-                sh """
-                  aws ecr get-login-password --region ${AWS_REGION} \
-                  | docker login --username AWS --password-stdin \
-                    ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-                  docker build -t ${IMAGE_URI} .
-                  docker push ${IMAGE_URI}
-                  docker rmi ${IMAGE_URI} || true
-                """
+        /***********************
+         * 4. BUILD & PUSH DOCKER
+         ***********************/
+        stage('Build & Push Docker Image') {
+
+            steps {
+
+                dir("${BACKEND_DIR}") {
+
+                    sh '''
+                        echo "=========================================="
+                        echo "Logging into Amazon ECR"
+                        echo "=========================================="
+
+                        aws ecr get-login-password \
+                            --region ${AWS_REGION} \
+                        | docker login \
+                            --username AWS \
+                            --password-stdin \
+                            ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+
+                        echo "=========================================="
+                        echo "Building Docker Image"
+                        echo "=========================================="
+
+                        docker build \
+                            -t ${IMAGE_URI} \
+                            .
+
+
+                        echo "=========================================="
+                        echo "Pushing Docker Image"
+                        echo "=========================================="
+
+                        docker push ${IMAGE_URI}
+
+
+                        echo "=========================================="
+                        echo "Removing local Docker image"
+                        echo "=========================================="
+
+                        docker rmi ${IMAGE_URI} || true
+
+
+                        echo "=========================================="
+                        echo "Docker image completed successfully"
+                        echo "Image: ${IMAGE_URI}"
+                        echo "=========================================="
+                    '''
+                }
             }
         }
 
+
+        /***********************
+         * 5. DEPLOY TO EKS
+         ***********************/
         stage('Deploy to EKS') {
+
             steps {
-                sh """
-                  aws eks update-kubeconfig \
-                    --region ${AWS_REGION} \
-                    --name backend-eks
 
-                  export IMAGE_URI=${IMAGE_URI}
-                  export NAMESPACE=${NAMESPACE}
-                  export REPLICAS=${params.REPLICAS}
-                  export SPRING_PROFILE=${SPRING_PROFILE}
-                  export REQUEST_CPU=${params.REQUEST_CPU}
-                  export REQUEST_MEMORY=${params.REQUEST_MEMORY}
-                  export LIMIT_CPU=${params.LIMIT_CPU}
-                  export LIMIT_MEMORY=${params.LIMIT_MEMORY}
+                dir("${BACKEND_DIR}") {
 
-                  kubectl get ns ${NAMESPACE} || kubectl create ns ${NAMESPACE}
+                    sh '''
+                        echo "=========================================="
+                        echo "Configuring kubectl"
+                        echo "=========================================="
 
-					envsubst < k8s/secretproviderclass.yaml | kubectl apply -f -
-					envsubst < k8s/deployment.yaml | kubectl apply -f -
-					envsubst < k8s/service.yaml | kubectl apply -f -
-                """
+                        aws eks update-kubeconfig \
+                            --region ${AWS_REGION} \
+                            --name backend-eks
+
+
+                        echo "=========================================="
+                        echo "Deployment Information"
+                        echo "=========================================="
+
+                        echo "Environment    : ${NAMESPACE}"
+                        echo "Namespace      : ${NAMESPACE}"
+                        echo "Spring Profile : ${SPRING_PROFILE}"
+                        echo "Image          : ${IMAGE_URI}"
+                        echo "Replicas       : ${REPLICAS}"
+
+
+                        echo "=========================================="
+                        echo "Creating Kubernetes namespace if required"
+                        echo "=========================================="
+
+                        kubectl get namespace ${NAMESPACE} \
+                            || kubectl create namespace ${NAMESPACE}
+
+
+                        echo "=========================================="
+                        echo "Applying SecretProviderClass"
+                        echo "=========================================="
+
+                        export IMAGE_URI=${IMAGE_URI}
+                        export NAMESPACE=${NAMESPACE}
+                        export REPLICAS=${REPLICAS}
+                        export SPRING_PROFILE=${SPRING_PROFILE}
+
+                        export REQUEST_CPU=${REQUEST_CPU}
+                        export REQUEST_MEMORY=${REQUEST_MEMORY}
+
+                        export LIMIT_CPU=${LIMIT_CPU}
+                        export LIMIT_MEMORY=${LIMIT_MEMORY}
+
+                        envsubst < k8s/secretproviderclass.yaml \
+                            | kubectl apply -f -
+
+
+                        echo "=========================================="
+                        echo "Applying Backend Deployment"
+                        echo "=========================================="
+
+                        envsubst < k8s/deployment.yaml \
+                            | kubectl apply -f -
+
+
+                        echo "=========================================="
+                        echo "Applying Backend Service"
+                        echo "=========================================="
+
+                        envsubst < k8s/service.yaml \
+                            | kubectl apply -f -
+
+
+                        echo "=========================================="
+                        echo "Waiting for Deployment Rollout"
+                        echo "=========================================="
+
+                        kubectl rollout status \
+                            deployment/pulsedesk \
+                            -n ${NAMESPACE} \
+                            --timeout=5m
+
+
+                        echo "=========================================="
+                        echo "Kubernetes Deployment Status"
+                        echo "=========================================="
+
+                        kubectl get pods \
+                            -n ${NAMESPACE}
+
+                        echo ""
+
+                        kubectl get deployment \
+                            -n ${NAMESPACE}
+
+                        echo ""
+
+                        kubectl get service \
+                            -n ${NAMESPACE}
+
+
+                        echo "=========================================="
+                        echo "EKS deployment completed successfully"
+                        echo "=========================================="
+                    '''
+                }
             }
         }
     }
 
+
+    /***********************
+     * POST ACTIONS
+     ***********************/
     post {
+
         success {
-            echo "✅ Deployment successful to ${ENVIRONMENT}"
+
+            echo """
+            ==========================================
+            ✅ DEPLOYMENT SUCCESSFUL
+            ==========================================
+
+            Application : PulseDesk Backend
+            Environment : ${ENVIRONMENT}
+            Namespace   : ${NAMESPACE}
+
+            Docker Image:
+            ${IMAGE_URI}
+
+            ==========================================
+            """
         }
+
         failure {
-            echo "❌ Pipeline failed"
+
+            echo """
+            ==========================================
+            ❌ PIPELINE FAILED
+            ==========================================
+
+            Application : PulseDesk Backend
+            Environment : ${ENVIRONMENT}
+
+            Please check the Jenkins console logs.
+
+            ==========================================
+            """
+        }
+
+        always {
+
+            echo "Pipeline execution completed."
         }
     }
 }
