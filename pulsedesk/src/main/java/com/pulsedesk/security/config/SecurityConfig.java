@@ -42,7 +42,7 @@ public class SecurityConfig {
 
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/auth/login", "/auth/refreshToken").permitAll()
+						.requestMatchers("/auth/login", "/auth/refreshToken", "/auth/test").permitAll()
 						.requestMatchers(HttpMethod.PATCH, "/internal/tickets/*/auto-assign").permitAll()
 //						.requestMatchers("/admin/**").hasAuthority("admin")
 						.anyRequest().authenticated())
