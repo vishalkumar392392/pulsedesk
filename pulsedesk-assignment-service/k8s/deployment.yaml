@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsedesk-assignment-service
+  namespace: ${NAMESPACE}
+  labels:
+    app: pulsedesk-assignment-service
+
+spec:
+  replicas: ${REPLICAS}
+
+  selector:
+    matchLabels:
+      app: pulsedesk-assignment-service
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+
+  template:
+    metadata:
+      labels:
+        app: pulsedesk-assignment-service
+
+    spec:
+      serviceAccountName: backend-sa
+
+      containers:
+        - name: pulsedesk-assignment-service
+          image: ${IMAGE_URI}
+          imagePullPolicy: Always
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: ${SPRING_PROFILE}
+
+            - name: SPRING_CONFIG_IMPORT
+              value: optional:configtree:/mnt/secrets/
+
+          resources:
+            requests:
+              cpu: ${REQUEST_CPU}
+              memory: ${REQUEST_MEMORY}
+            limits:
+              cpu: ${LIMIT_CPU}
+              memory: ${LIMIT_MEMORY}
+
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets
+              readOnly: true
+
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: aws-secrets
