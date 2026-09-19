@@ -10,6 +10,14 @@ metadata:
     alb.ingress.kubernetes.io/group.name: pulsedesk
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:735235878184:certificate/f16753fa-9b35-4db4-849d-580f354faf33
+    # `/` requires JWT authentication; this endpoint is explicitly public and
+    # returns HTTP 200 when the Spring Boot application is ready to serve.
+    alb.ingress.kubernetes.io/healthcheck-path: /auth/test
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/success-codes: "200"
 spec:
   ingressClassName: alb
   rules:
