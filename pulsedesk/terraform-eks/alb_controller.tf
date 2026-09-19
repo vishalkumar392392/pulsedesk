@@ -31,7 +31,7 @@ resource "kubernetes_service_account" "aws_load_balancer_controller" {
     }
   }
 
-  depends_on = [module.eks]
+  depends_on = [time_sleep.wait_for_eks_access]
 }
 
 resource "helm_release" "aws_load_balancer_controller" {
@@ -42,6 +42,13 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   # Pin the chart so controller upgrades are explicit Terraform changes.
   version = var.aws_load_balancer_controller_chart_version
+
+  # Initial EKS control-plane and chart-image startup can exceed Helm's five
+  # minute default. Atomic installs leave no partially-installed release.
+  timeout         = 900
+  wait            = true
+  atomic          = true
+  cleanup_on_fail = true
 
   set {
     name  = "clusterName"
