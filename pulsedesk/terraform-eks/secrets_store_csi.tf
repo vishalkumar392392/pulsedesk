@@ -9,6 +9,14 @@ resource "helm_release" "secrets_store_csi_driver" {
   namespace  = "kube-system"
   version    = "1.4.6"
 
+  # The Kubernetes API server performs authoritative validation. Skipping
+  # Helm's client-side OpenAPI fetch avoids a bootstrap-time API timeout.
+  disable_openapi_validation = true
+  timeout                    = 900
+  wait                       = true
+  atomic                     = true
+  cleanup_on_fail            = true
+
   set {
     name  = "syncSecret.enabled"
     value = "true"
@@ -19,7 +27,7 @@ resource "helm_release" "secrets_store_csi_driver" {
     value = "true"
   }
 
-  depends_on = [module.eks]
+  depends_on = [time_sleep.wait_for_eks_access]
 }
 
 # Replaces:
@@ -32,6 +40,11 @@ resource "helm_release" "secrets_store_csi_aws_provider" {
   chart      = "secrets-store-csi-driver-provider-aws"
   namespace  = "kube-system"
   version    = "0.3.10"
+
+  timeout         = 900
+  wait            = true
+  atomic          = true
+  cleanup_on_fail = true
 
   depends_on = [helm_release.secrets_store_csi_driver]
 }

@@ -85,9 +85,9 @@ pipeline {
         /*
          * Backend API URLs
          */
-        DEV_API_URL  = "https://api-dev.pulsedeskapp.com"
-        UAT_API_URL  = "https://api-uat.pulsedeskapp.com"
-        PROD_API_URL = "https://api.pulsedeskapp.com"
+        DEV_API_URL  = "https://api-pulsedesk.vishalpalla.com/"
+        UAT_API_URL  = "https://api-pulsedesk.vishalpalla.com/"
+        PROD_API_URL = "https://api-pulsedesk.vishalpalla.com/"
     }
 
     stages {
