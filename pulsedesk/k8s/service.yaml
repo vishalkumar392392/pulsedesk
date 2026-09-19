@@ -5,10 +5,8 @@ metadata:
   namespace: ${NAMESPACE}
   labels:
     app: pulsedesk
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: pulsedesk
   ports:

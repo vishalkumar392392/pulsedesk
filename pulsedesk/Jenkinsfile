@@ -316,6 +316,14 @@ pipeline {
 
 
                         echo "=========================================="
+                        echo "Applying Backend Ingress"
+                        echo "=========================================="
+
+                        envsubst < k8s/ingress.yaml \
+                            | kubectl apply -f -
+
+
+                        echo "=========================================="
                         echo "Waiting for Deployment Rollout"
                         echo "=========================================="
 
@@ -340,6 +348,11 @@ pipeline {
                         echo ""
 
                         kubectl get service \
+                            -n ${NAMESPACE}
+
+                        echo ""
+
+                        kubectl get ingress \
                             -n ${NAMESPACE}
 
 

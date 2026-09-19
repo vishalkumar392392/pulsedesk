@@ -2,76 +2,55 @@
 
 aws eks update-kubeconfig --region us-east-2 --name backend-eks
 
-# 2. Check Kubernetes resources
+# Record values needed for verification before Terraform removes its outputs.
+export AWS_REGION="$(terraform output -raw region)"
+export VPC_ID="$(terraform output -raw vpc_id)"
+
+# 2. Remove application Ingresses first and wait for the controller to delete
+#    the ALB, target groups, security groups, and ENIs. This must happen while
+#    both the controller and EKS API are still running.
+
+kubectl delete ingress --all -A --wait=true
+
+# 3. Check Kubernetes resources
 
 kubectl get all -A
 kubectl get svc -A
 
-# 3. Delete LoadBalancer services
+# 4. Delete application deployments and their ClusterIP services in every app
+#    namespace. Do not delete kube-system services.
 
-kubectl delete svc --all -n dev
+kubectl delete deployment,service --all -n dev
+kubectl delete deployment,service --all -n uat
+kubectl delete deployment,service --all -n prod
 
-# 4. Delete application deployments
+# 5. Verify no ALB-backed Ingress remains
 
-kubectl delete deployment --all -n dev
-
-# 5. Verify services
-
-kubectl get svc -A
+kubectl get ingress -A
 
 # 6. Verify AWS Load Balancers
 
 aws elbv2 describe-load-balancers \
+ --region "$AWS_REGION" \
  --query 'LoadBalancers[*].[LoadBalancerName,Type,State.Code,VpcId]' \
  --output table
 
 # 7. Verify ENIs
 
 aws ec2 describe-network-interfaces \
- --filters "Name=vpc-id,Values=vpc-0490fa190a7503b7d" \
+ --region "$AWS_REGION" \
+ --filters "Name=vpc-id,Values=$VPC_ID" \
  --query 'NetworkInterfaces[*].[NetworkInterfaceId,SubnetId,Description,Status]' \
  --output table
 
-# 8. Destroy EKS
+# 8. Destroy the full Terraform stack in one dependency-aware operation. The
+#    Helm controller release is deleted before EKS; EKS and node groups are
+#    deleted before the VPC. Do not use -target or manually delete ENIs.
 
-terraform destroy -target=module.eks -auto-approve
+terraform destroy
 
-# 9. Verify EKS is deleted
-
-aws eks list-clusters --region us-east-2
-
-# 10. Check remaining ENIs
-
-aws ec2 describe-network-interfaces \
- --filters "Name=vpc-id,Values=vpc-0490fa190a7503b7d" \
- --query 'NetworkInterfaces[*].[NetworkInterfaceId,SubnetId,Description,Status]' \
- --output table
-
-# 11. Check EC2 instances
-
-aws ec2 describe-instances \
- --filters "Name=vpc-id,Values=vpc-0490fa190a7503b7d" \
- --query 'Reservations[*].Instances[*].[InstanceId,State.Name,SubnetId,PublicIpAddress,PrivateIpAddress]' \
- --output table
-
-# 12. Check NAT Gateways
-
-aws ec2 describe-nat-gateways \
- --filter "Name=vpc-id,Values=vpc-0490fa190a7503b7d" \
- --query 'NatGateways[*].[NatGatewayId,State,SubnetId,NatGatewayAddresses[*].PublicIp]' \
- --output table
-
-# 13. Check Elastic IPs
-
-aws ec2 describe-addresses \
- --query 'Addresses[*].[AllocationId,PublicIp,AssociationId,InstanceId,NetworkInterfaceId,PrivateIpAddress]' \
- --output table
-
-# 14. Destroy remaining infrastructure
-
-terraform destroy -auto-approve
-
-# 15. Verify VPC is deleted
+# 9. Verify VPC is deleted
 
 aws ec2 describe-vpcs \
- --vpc-ids vpc-0490fa190a7503b7d
+ --region "$AWS_REGION" \
+ --vpc-ids "$VPC_ID"
