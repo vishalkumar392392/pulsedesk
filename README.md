@@ -2,6 +2,8 @@
 
 PulseDesk is a help-desk application for creating, assigning, and managing support tickets. It includes a React frontend, a Spring Boot API, MySQL persistence, and a Kafka-based ticket assignment service.
 
+![alt text](image.png)
+
 ## Project structure
 
 | Directory                      | Purpose                                                         |
@@ -74,12 +76,12 @@ VITE_API_BASE_URL=http://localhost:80
 
 Vite mode files provide environment-specific API URLs:
 
-| Vite mode | File | API URL |
-| --- | --- | --- |
-| Local | `.env` | `http://localhost:80` |
+| Vite mode   | File               | API URL                            |
+| ----------- | ------------------ | ---------------------------------- |
+| Local       | `.env`             | `http://localhost:80`              |
 | Development | `.env.development` | `https://api-dev.pulsedeskapp.com` |
-| UAT | `.env.uat` | `https://api-uat.pulsedeskapp.com` |
-| Production | `.env.production` | `https://api.pulsedeskapp.com` |
+| UAT         | `.env.uat`         | `https://api-uat.pulsedeskapp.com` |
+| Production  | `.env.production`  | `https://api.pulsedeskapp.com`     |
 
 ```bash
 cd pulse-ui
