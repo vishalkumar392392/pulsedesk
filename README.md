@@ -2,7 +2,7 @@
 
 PulseDesk is a help-desk application for creating, assigning, and managing support tickets. It includes a React frontend, a Spring Boot API, MySQL persistence, and a Kafka-based ticket assignment service.
 
-![alt text](image.png)
+![alt text](image-1.png)
 
 ## Project structure
 
