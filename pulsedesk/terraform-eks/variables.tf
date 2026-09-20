@@ -76,6 +76,18 @@ variable "jenkins_build_slave_role_name" {
   default     = "eksctl"
 }
 
+variable "aws_load_balancer_controller_service_account_name" {
+  description = "Kubernetes service account name used by AWS Load Balancer Controller."
+  type        = string
+  default     = "aws-load-balancer-controller"
+}
+
+variable "aws_load_balancer_controller_chart_version" {
+  description = "Pinned aws-load-balancer-controller Helm chart version."
+  type        = string
+  default     = "1.14.1"
+}
+
 variable "tags" {
   description = "Common tags applied to all resources."
   type        = map(string)

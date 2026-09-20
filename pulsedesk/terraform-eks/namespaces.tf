@@ -6,5 +6,5 @@ resource "kubernetes_namespace" "app" {
     name = each.value
   }
 
-  depends_on = [module.eks]
+  depends_on = [time_sleep.wait_for_eks_access]
 }
