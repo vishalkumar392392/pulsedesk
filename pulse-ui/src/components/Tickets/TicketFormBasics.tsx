@@ -42,14 +42,14 @@ export const TicketFormBasics = ({
           }}
           render={({ field, fieldState }) => (
             <>
-              <div className="mt-8 mb-4 flex items-center justify-between">
+              <div className="mt-8 mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <label className="mt-1 mr-4">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   {...field}
                   type="text"
-                  className={`mt-1 w-[75%] rounded-md p-1 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 ${
+                  className={`mt-1 w-full sm:w-[70%] rounded-md p-1 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 ${
                     fieldState.error
                       ? "border-red-500 focus:ring-2 focus:ring-red-200"
                       : "border-gray-300 focus:ring-2 focus:ring-blue-200"
@@ -65,9 +65,9 @@ export const TicketFormBasics = ({
           )}
         />
         <hr className="border-gray-300" />
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <label>Category</label>
-          <div className="w-[50%]">
+          <div className="w-full sm:w-[55%]">
             <DropDown
               data={isOpen}
               setData={setIsOpen}

@@ -118,7 +118,7 @@ export function DataGrid<T extends object>({
         className="w-full overflow-auto"
         style={pagination ? undefined : { maxHeight: scrollHeight }}
       >
-        <table className="min-w-full table-auto border-gray-300 text-sm">
+        <table className="min-w-full table-auto border-gray-300 text-xs sm:text-sm">
           <thead className={pagination ? undefined : "sticky top-0 z-10"}>
             <tr className="font-semibold">
               {resolvedColumns.map((col, i) => (
@@ -127,7 +127,7 @@ export function DataGrid<T extends object>({
                   onClick={
                     col.sortable ? () => handleSort(String(col.key)) : undefined
                   }
-                  className={`bg-table-header border-t-0 border-b border-gray-300 p-3 ${
+                  className={`bg-table-header whitespace-nowrap border-t-0 border-b border-gray-300 p-2 sm:p-3 ${
                     i === 0 ? "rounded-tl-lg" : ""
                   } ${
                     i === resolvedColumns.length - 1 ? "rounded-tr-lg" : ""
@@ -181,7 +181,7 @@ export function DataGrid<T extends object>({
                   {resolvedColumns.map((col) => (
                     <td
                       key={String(col.key)}
-                      className="border-y border-gray-300 p-3"
+                      className="border-y border-gray-300 p-2 sm:p-3"
                     >
                       {renderCell(row, col)}
                     </td>

@@ -80,10 +80,12 @@ export const Login = () => {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="border-blaze-haze mx-auto my-2 flex w-[45%] flex-col gap-3 rounded-lg border-3 p-15"
-    >
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="border-blaze-haze flex w-full flex-col gap-3 rounded-lg border-3 bg-white p-8 sm:w-[80%] sm:p-12 md:w-[55%] lg:w-[45%] lg:p-15 xl:w-[38%]"
+      >
+
       <div className="my-5 flex justify-center">
         <PulseIcon />
       </div>
@@ -194,5 +196,7 @@ export const Login = () => {
         {isSubmitting ? "Logging in…" : "Login"}
       </button>
     </form>
+    </div>
   );
 };
+

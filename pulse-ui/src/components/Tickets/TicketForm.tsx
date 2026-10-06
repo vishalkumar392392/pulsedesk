@@ -71,7 +71,8 @@ export const TicketForm = () => {
   };
   return (
     <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-      <div className="mb-6 flex items-center gap-6">
+      {/* Step indicator */}
+      <div className="mb-6 flex flex-wrap items-center gap-3 sm:gap-6">
         <div className="flex gap-1">
           <div
             className={`flex h-6 w-6 items-center justify-center rounded-full border ${step === 1 ? "border-pulse-green border-2" : "border-gray-400"} ${step >= 2 ? "bg-pulse-green" : "bg-white"}`}
@@ -84,7 +85,7 @@ export const TicketForm = () => {
             Basics
           </div>
         </div>
-        <hr className="w-6 border-gray-400" />
+        <hr className="w-4 border-gray-400 sm:w-6" />
         <div className="flex gap-1">
           <div
             className={`flex h-6 w-6 items-center justify-center rounded-full border border-gray-400 ${step === 2 ? "border-pulse-green border-2" : "border-gray-400"} ${step >= 3 ? "bg-pulse-green" : "bg-white"}`}
@@ -97,7 +98,7 @@ export const TicketForm = () => {
             Details
           </div>
         </div>
-        <hr className="w-6 border-gray-400" />
+        <hr className="w-4 border-gray-400 sm:w-6" />
 
         <div className="flex gap-1">
           <div
@@ -112,9 +113,11 @@ export const TicketForm = () => {
           </div>
         </div>
       </div>
+
+      {/* On mobile: show only the active step. On xl: show all three columns */}
       <div className="grid w-full grid-cols-1 items-start gap-6 xl:grid-cols-3">
         <div
-          className={`min-w-0 ${step != 1 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step !== 1 ? "xl:pointer-events-none xl:text-gray-400 xl:opacity-60 xl:select-none hidden xl:block" : "bg-white"}`}
         >
           <TicketFormBasics
             control={control}
@@ -123,7 +126,7 @@ export const TicketForm = () => {
           />
         </div>
         <div
-          className={`min-w-0 ${step != 2 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step !== 2 ? "xl:pointer-events-none xl:text-gray-400 xl:opacity-60 xl:select-none hidden xl:block" : "bg-white"}`}
         >
           <TicketFormDetails
             control={control}
@@ -133,7 +136,7 @@ export const TicketForm = () => {
           />
         </div>
         <div
-          className={`min-w-0 ${step != 3 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step !== 3 ? "xl:pointer-events-none xl:text-gray-400 xl:opacity-60 xl:select-none hidden xl:block" : "bg-white"}`}
         >
           <TicketFormReview control={control} />
         </div>

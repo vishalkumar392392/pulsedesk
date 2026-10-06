@@ -41,26 +41,27 @@ export const PageBreadcrumb = () => {
   const sectionLabel = getSegmentLabel(segments[0]);
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="bg-blaze-haze-200 text-pulse-green ring-blaze-haze-200 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl shadow-sm ring-1">
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div className="bg-blaze-haze-200 text-pulse-green ring-blaze-haze-200 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg shadow-sm ring-1 sm:h-11 sm:w-11 sm:text-xl">
         {ROUTES[sectionLabel] ?? (
           <span className="bg-pulse-green h-3 w-3 rounded-sm" />
         )}
       </div>
 
       <div className="min-w-0">
-        <p className="text-blaze-haze-700 mb-0.5 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
+        {/* Context subtitle — hidden on mobile */}
+        <p className="text-blaze-haze-700 mb-0.5 hidden text-[0.65rem] font-bold tracking-[0.18em] uppercase sm:block">
           {PAGE_CONTEXT[currentSegment] ?? "PulseDesk workspace"}
         </p>
         <nav aria-label="Breadcrumb">
-          <ol className="flex items-center gap-1.5 text-xl leading-tight font-semibold">
+          <ol className="flex items-center gap-1 text-base font-semibold leading-tight sm:gap-1.5 sm:text-xl">
             {segments.map((segment, index) => {
               const isCurrentPage = index === segments.length - 1;
               const route = `/${segments.slice(0, index + 1).join("/")}`;
               const label = getSegmentLabel(segment);
 
               return (
-                <li key={route} className="flex items-center gap-1.5">
+                <li key={route} className="flex items-center gap-1 sm:gap-1.5">
                   {index > 0 && (
                     <GoChevronRight
                       className="text-base text-gray-400"
@@ -68,7 +69,7 @@ export const PageBreadcrumb = () => {
                     />
                   )}
                   {isCurrentPage ? (
-                    <span className="text-gray-800" aria-current="page">
+                    <span className="text-gray-800 truncate max-w-[8rem] sm:max-w-none" aria-current="page">
                       {label}
                     </span>
                   ) : (
@@ -88,3 +89,4 @@ export const PageBreadcrumb = () => {
     </div>
   );
 };
+

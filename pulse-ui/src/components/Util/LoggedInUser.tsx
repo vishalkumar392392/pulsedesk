@@ -29,11 +29,12 @@ export const LoggedInUser = () => {
 
   return (
     <div>
-      <div className="flex items-center gap-4 rounded-4xl border-2 border-gray-300 px-3 py-1">
+      <div className="flex items-center gap-2 rounded-4xl border-2 border-gray-300 px-2 py-1 sm:gap-4 sm:px-3">
         <div className="bg-blaze-haze-200 rounded-full p-1.5 text-sm font-bold">
           {getIntials(user.name)}
         </div>
-        <div className="flex flex-col">
+        {/* Name and role hidden on mobile, shown md+ */}
+        <div className="hidden flex-col md:flex">
           <div className="text-md font-bold">{formatName(user.name)}</div>
           <div className="text-sm text-gray-500">{titleCase(user.role)}</div>
         </div>
@@ -41,3 +42,4 @@ export const LoggedInUser = () => {
     </div>
   );
 };
+

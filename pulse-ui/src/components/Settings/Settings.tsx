@@ -78,7 +78,7 @@ const ProfileSettings = ({ user }: { user: User }) => {
   };
 
   return (
-    <section className="rounded-2xl border border-gray-300 bg-white p-8">
+    <section className="rounded-2xl border border-gray-300 bg-white p-5 sm:p-8">
       <h2 className="text-xl font-bold tracking-widest text-gray-600 uppercase">
         Profile
       </h2>
@@ -183,7 +183,7 @@ const PasswordSettings = () => {
   };
 
   return (
-    <section className="rounded-2xl border border-gray-300 bg-white p-8">
+    <section className="rounded-2xl border border-gray-300 bg-white p-5 sm:p-8">
       <h2 className="text-xl font-bold tracking-widest text-gray-600 uppercase">
         Change Password
       </h2>

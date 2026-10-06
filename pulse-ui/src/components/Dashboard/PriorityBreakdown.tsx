@@ -33,7 +33,7 @@ export const PriorityBreakdown = ({ tickets }: PriorityBreakdownProps) => {
   const highestCount = Math.max(...Object.values(counts), 1);
 
   return (
-    <section className="h-full min-w-0 rounded-xl border border-gray-300 p-6">
+    <section className="h-full min-w-0 rounded-xl border border-gray-300 p-4 sm:p-6">
       <h2 className="text-lg font-semibold tracking-wider text-gray-600">
         PRIORITY BREAKDOWN
       </h2>
@@ -46,7 +46,7 @@ export const PriorityBreakdown = ({ tickets }: PriorityBreakdownProps) => {
           return (
             <div
               key={priority}
-              className="grid grid-cols-[7rem_minmax(0,1fr)_2rem] items-center gap-4"
+              className="grid grid-cols-[4.5rem_minmax(0,1fr)_2rem] sm:grid-cols-[7rem_minmax(0,1fr)_2rem] items-center gap-4"
             >
               <span className="text-md text-gray-600">{label}</span>
 

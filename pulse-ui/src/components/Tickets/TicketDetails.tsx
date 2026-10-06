@@ -221,7 +221,7 @@ export const TicketDetails = () => {
   }
 
   return (
-    <main className="space-y-7 pb-8">
+    <main className="space-y-5 pb-6 sm:space-y-7 sm:pb-8">
       <Link
         to="/tickets"
         className="inline-flex items-center text-gray-600 hover:text-gray-900"
@@ -230,11 +230,11 @@ export const TicketDetails = () => {
       </Link>
 
       <section>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-xl font-bold sm:text-2xl">
           <span className="text-gray-600">#{ticket.id}</span> — {ticket.title}
         </h1>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mt-6">
           <div className="inline-flex items-center gap-3 rounded-xl border border-gray-300 bg-white px-4 py-2.5 shadow-sm">
             <span className="text-sm font-semibold tracking-wide text-gray-500 uppercase">
               Status
@@ -296,7 +296,7 @@ export const TicketDetails = () => {
                 disabled={
                   isLoadingAssignees || isAssigneesError || isUpdatingAssignee
                 }
-                className="focus:border-blaze-haze-600 focus:ring-blaze-haze-200 min-w-56 rounded-xl border border-gray-300 bg-white px-4 py-2 outline-none focus:ring-2 disabled:bg-gray-100"
+                className="focus:border-blaze-haze-600 focus:ring-blaze-haze-200 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 outline-none focus:ring-2 disabled:bg-gray-100 sm:w-auto sm:min-w-56"
               >
                 <option value="">Unassigned</option>
                 {assignees.map((assignee) => (
@@ -327,7 +327,7 @@ export const TicketDetails = () => {
         )}
       </section>
 
-      <section className="rounded-2xl border border-gray-300 p-7">
+      <section className="rounded-2xl border border-gray-300 p-4 sm:p-7">
         <h2 className="text-lg font-bold tracking-wider text-gray-600">
           DESCRIPTION
         </h2>
@@ -336,7 +336,7 @@ export const TicketDetails = () => {
         </p>
       </section>
 
-      <section className="rounded-2xl border border-gray-300 p-7">
+      <section className="rounded-2xl border border-gray-300 p-4 sm:p-7">
         <h2 className="text-lg font-bold tracking-wider text-gray-600">
           COMMENTS ({comments.length})
         </h2>
@@ -392,7 +392,7 @@ export const TicketDetails = () => {
 
       <form
         onSubmit={handleSubmit(submitComment)}
-        className="flex items-start gap-3"
+        className="flex flex-col gap-3 sm:flex-row sm:items-start"
       >
         <div className="grow">
           <input
@@ -418,7 +418,7 @@ export const TicketDetails = () => {
         <button
           type="submit"
           disabled={isPostingComment}
-          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 cursor-pointer rounded-xl px-5 py-3 font-semibold text-white disabled:cursor-wait disabled:opacity-60"
+          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 w-full cursor-pointer rounded-xl px-5 py-3 font-semibold text-white disabled:cursor-wait disabled:opacity-60 sm:w-auto"
         >
           {isPostingComment ? "Posting…" : "Post"}
         </button>

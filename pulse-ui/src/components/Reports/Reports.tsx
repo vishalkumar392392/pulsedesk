@@ -163,12 +163,14 @@ export const Reports = () => {
 
   return (
     <div className="pb-10">
-      <div className="flex items-center gap-4">
+      {/* Header with range selector */}
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <h1 className="shrink-0 text-xl font-bold">Reports</h1>
         <ReportRangeSelector value={rangeDays} onChange={setRangeDays} />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      {/* Bar charts — stack on mobile, side by side on xl */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <ReportBarCard
           title="Tickets by status"
           items={report.statusItems}
@@ -177,6 +179,7 @@ export const Reports = () => {
         <ReportBarCard title="Resolved by agent" items={report.agentItems} />
       </div>
 
+      {/* Metric cards — side by side from sm */}
       <div className="mt-6 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
         <ReportMetricCard
           label="Avg. resolution time"
@@ -191,3 +194,4 @@ export const Reports = () => {
     </div>
   );
 };
+

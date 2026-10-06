@@ -30,7 +30,7 @@ export const TicketPriorityDropdown = ({
     },
   });
   return (
-    <div className="my-2">
+    <div>
       <form>
         <DropDown
           data={isOpen}

@@ -121,8 +121,10 @@ export const Users = () => {
           {titleCase(createdUserName)} was created successfully.
         </div>
       )}
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <form className="min-w-0 flex-1">
+
+      {/* Toolbar — stack on mobile */}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <form className="w-full sm:w-auto sm:min-w-[180px]">
           <DropDown
             data={isOpen}
             setData={setIsOpen}
@@ -145,19 +147,80 @@ export const Users = () => {
           Add user
         </button>
       </div>
-      <DataGrid
-        columns={userColumns}
-        data={users}
-        rowKey="id"
-        onSortChange={setSort}
-        pagination={{
-          page,
-          totalPages: data?.totalPages,
-          pageSize,
-          onPageChange: setPage,
-          onPageSizeChange: setPageSize,
-        }}
-      />
+
+      {/* Mobile card list — visible on < lg */}
+      <div className="lg:hidden space-y-3">
+        {users.length === 0 ? (
+          <p className="py-8 text-center text-gray-500">No users found.</p>
+        ) : (
+          users.map((user) => (
+            <div
+              key={user.id}
+              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-800 truncate">{titleCase(user.name)}</p>
+                  <p className="mt-0.5 text-sm text-gray-500 truncate">{user.email}</p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-1 text-xs font-semibold ${userStatusStyle(user.status)}`}
+                >
+                  {titleCase(user.status)}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-sm text-gray-500">{titleCase(user.role)}</span>
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(user)}
+                  className="cursor-pointer rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+        {/* Mobile pagination */}
+        {data && (data.totalElements ?? 0) >= 10 && (
+          <div className="flex items-center justify-center gap-4 pt-2">
+            <button
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+              className="rounded border border-gray-300 px-3 py-1 text-sm disabled:opacity-40"
+            >
+              ← Prev
+            </button>
+            <span className="text-sm text-gray-600">Page {page + 1} of {data?.totalPages}</span>
+            <button
+              disabled={page + 1 >= (data?.totalPages ?? 0)}
+              onClick={() => setPage(page + 1)}
+              className="rounded border border-gray-300 px-3 py-1 text-sm disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table — hidden on < lg */}
+      <div className="hidden lg:block">
+        <DataGrid
+          columns={userColumns}
+          data={users}
+          rowKey="id"
+          onSortChange={setSort}
+          pagination={{
+            page,
+            totalPages: data?.totalPages,
+            pageSize,
+            onPageChange: setPage,
+            onPageSizeChange: setPageSize,
+          }}
+        />
+      </div>
     </div>
   );
 };
+

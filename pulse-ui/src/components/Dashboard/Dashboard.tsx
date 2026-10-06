@@ -163,13 +163,13 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {metrics.map((metric) => (
           <DashboardMetric key={metric.label} {...metric} />
         ))}
       </div>
-      <div className="mt-8 grid grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
-        <div className="min-w-0 rounded-xl border border-gray-300 p-4">
+      <div className="mt-6 grid grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+        <div className="min-w-0 rounded-xl border border-gray-300 p-3 sm:p-4">
           <div className="font-semibold text-gray-700">
             {recentTicketsHeading}
           </div>
@@ -179,13 +179,13 @@ export default function Dashboard() {
                 key={row.id}
                 to={`/tickets/${row.id}`}
                 aria-label={`Open ticket ${row.id}: ${row.title}`}
-                className="group my-1 flex items-center gap-5 rounded-lg border-b border-gray-300 px-2 py-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700"
+                className="group my-1 flex items-center gap-2 rounded-lg border-b border-gray-300 px-2 py-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700 sm:gap-5"
               >
-                <span className="w-12 shrink-0 text-gray-500">#{row.id}</span>
-                <span className="min-w-0 flex-1 truncate font-light">
+                <span className="hidden w-12 shrink-0 text-gray-500 sm:block">#{row.id}</span>
+                <span className="min-w-0 flex-1 truncate text-sm font-light sm:text-base">
                   {row.title}
                 </span>
-                <span className="inline-flex shrink-0 items-center gap-2">
+                <span className="hidden shrink-0 items-center gap-2 sm:inline-flex">
                   <span
                     className={`size-2 shrink-0 rounded-full ${priorityStyle(row.priority)}`}
                     aria-hidden="true"
@@ -194,7 +194,7 @@ export default function Dashboard() {
                     {titleCase(row.priority)}
                   </span>
                 </span>
-                <span className={`${statusStyle(row.status)} shrink-0`}>
+                <span className={`${statusStyle(row.status)} shrink-0 !text-xs sm:!text-sm`}>
                   {titleCase(row.status)}
                 </span>
                 <GoChevronRight
@@ -228,17 +228,17 @@ export default function Dashboard() {
           </div>
         </div>
         {isEmployee ? (
-          <section className="h-full min-w-0 rounded-xl border border-gray-300 p-6">
+          <section className="h-full min-w-0 rounded-xl border border-gray-300 p-4 sm:p-6">
             <h2 className="text-lg font-semibold tracking-wider text-gray-600">
               NEED SUPPORT?
             </h2>
-            <p className="mt-5 leading-7 text-gray-600">
+            <p className="mt-4 leading-7 text-gray-600 sm:mt-5">
               Create a support ticket and follow its progress here. You will
               see only the requests created from your account.
             </p>
             <Link
               to="/tickets/create"
-              className="bg-pulse-green mt-6 inline-flex rounded-lg px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-800"
+              className="bg-pulse-green mt-5 inline-flex rounded-lg px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-800 sm:mt-6"
             >
               + Create a ticket
             </Link>

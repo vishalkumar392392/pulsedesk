@@ -71,7 +71,7 @@ export const AssetDetails = ({ asset }: AssetDetailsProps) => {
   };
 
   return (
-    <aside className="bg-table-header min-h-[24rem] border-t border-gray-300 p-6 lg:border-t-0 lg:border-l">
+    <aside className="bg-table-header min-h-[24rem] border-t border-gray-300 p-4 sm:p-6 lg:border-t-0 lg:border-l">
       <h2 className="text-lg font-bold tracking-wide">
         {asset.tag.toUpperCase()}
       </h2>

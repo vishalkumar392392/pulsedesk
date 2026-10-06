@@ -4,13 +4,14 @@ import { canViewNavigationItem } from "../../util/accessControl";
 import { authStorage } from "../../services/auth/authStorage";
 
 export const NavItems = ({
-  isHamburgerMenuClicked = true,
   setIsHamburgerMenuClicked = () => {},
   ROUTES = DEFAULT_ROUTES,
+  onNavItemClick,
 }: {
   isHamburgerMenuClicked?: boolean;
   setIsHamburgerMenuClicked?: (isClicked: boolean) => void;
   ROUTES?: Record<string, React.ReactNode>;
+  onNavItemClick?: () => void;
 }) => {
   const navigate = useNavigate();
   const role = getStoredUser()?.role;
@@ -21,54 +22,55 @@ export const NavItems = ({
   const logout = () => {
     authStorage.clear();
     setIsHamburgerMenuClicked(false);
+    onNavItemClick?.();
     navigate("/login", { replace: true });
   };
 
   const itemClassName = (isActive: boolean) =>
-    `flex w-full cursor-pointer items-center gap-1.5 rounded-sm py-1 text-left sm:py-2 ${
+    `flex w-full cursor-pointer items-center gap-2 rounded-lg py-2 px-3 text-left text-sm font-medium transition-colors ${
       isActive
-        ? "bg-blaze-haze-200 underline underline-offset-2"
-        : "hover:bg-gray-100"
+        ? "bg-blaze-haze-200 text-pulse-green underline underline-offset-2"
+        : "text-gray-700 hover:bg-gray-100"
     }`;
 
   return (
     <div>
-      {isHamburgerMenuClicked === true && (
-        <div>
-          <ul>
-            {visibleRoutes.map(([key, icon]) => {
-              const isLogout = key === "Logout";
+      <ul className="space-y-0.5">
+        {visibleRoutes.map(([key, icon]) => {
+          const isLogout = key === "Logout";
 
-              return (
-                <li key={key}>
-                  {key === "Settings" ? (
-                    <hr className="my-3 w-[95%] border-gray-300" />
-                  ) : null}
-                  {isLogout ? (
-                    <button
-                      type="button"
-                      onClick={logout}
-                      className={itemClassName(false)}
-                    >
-                      {icon}
-                      {key}
-                    </button>
-                  ) : (
-                    <NavLink
-                      to={`/${key.toLowerCase()}`}
-                      onClick={() => setIsHamburgerMenuClicked(false)}
-                      className={({ isActive }) => itemClassName(isActive)}
-                    >
-                      {icon}
-                      {key}
-                    </NavLink>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
+          return (
+            <li key={key}>
+              {key === "Settings" ? (
+                <hr className="my-3 w-[95%] border-gray-300" />
+              ) : null}
+              {isLogout ? (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className={itemClassName(false)}
+                >
+                  <span className="text-base">{icon}</span>
+                  {key}
+                </button>
+              ) : (
+                <NavLink
+                  to={`/${key.toLowerCase()}`}
+                  onClick={() => {
+                    setIsHamburgerMenuClicked(false);
+                    onNavItemClick?.();
+                  }}
+                  className={({ isActive }) => itemClassName(isActive)}
+                >
+                  <span className="text-base">{icon}</span>
+                  {key}
+                </NavLink>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };
+

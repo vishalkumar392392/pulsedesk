@@ -20,7 +20,7 @@ export const ReportBarCard = ({
   const largestValue = Math.max(...items.map((item) => item.value), 1);
 
   return (
-    <section className="min-h-64 rounded-xl border border-gray-300 p-6">
+    <section className="min-h-64 rounded-xl border border-gray-300 p-4 sm:p-6">
       <h2 className="text-lg font-semibold tracking-widest text-gray-600 uppercase">
         {title}
       </h2>
@@ -36,7 +36,7 @@ export const ReportBarCard = ({
             return (
               <div
                 key={label}
-                className="grid grid-cols-[7.5rem_minmax(0,1fr)_2rem] items-center gap-4"
+                className="grid grid-cols-[5rem_minmax(0,1fr)_2rem] sm:grid-cols-[7.5rem_minmax(0,1fr)_2rem] items-center gap-4"
               >
                 <span className="truncate text-gray-600" title={label}>
                   {label}
