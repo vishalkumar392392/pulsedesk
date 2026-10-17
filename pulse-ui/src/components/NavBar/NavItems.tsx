@@ -7,10 +7,12 @@ export const NavItems = ({
   isHamburgerMenuClicked = true,
   setIsHamburgerMenuClicked = () => {},
   ROUTES = DEFAULT_ROUTES,
+  variant = "default",
 }: {
   isHamburgerMenuClicked?: boolean;
   setIsHamburgerMenuClicked?: (isClicked: boolean) => void;
   ROUTES?: Record<string, React.ReactNode>;
+  variant?: "default" | "touch";
 }) => {
   const navigate = useNavigate();
   const role = getStoredUser()?.role;
@@ -25,11 +27,17 @@ export const NavItems = ({
   };
 
   const itemClassName = (isActive: boolean) =>
-    `flex w-full cursor-pointer items-center gap-1.5 rounded-sm py-1 text-left sm:py-2 ${
-      isActive
-        ? "bg-blaze-haze-200 underline underline-offset-2"
-        : "hover:bg-gray-100"
-    }`;
+    variant === "touch"
+      ? `flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-left text-base ${
+          isActive
+            ? "bg-blaze-haze-200 text-pulse-green font-semibold"
+            : "text-gray-700 hover:bg-gray-100"
+        }`
+      : `flex w-full cursor-pointer items-center gap-1.5 rounded-sm py-1 text-left sm:py-2 ${
+          isActive
+            ? "bg-blaze-haze-200 underline underline-offset-2"
+            : "hover:bg-gray-100"
+        }`;
 
   return (
     <div>
@@ -42,7 +50,9 @@ export const NavItems = ({
               return (
                 <li key={key}>
                   {key === "Settings" ? (
-                    <hr className="my-3 w-[95%] border-gray-300" />
+                    <hr
+                      className={`my-3 border-gray-300 ${variant === "touch" ? "w-full" : "w-[95%]"}`}
+                    />
                   ) : null}
                   {isLogout ? (
                     <button

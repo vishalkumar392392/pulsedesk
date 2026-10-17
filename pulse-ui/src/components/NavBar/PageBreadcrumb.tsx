@@ -42,7 +42,7 @@ export const PageBreadcrumb = () => {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="bg-blaze-haze-200 text-pulse-green ring-blaze-haze-200 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl shadow-sm ring-1">
+      <div className="bg-blaze-haze-200 text-pulse-green ring-blaze-haze-200 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl shadow-sm ring-1 max-lg:h-10 max-lg:w-10 max-lg:text-lg">
         {ROUTES[sectionLabel] ?? (
           <span className="bg-pulse-green h-3 w-3 rounded-sm" />
         )}
@@ -53,7 +53,7 @@ export const PageBreadcrumb = () => {
           {PAGE_CONTEXT[currentSegment] ?? "PulseDesk workspace"}
         </p>
         <nav aria-label="Breadcrumb">
-          <ol className="flex items-center gap-1.5 text-xl leading-tight font-semibold">
+          <ol className="flex items-center gap-1.5 text-xl leading-tight font-semibold max-lg:flex-wrap max-lg:text-lg">
             {segments.map((segment, index) => {
               const isCurrentPage = index === segments.length - 1;
               const route = `/${segments.slice(0, index + 1).join("/")}`;

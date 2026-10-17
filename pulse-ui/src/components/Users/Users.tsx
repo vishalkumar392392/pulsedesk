@@ -121,7 +121,7 @@ export const Users = () => {
           {titleCase(createdUserName)} was created successfully.
         </div>
       )}
-      <div className="mb-5 flex items-center justify-between gap-4">
+      <div className="mb-5 flex items-center justify-between gap-4 max-sm:gap-3">
         <form className="min-w-0 flex-1">
           <DropDown
             data={isOpen}
@@ -142,7 +142,7 @@ export const Users = () => {
           className="bg-blaze-haze-700 hover:bg-blaze-haze-600 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white shadow-sm transition-colors"
         >
           <IoAdd aria-hidden="true" fontSize={20} />
-          Add user
+          <span className="max-[22rem]:sr-only">Add user</span>
         </button>
       </div>
       <DataGrid
@@ -150,6 +150,44 @@ export const Users = () => {
         data={users}
         rowKey="id"
         onSortChange={setSort}
+        renderMobileCard={(user) => (
+          <div className="flex items-start gap-3">
+            <div className="bg-blaze-haze-200 text-pulse-green flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold">
+              {user.name
+                .trim()
+                .split(/\s+/)
+                .map((part) => part.charAt(0))
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <p className="truncate font-semibold text-gray-800">
+                  {titleCase(user.name)}
+                </p>
+                <span
+                  className={`shrink-0 rounded-4xl px-2 py-0.5 text-xs ${userStatusStyle(user.status)}`}
+                >
+                  {titleCase(user.status)}
+                </span>
+              </div>
+              <p className="truncate text-sm text-gray-500">{user.email}</p>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span className="text-sm text-gray-600">
+                  {titleCase(user.role)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(user)}
+                  className="cursor-pointer rounded-lg border border-gray-300 px-4 py-1.5 text-sm font-medium hover:bg-gray-50"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         pagination={{
           page,
           totalPages: data?.totalPages,

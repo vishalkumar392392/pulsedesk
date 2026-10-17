@@ -11,6 +11,8 @@ import { assetStatusStyle } from "./assetStyles";
 import { AssetStatusDropdown } from "./Dropdowns/AssetStatusDropdown";
 import { AssetTypeDropdown } from "./Dropdowns/AssetTypeDropdown";
 import { CreateAssetModal } from "./CreateAssetModal";
+import { AssetDetailsSheet } from "./AssetDetailsSheet";
+import { useIsDesktop } from "../../util/useMediaQuery";
 
 export const Assets = () => {
   const ASSET_COLUMNS: DataGridColumn<Asset>[] = [
@@ -64,6 +66,8 @@ export const Assets = () => {
   });
   const assets: Asset[] = data || [];
   const selectedAsset = assets.find((asset) => asset.id === selectedAssetId);
+  const isDesktop = useIsDesktop();
+  const showInlineDetails = isDesktop && selectedAsset;
 
   return (
     <div>
@@ -92,18 +96,21 @@ export const Assets = () => {
             setCreatedAssetTag("");
             setIsCreateAssetOpen(true);
           }}
-          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white shadow-sm transition-colors"
+          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white shadow-sm transition-colors max-sm:w-full max-sm:justify-center max-sm:py-2.5"
         >
           <IoAdd aria-hidden="true" fontSize={20} />
           Add asset
         </button>
       </div>
-      <AssetTypeDropdown setType={setType} />
-      <AssetStatusDropdown setStatus={setStatus} />
-      <br />
+      <div className="grid grid-cols-2 gap-3 lg:block">
+        <AssetTypeDropdown setType={setType} />
+        <AssetStatusDropdown setStatus={setStatus} />
+      </div>
+      <br className="max-lg:hidden" />
+      <div className="h-4 lg:hidden" />
       <div
         className={
-          selectedAsset
+          showInlineDetails
             ? "grid overflow-hidden rounded-lg border border-gray-300 lg:grid-cols-[minmax(0,2fr)_minmax(19rem,1fr)]"
             : undefined
         }
@@ -116,15 +123,53 @@ export const Assets = () => {
             selectedRowKey={selectedAssetId}
             onRowClick={(asset) => setSelectedAssetId(asset.id)}
             scrollHeight="32rem"
+            renderMobileCard={(asset) => (
+              <>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold tracking-wide text-gray-800">
+                      {asset.tag.toUpperCase()}
+                    </p>
+                    <p className="mt-0.5 truncate text-sm text-gray-500">
+                      {titleCase(asset.model)} · {titleCase(asset.type)}
+                    </p>
+                  </div>
+                  <span
+                    className={`${assetStatusStyle(asset.status)} shrink-0 text-xs!`}
+                  >
+                    {asset.status ? titleCase(asset.status) : "Unknown"}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-gray-600">
+                  {asset.assignedTo ? (
+                    <>
+                      Assigned to{" "}
+                      <span className="font-medium text-gray-800">
+                        {formatName(asset.assignedTo)}
+                      </span>
+                    </>
+                  ) : (
+                    "Unassigned"
+                  )}
+                </p>
+              </>
+            )}
           />
         </div>
-        {selectedAsset && (
+        {showInlineDetails && (
           <AssetDetails
             key={`${selectedAsset.id}-${selectedAsset.assignedToId ?? "unassigned"}`}
             asset={selectedAsset}
           />
         )}
       </div>
+      {!isDesktop && selectedAsset && (
+        <AssetDetailsSheet
+          key={`${selectedAsset.id}-${selectedAsset.assignedToId ?? "unassigned"}`}
+          asset={selectedAsset}
+          onClose={() => setSelectedAssetId(undefined)}
+        />
+      )}
     </div>
   );
 };

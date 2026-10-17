@@ -38,7 +38,9 @@ export const Tickets = () => {
       key: "status",
       header: "STATUS",
       render: (ticket) => (
-        <span className={statusStyle(ticket.status)}>
+        <span
+          className={`${statusStyle(ticket.status)} max-lg:whitespace-nowrap`}
+        >
           {titleCase(ticket.status)}
         </span>
       ),
@@ -73,7 +75,9 @@ export const Tickets = () => {
       key: "createdAt",
       header: "CREATED",
       render: (ticket) => (
-        <span className="px-2 py-1 text-sm">{ticket.createdAt}</span>
+        <span className="px-2 py-1 text-sm max-lg:whitespace-nowrap">
+          {ticket.createdAt}
+        </span>
       ),
     },
   ];
@@ -98,17 +102,20 @@ export const Tickets = () => {
   const navigate = useNavigate();
   return (
     <div>
-      <TicketStatusDropdown setPage={setPage} setStatus={setStatus} />
-      <TicketPriorityDropdown setPage={setPage} setPriority={setPriority} />
+      <div className="grid grid-cols-2 gap-3 lg:block">
+        <TicketStatusDropdown setPage={setPage} setStatus={setStatus} />
+        <TicketPriorityDropdown setPage={setPage} setPriority={setPriority} />
+      </div>
       <div className="flex justify-end">
         <button
           onClick={() => navigate("/tickets/create")}
-          className="bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white"
+          className="bg-pulse-green disabled:bg-pulse-green mt-9 cursor-pointer rounded px-2 py-1 text-white max-lg:mt-4 max-lg:rounded-lg max-lg:px-4 max-lg:py-2.5 max-lg:font-semibold max-sm:w-full"
         >
           + New Ticket
         </button>
       </div>
-      <br />
+      <br className="max-lg:hidden" />
+      <div className="h-4 lg:hidden" />
       <DataGrid
         columns={visibleColumns}
         data={tickets}
@@ -116,6 +123,42 @@ export const Tickets = () => {
         rowKey="id"
         onRowClick={(ticket) => navigate(`/tickets/${ticket.id}`)}
         onSortChange={setSort}
+        renderMobileCard={(ticket) => (
+          <>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500">
+                  #{ticket.id} · {ticket.createdAt}
+                </p>
+                <p className="mt-1 line-clamp-2 font-medium text-gray-800">
+                  {titleCase(ticket.title)}
+                </p>
+              </div>
+              <span
+                className={`${statusStyle(ticket.status)} shrink-0 text-xs!`}
+              >
+                {titleCase(ticket.status)}
+              </span>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+              <span className="inline-flex items-center gap-2 text-gray-700">
+                <span
+                  className={`size-2 shrink-0 rounded-full ${priorityStyle(ticket.priority)}`}
+                  aria-hidden="true"
+                />
+                {titleCase(ticket.priority)} priority
+              </span>
+              {!isEmployee &&
+                (ticket.assigneeName ? (
+                  <span className="bg-pulse-green-100 truncate rounded-4xl px-2 py-1 text-xs">
+                    {formatName(ticket.assigneeName)}
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-500">Unassigned</span>
+                ))}
+            </div>
+          </>
+        )}
         pagination={{
           page,
           totalPages: data?.totalPages,

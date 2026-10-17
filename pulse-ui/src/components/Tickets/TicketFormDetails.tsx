@@ -278,7 +278,7 @@ export const TicketFormDetails = ({
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="my-3 cursor-pointer rounded border border-gray-300 px-2 py-1"
+            className="my-3 cursor-pointer rounded border border-gray-300 px-2 py-1 max-lg:px-4 max-lg:py-2"
           >
             <div className="flex items-center">
               {" "}
@@ -289,7 +289,7 @@ export const TicketFormDetails = ({
             type="button"
             disabled={!isDetailsFormValid}
             onClick={() => setStep(3)}
-            className={`rounded px-2 py-1 text-white ${!isDetailsFormValid ? "bg-pulse-green-100 cursor-not-allowed" : "bg-pulse-green disabled:bg-pulse-green cursor-pointer"} my-3`}
+            className={`rounded px-2 py-1 text-white max-lg:px-4 max-lg:py-2 ${!isDetailsFormValid ? "bg-pulse-green-100 cursor-not-allowed" : "bg-pulse-green disabled:bg-pulse-green cursor-pointer"} my-3`}
           >
             <div className="flex items-center">Next {<GrFormNextLink />}</div>
           </button>

@@ -28,7 +28,7 @@ export const AssetTypeDropdown = ({ setType }: AssetTypeDropdownProps) => {
     },
   });
   return (
-    <div className="my-2">
+    <div className="my-2 max-lg:my-0">
       <form>
         <DropDown
           data={isOpen}

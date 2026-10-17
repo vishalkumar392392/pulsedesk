@@ -1,14 +1,12 @@
+import { useIsDesktop } from "../../util/useMediaQuery";
 import { DesktopLayout } from "./Desktop/DesktopLayout";
+import { MobileLayout } from "./Mobile/MobileLayout";
 
 export const Layout = () => {
+  // Render a single layout so the routed page (and its queries) mounts once.
+  const isDesktop = useIsDesktop();
+
   return (
-    <div className="">
-      {/* <div className="block sm:hidden">
-        <MobileLayout />
-      </div> */}
-      <div>
-        <DesktopLayout />
-      </div>
-    </div>
+    <div className="">{isDesktop ? <DesktopLayout /> : <MobileLayout />}</div>
   );
 };

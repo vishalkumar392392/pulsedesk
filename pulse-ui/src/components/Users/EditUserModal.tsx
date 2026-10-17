@@ -86,7 +86,7 @@ export const EditUserModal = ({ user, onClose }: EditUserModalProps) => {
       }}
     >
       <section
-        className="w-full max-w-xl rounded-2xl border border-gray-300 bg-white p-8 shadow-2xl"
+        className="w-full max-w-xl rounded-2xl border border-gray-300 bg-white p-8 shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-user-title"
@@ -105,7 +105,10 @@ export const EditUserModal = ({ user, onClose }: EditUserModalProps) => {
           </button>
         </div>
 
-        <form className="mt-7 space-y-5" onSubmit={handleSubmit(submitUpdate)}>
+        <form
+          className="mt-7 space-y-5 max-sm:mt-5 max-sm:space-y-4"
+          onSubmit={handleSubmit(submitUpdate)}
+        >
           <label className="block">
             <span className="mb-2 block font-semibold">Name</span>
             <input

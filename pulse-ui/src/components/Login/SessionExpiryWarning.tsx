@@ -149,7 +149,7 @@ export const SessionExpiryWarning = () => {
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       <section
-        className="w-full max-w-md rounded-2xl border border-amber-200 bg-white p-8 text-center shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-amber-200 bg-white p-8 text-center shadow-2xl max-sm:p-6"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="session-expiry-title"

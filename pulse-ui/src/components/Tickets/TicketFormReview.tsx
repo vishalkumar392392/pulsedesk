@@ -19,8 +19,8 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex justify-between">
-          <div className="text-gray-600">Title</div>
+        <div className="flex justify-between max-lg:gap-4">
+          <div className="text-gray-600 max-lg:shrink-0">Title</div>
           <div className="min-w-0 text-right wrap-break-word">{title}</div>
         </div>
         <hr className="border-gray-300" />
@@ -66,7 +66,7 @@ export const TicketFormReview = ({ control }: TicketFormReviewProps) => {
       <div className="flex justify-center">
         <button
           disabled={!acceptTerms}
-          className={`rounded px-2 py-1 text-white ${!acceptTerms ? "bg-pulse-green-100 cursor-not-allowed" : "bg-pulse-green disabled:bg-pulse-green cursor-pointer"} my-3`}
+          className={`rounded px-2 py-1 text-white max-lg:w-full max-lg:px-4 max-lg:py-2.5 ${!acceptTerms ? "bg-pulse-green-100 cursor-not-allowed" : "bg-pulse-green disabled:bg-pulse-green cursor-pointer"} my-3`}
         >
           <div className="flex items-center">Submit</div>
         </button>

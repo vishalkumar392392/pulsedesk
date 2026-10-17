@@ -78,8 +78,8 @@ const ProfileSettings = ({ user }: { user: User }) => {
   };
 
   return (
-    <section className="rounded-2xl border border-gray-300 bg-white p-8">
-      <h2 className="text-xl font-bold tracking-widest text-gray-600 uppercase">
+    <section className="rounded-2xl border border-gray-300 bg-white p-8 max-lg:p-6 max-sm:p-4">
+      <h2 className="text-xl font-bold tracking-widest text-gray-600 uppercase max-sm:text-base max-sm:tracking-wider">
         Profile
       </h2>
 
@@ -137,7 +137,7 @@ const ProfileSettings = ({ user }: { user: User }) => {
         <button
           type="submit"
           disabled={!isDirty || !isValid || isSubmitting}
-          className="mt-5 cursor-pointer rounded-xl border border-gray-300 px-4 py-2 font-semibold transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-5 cursor-pointer rounded-xl border border-gray-300 px-4 py-2 font-semibold transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 max-sm:w-full max-sm:py-2.5"
         >
           {isSubmitting ? "Saving…" : "Save Changes"}
         </button>
@@ -183,8 +183,8 @@ const PasswordSettings = () => {
   };
 
   return (
-    <section className="rounded-2xl border border-gray-300 bg-white p-8">
-      <h2 className="text-xl font-bold tracking-widest text-gray-600 uppercase">
+    <section className="rounded-2xl border border-gray-300 bg-white p-8 max-lg:p-6 max-sm:p-4">
+      <h2 className="text-xl font-bold tracking-widest text-gray-600 uppercase max-sm:text-base max-sm:tracking-wider">
         Change Password
       </h2>
 
@@ -264,7 +264,7 @@ const PasswordSettings = () => {
         <button
           type="submit"
           disabled={!isValid || isSubmitting}
-          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 cursor-pointer rounded-xl px-4 py-2 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-blaze-haze-700 hover:bg-blaze-haze-600 cursor-pointer rounded-xl px-4 py-2 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 max-sm:w-full max-sm:py-2.5"
         >
           {isSubmitting ? "Updating…" : "Update Password"}
         </button>
@@ -285,7 +285,7 @@ export const Settings = () => {
   }
 
   return (
-    <main className="w-full max-w-5xl space-y-6 pb-10">
+    <main className="w-full max-w-5xl space-y-6 pb-10 max-sm:space-y-4">
       <ProfileSettings user={user} />
       <PasswordSettings />
     </main>

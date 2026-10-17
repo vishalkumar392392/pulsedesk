@@ -53,11 +53,17 @@ const DashboardMetric = ({
   title,
 }: DashboardMetricProps) => (
   <div
-    className="rounded-xl border border-gray-300 px-4 pt-3 pb-4"
+    className="rounded-xl border border-gray-300 px-4 pt-3 pb-4 max-sm:px-3"
     title={title}
   >
-    <div className="text-gray-600">{label}</div>
-    <div className={`py-2 text-3xl font-light ${valueClassName}`}>{value}</div>
+    <div className="text-gray-600 max-sm:text-xs max-sm:font-medium max-sm:tracking-wide">
+      {label}
+    </div>
+    <div
+      className={`py-2 text-3xl font-light max-sm:pb-0 max-sm:text-2xl ${valueClassName}`}
+    >
+      {value}
+    </div>
   </div>
 );
 
@@ -148,7 +154,7 @@ export default function Dashboard() {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-pulse-green text-xl font-bold">
+          <div className="text-pulse-green text-xl font-bold max-sm:text-lg">
             Welcome back{firstName ? `, ${titleCase(firstName)}` : ""}
           </div>
           <div className="mt-2 text-gray-500">{dashboardSubtitle}</div>
@@ -156,19 +162,19 @@ export default function Dashboard() {
         {isEmployee && (
           <Link
             to="/tickets/create"
-            className="bg-pulse-green rounded-lg px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-800"
+            className="bg-pulse-green rounded-lg px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-800 max-sm:w-full max-sm:py-2.5 max-sm:text-center"
           >
             + New Ticket
           </Link>
         )}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 max-sm:mt-6 max-sm:gap-3 xl:grid-cols-4">
         {metrics.map((metric) => (
           <DashboardMetric key={metric.label} {...metric} />
         ))}
       </div>
-      <div className="mt-8 grid grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
+      <div className="mt-8 grid grid-cols-1 items-stretch gap-4 max-sm:mt-6 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
         <div className="min-w-0 rounded-xl border border-gray-300 p-4">
           <div className="font-semibold text-gray-700">
             {recentTicketsHeading}
@@ -179,23 +185,34 @@ export default function Dashboard() {
                 key={row.id}
                 to={`/tickets/${row.id}`}
                 aria-label={`Open ticket ${row.id}: ${row.title}`}
-                className="group my-1 flex items-center gap-5 rounded-lg border-b border-gray-300 px-2 py-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700"
+                className="group my-1 flex items-center gap-3 rounded-lg border-b border-gray-300 px-2 py-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-700 sm:gap-5"
               >
-                <span className="w-12 shrink-0 text-gray-500">#{row.id}</span>
-                <span className="min-w-0 flex-1 truncate font-light">
-                  {row.title}
-                </span>
-                <span className="inline-flex shrink-0 items-center gap-2">
-                  <span
-                    className={`size-2 shrink-0 rounded-full ${priorityStyle(row.priority)}`}
-                    aria-hidden="true"
-                  />
-                  <span className="font-light text-gray-700">
-                    {titleCase(row.priority)}
+                {/* Two stacked lines on phones; the wrappers collapse (sm:contents) into a single row from sm up. */}
+                <span className="flex min-w-0 flex-1 flex-col gap-2 sm:contents">
+                  <span className="flex min-w-0 items-center gap-2 sm:contents">
+                    <span className="shrink-0 text-gray-500 sm:w-12">
+                      #{row.id}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate font-light">
+                      {row.title}
+                    </span>
                   </span>
-                </span>
-                <span className={`${statusStyle(row.status)} shrink-0`}>
-                  {titleCase(row.status)}
+                  <span className="flex items-center justify-between gap-3 sm:contents">
+                    <span className="inline-flex shrink-0 items-center gap-2">
+                      <span
+                        className={`size-2 shrink-0 rounded-full ${priorityStyle(row.priority)}`}
+                        aria-hidden="true"
+                      />
+                      <span className="font-light text-gray-700">
+                        {titleCase(row.priority)}
+                      </span>
+                    </span>
+                    <span
+                      className={`${statusStyle(row.status)} shrink-0 max-sm:px-2.5 max-sm:py-0.5 max-sm:text-xs`}
+                    >
+                      {titleCase(row.status)}
+                    </span>
+                  </span>
                 </span>
                 <GoChevronRight
                   aria-hidden="true"
@@ -205,9 +222,7 @@ export default function Dashboard() {
             ))
           ) : (
             <div className="flex min-h-48 flex-col items-center justify-center px-4 text-center">
-              <p className="text-gray-500">
-                {emptyTicketsMessage}
-              </p>
+              <p className="text-gray-500">{emptyTicketsMessage}</p>
               {isEmployee && (
                 <Link
                   to="/tickets/create"
@@ -228,13 +243,13 @@ export default function Dashboard() {
           </div>
         </div>
         {isEmployee ? (
-          <section className="h-full min-w-0 rounded-xl border border-gray-300 p-6">
+          <section className="h-full min-w-0 rounded-xl border border-gray-300 p-6 max-sm:p-4">
             <h2 className="text-lg font-semibold tracking-wider text-gray-600">
               NEED SUPPORT?
             </h2>
             <p className="mt-5 leading-7 text-gray-600">
-              Create a support ticket and follow its progress here. You will
-              see only the requests created from your account.
+              Create a support ticket and follow its progress here. You will see
+              only the requests created from your account.
             </p>
             <Link
               to="/tickets/create"

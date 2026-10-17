@@ -38,6 +38,8 @@ interface DataGridProps<T extends object> {
   totalElements?: number;
   scrollHeight?: number | string;
   emptyMessage?: string;
+  /** When provided, rows render as cards instead of the table below `md`. */
+  renderMobileCard?: (row: T) => React.ReactNode;
 }
 
 export function DataGrid<T extends object>({
@@ -51,6 +53,7 @@ export function DataGrid<T extends object>({
   totalElements,
   scrollHeight = "24rem",
   emptyMessage = "No data available",
+  renderMobileCard,
 }: DataGridProps<T>) {
   const [sortState, setSortState] = useState<SortState>({
     key: null,
@@ -69,18 +72,22 @@ export function DataGrid<T extends object>({
     }));
   }, [columns, data]);
 
-  const handleSort = (key: string) => {
-    let next: SortState;
-    if (sortState.key !== key) {
-      next = { key, direction: "asc" };
-    } else if (sortState.direction === "asc") {
-      next = { key, direction: "desc" };
-    } else {
-      next = { key: null, direction: null };
-    }
+  const applySort = (next: SortState) => {
     setSortState(next);
     onSortChange?.(next);
   };
+
+  const handleSort = (key: string) => {
+    if (sortState.key !== key) {
+      applySort({ key, direction: "asc" });
+    } else if (sortState.direction === "asc") {
+      applySort({ key, direction: "desc" });
+    } else {
+      applySort({ key: null, direction: null });
+    }
+  };
+
+  const sortableColumns = resolvedColumns.filter((col) => col.sortable);
 
   const renderCell = (row: T, column: DataGridColumn<T>) => {
     if (column.render) return column.render(row);
@@ -114,8 +121,84 @@ export function DataGrid<T extends object>({
 
   return (
     <div>
+      {renderMobileCard && (
+        <div className="md:hidden">
+          {sortableColumns.length > 0 && (
+            <label className="mb-3 flex items-center justify-end gap-2 text-sm text-gray-600">
+              Sort by
+              <select
+                value={
+                  sortState.key && sortState.direction
+                    ? `${sortState.key}:${sortState.direction}`
+                    : ""
+                }
+                onChange={(event) => {
+                  const [key, direction] = event.target.value.split(":");
+                  applySort(
+                    key
+                      ? { key, direction: direction as SortDirection }
+                      : { key: null, direction: null },
+                  );
+                }}
+                className="focus:border-blaze-haze-600 focus:ring-blaze-haze-200 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-800 outline-none focus:ring-2"
+              >
+                <option value="">Default</option>
+                {sortableColumns.map((col) => (
+                  <optgroup key={String(col.key)} label={titleCase(col.header)}>
+                    <option value={`${String(col.key)}:asc`}>
+                      {titleCase(col.header)} ↑
+                    </option>
+                    <option value={`${String(col.key)}:desc`}>
+                      {titleCase(col.header)} ↓
+                    </option>
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+          )}
+
+          <ul className="space-y-3">
+            {data.map((row, index) => {
+              const currentRowKey = getRowKey(row, index);
+              const isSelected =
+                selectedRowKey !== undefined &&
+                String(currentRowKey) === String(selectedRowKey);
+
+              return (
+                <li
+                  key={currentRowKey}
+                  aria-selected={isSelected || undefined}
+                  role={onRowClick ? "button" : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onClick={() => onRowClick?.(row, index)}
+                  onKeyDown={(event) => {
+                    if (!onRowClick || event.target !== event.currentTarget)
+                      return;
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    onRowClick(row, index);
+                  }}
+                  className={`rounded-xl border bg-white p-4 shadow-sm transition-colors ${
+                    isSelected
+                      ? "border-blaze-haze-600 bg-blaze-haze-100"
+                      : "border-gray-300"
+                  } ${onRowClick ? "focus-visible:outline-blaze-haze-600 active:bg-blaze-haze-100 cursor-pointer focus-visible:outline-2" : ""}`}
+                >
+                  {renderMobileCard(row)}
+                </li>
+              );
+            })}
+          </ul>
+          {data.length === 0 && (
+            <p className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-gray-500">
+              {emptyMessage}
+            </p>
+          )}
+        </div>
+      )}
+
       <div
-        className="w-full overflow-auto"
+        className={`w-full overflow-auto ${renderMobileCard ? "max-md:hidden" : ""}`}
         style={pagination ? undefined : { maxHeight: scrollHeight }}
       >
         <table className="min-w-full table-auto border-gray-300 text-sm">
@@ -204,7 +287,7 @@ export function DataGrid<T extends object>({
       </div>
 
       {shouldShowPagination && pagination && (
-        <div className="my-4 flex items-center justify-center gap-4">
+        <div className="my-4 flex items-center justify-center gap-4 max-lg:flex-wrap max-lg:gap-3">
           <div
             className={`rounded-md border border-gray-300 ${
               pagination.page - 1 < 0

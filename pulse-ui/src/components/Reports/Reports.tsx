@@ -163,12 +163,12 @@ export const Reports = () => {
 
   return (
     <div className="pb-10">
-      <div className="flex items-center gap-4">
-        <h1 className="shrink-0 text-xl font-bold">Reports</h1>
+      <div className="flex items-center gap-4 max-sm:gap-3">
+        <h1 className="shrink-0 text-xl font-bold max-sm:text-lg">Reports</h1>
         <ReportRangeSelector value={rangeDays} onChange={setRangeDays} />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      <div className="mt-6 grid grid-cols-1 gap-6 max-sm:mt-4 max-sm:gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <ReportBarCard
           title="Tickets by status"
           items={report.statusItems}
@@ -177,7 +177,7 @@ export const Reports = () => {
         <ReportBarCard title="Resolved by agent" items={report.agentItems} />
       </div>
 
-      <div className="mt-6 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="mt-6 grid max-w-3xl grid-cols-1 gap-6 max-sm:mt-4 max-sm:grid-cols-2 max-sm:gap-3 sm:grid-cols-2">
         <ReportMetricCard
           label="Avg. resolution time"
           value={`${report.averageResolutionDays.toFixed(1)}d`}

@@ -27,7 +27,7 @@ export const ReportRangeSelector = ({
     <div className="relative min-w-0 flex-1">
       <button
         type="button"
-        className="flex w-full items-center gap-2 rounded-xl border border-gray-300 px-4 py-3 text-left hover:bg-gray-50"
+        className="flex w-full items-center gap-2 rounded-xl border border-gray-300 px-4 py-3 text-left hover:bg-gray-50 max-sm:px-3 max-sm:py-2.5"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}

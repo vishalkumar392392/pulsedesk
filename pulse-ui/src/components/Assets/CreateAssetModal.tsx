@@ -105,7 +105,7 @@ export const CreateAssetModal = ({
       }}
     >
       <section
-        className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-300 bg-white p-8 shadow-2xl"
+        className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-300 bg-white p-8 shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-asset-title"
@@ -130,7 +130,10 @@ export const CreateAssetModal = ({
           </button>
         </div>
 
-        <form className="mt-7 space-y-5" onSubmit={handleSubmit(submitAsset)}>
+        <form
+          className="mt-7 space-y-5 max-sm:mt-5 max-sm:space-y-4"
+          onSubmit={handleSubmit(submitAsset)}
+        >
           <label className="block">
             <span className="mb-2 block font-semibold">
               Asset tag <span className="text-red-500">*</span>

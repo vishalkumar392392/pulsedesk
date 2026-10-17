@@ -97,7 +97,7 @@ export const CreateUserModal = ({
       }}
     >
       <section
-        className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-300 bg-white p-8 shadow-2xl"
+        className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-300 bg-white p-8 shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-user-title"
@@ -122,7 +122,10 @@ export const CreateUserModal = ({
           </button>
         </div>
 
-        <form className="mt-7 space-y-5" onSubmit={handleSubmit(submitUser)}>
+        <form
+          className="mt-7 space-y-5 max-sm:mt-5 max-sm:space-y-4"
+          onSubmit={handleSubmit(submitUser)}
+        >
           <label className="block">
             <span className="mb-2 block font-semibold">
               Name <span className="text-red-500">*</span>

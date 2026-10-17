@@ -39,8 +39,8 @@ export const Modal = () => {
 
   return (
     open && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-md">
-        <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl bg-white p-10 shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-md max-lg:p-4">
+        <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl bg-white p-10 shadow-2xl max-lg:p-6">
           {STATUS_CODES.includes(statusCode) ? (
             <MdOutlineDone
               fontSize={70}
@@ -54,7 +54,9 @@ export const Modal = () => {
               className="rounded-full bg-red-100"
             />
           )}
-          <div className="text-2xl font-bold">{title}</div>
+          <div className="text-2xl font-bold max-lg:text-center max-lg:text-xl">
+            {title}
+          </div>
 
           <div className="text-center text-gray-600">{message}</div>
 

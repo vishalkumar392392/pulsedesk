@@ -221,7 +221,7 @@ export const TicketDetails = () => {
   }
 
   return (
-    <main className="space-y-7 pb-8">
+    <main className="space-y-7 pb-8 max-sm:space-y-5">
       <Link
         to="/tickets"
         className="inline-flex items-center text-gray-600 hover:text-gray-900"
@@ -230,11 +230,11 @@ export const TicketDetails = () => {
       </Link>
 
       <section>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-bold max-lg:text-xl max-lg:leading-snug max-lg:break-words">
           <span className="text-gray-600">#{ticket.id}</span> — {ticket.title}
         </h1>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 max-sm:mt-4">
           <div className="inline-flex items-center gap-3 rounded-xl border border-gray-300 bg-white px-4 py-2.5 shadow-sm">
             <span className="text-sm font-semibold tracking-wide text-gray-500 uppercase">
               Status
@@ -262,7 +262,7 @@ export const TicketDetails = () => {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-gray-600">
+          <div className="flex flex-wrap items-center gap-3 text-gray-600 max-sm:gap-x-2 max-sm:gap-y-1 max-sm:text-sm">
             <span className="inline-flex items-center gap-2">
               Priority:
               <span
@@ -278,7 +278,7 @@ export const TicketDetails = () => {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-end gap-x-10 gap-y-4">
+        <div className="mt-8 flex flex-wrap items-end gap-x-10 gap-y-4 max-sm:mt-5 max-sm:flex-col max-sm:items-stretch">
           <p>
             Requester:{" "}
             <strong>
@@ -287,7 +287,7 @@ export const TicketDetails = () => {
                 : `User #${ticket.requesterId ?? "—"}`}
             </strong>
           </p>
-          <label className="block">
+          <label className="block max-sm:w-full">
             <span className="mb-1 block">Assignee:</span>
             {canManage ? (
               <select
@@ -296,7 +296,7 @@ export const TicketDetails = () => {
                 disabled={
                   isLoadingAssignees || isAssigneesError || isUpdatingAssignee
                 }
-                className="focus:border-blaze-haze-600 focus:ring-blaze-haze-200 min-w-56 rounded-xl border border-gray-300 bg-white px-4 py-2 outline-none focus:ring-2 disabled:bg-gray-100"
+                className="focus:border-blaze-haze-600 focus:ring-blaze-haze-200 min-w-56 rounded-xl border border-gray-300 bg-white px-4 py-2 outline-none focus:ring-2 disabled:bg-gray-100 max-sm:w-full max-sm:py-2.5"
               >
                 <option value="">Unassigned</option>
                 {assignees.map((assignee) => (
@@ -327,16 +327,16 @@ export const TicketDetails = () => {
         )}
       </section>
 
-      <section className="rounded-2xl border border-gray-300 p-7">
+      <section className="rounded-2xl border border-gray-300 p-7 max-lg:p-5 max-sm:p-4">
         <h2 className="text-lg font-bold tracking-wider text-gray-600">
           DESCRIPTION
         </h2>
-        <p className="mt-5 text-lg leading-7 whitespace-pre-wrap">
+        <p className="mt-5 text-lg leading-7 whitespace-pre-wrap max-sm:mt-3 max-sm:text-base max-sm:break-words">
           {ticket.description}
         </p>
       </section>
 
-      <section className="rounded-2xl border border-gray-300 p-7">
+      <section className="rounded-2xl border border-gray-300 p-7 max-lg:p-5 max-sm:p-4">
         <h2 className="text-lg font-bold tracking-wider text-gray-600">
           COMMENTS ({comments.length})
         </h2>
@@ -381,7 +381,7 @@ export const TicketDetails = () => {
                     · {formatRelativeTime(comment.createdAt)}
                   </span>
                 </p>
-                <p className="mt-1 text-lg whitespace-pre-wrap">
+                <p className="mt-1 text-lg whitespace-pre-wrap max-sm:text-base max-sm:break-words">
                   {comment.body}
                 </p>
               </article>
@@ -392,7 +392,7 @@ export const TicketDetails = () => {
 
       <form
         onSubmit={handleSubmit(submitComment)}
-        className="flex items-start gap-3"
+        className="flex items-start gap-3 max-sm:gap-2"
       >
         <div className="grow">
           <input

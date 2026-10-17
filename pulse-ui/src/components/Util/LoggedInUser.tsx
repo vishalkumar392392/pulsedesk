@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { formatName, getStoredUser, titleCase } from "../../util/helper";
 import { AUTH_USER_CHANGED_EVENT } from "../../services/auth/authStorage";
 
-export const LoggedInUser = () => {
+export const LoggedInUser = ({ compact = false }: { compact?: boolean }) => {
   const [user, setUser] = useState(getStoredUser);
 
   useEffect(() => {
@@ -26,6 +26,18 @@ export const LoggedInUser = () => {
   };
 
   if (!user) return null;
+
+  if (compact) {
+    return (
+      <div
+        className="bg-blaze-haze-200 text-pulse-green flex size-10 items-center justify-center rounded-full border-2 border-gray-300 text-sm font-bold"
+        title={`${formatName(user.name)} · ${titleCase(user.role)}`}
+        aria-label={`Signed in as ${formatName(user.name)}`}
+      >
+        {getIntials(user.name)}
+      </div>
+    );
+  }
 
   return (
     <div>

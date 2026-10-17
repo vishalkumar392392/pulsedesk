@@ -4,7 +4,7 @@ import { Link } from "react-router";
 export const NotAuthorized = () => {
   return (
     <main className="flex min-h-[60vh] items-center justify-center">
-      <section className="w-full max-w-lg rounded-2xl border border-gray-300 bg-white p-10 text-center shadow-sm">
+      <section className="w-full max-w-lg rounded-2xl border border-gray-300 bg-white p-10 text-center shadow-sm max-sm:p-6">
         <div className="bg-blaze-haze-200 text-pulse-green mx-auto flex size-14 items-center justify-center rounded-2xl">
           <MdBlock className="text-3xl" aria-hidden="true" />
         </div>

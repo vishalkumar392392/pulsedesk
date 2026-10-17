@@ -42,14 +42,14 @@ export const TicketFormBasics = ({
           }}
           render={({ field, fieldState }) => (
             <>
-              <div className="mt-8 mb-4 flex items-center justify-between">
+              <div className="mt-8 mb-4 flex items-center justify-between max-sm:mt-5 max-sm:flex-col max-sm:items-stretch max-sm:gap-1">
                 <label className="mt-1 mr-4">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   {...field}
                   type="text"
-                  className={`mt-1 w-[75%] rounded-md p-1 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 ${
+                  className={`mt-1 w-[75%] rounded-md p-1 transition-colors outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 max-lg:border max-lg:px-3 max-lg:py-2 max-sm:w-full ${
                     fieldState.error
                       ? "border-red-500 focus:ring-2 focus:ring-red-200"
                       : "border-gray-300 focus:ring-2 focus:ring-blue-200"
@@ -67,7 +67,7 @@ export const TicketFormBasics = ({
         <hr className="border-gray-300" />
         <div className="mt-4 flex items-center justify-between">
           <label>Category</label>
-          <div className="w-[50%]">
+          <div className="w-[50%] max-sm:w-[65%]">
             <DropDown
               data={isOpen}
               setData={setIsOpen}
@@ -83,7 +83,7 @@ export const TicketFormBasics = ({
             type="button"
             disabled={isBasicFormValid}
             onClick={() => setStep(2)}
-            className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white ${isBasicFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
+            className={`bg-pulse-green disabled:bg-pulse-green rounded px-2 py-1 text-white max-lg:px-4 max-lg:py-2 ${isBasicFormValid ? "cursor-not-allowed" : "cursor-pointer"} my-3`}
           >
             <div className="flex items-center">Next {<GrFormNextLink />}</div>
           </button>

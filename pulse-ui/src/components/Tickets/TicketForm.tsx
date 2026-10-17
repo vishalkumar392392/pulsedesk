@@ -71,7 +71,7 @@ export const TicketForm = () => {
   };
   return (
     <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-      <div className="mb-6 flex items-center gap-6">
+      <div className="mb-6 flex items-center gap-6 max-sm:gap-2">
         <div className="flex gap-1">
           <div
             className={`flex h-6 w-6 items-center justify-center rounded-full border ${step === 1 ? "border-pulse-green border-2" : "border-gray-400"} ${step >= 2 ? "bg-pulse-green" : "bg-white"}`}
@@ -79,12 +79,12 @@ export const TicketForm = () => {
             {step >= 2 ? <TiTickOutline color="white" /> : 1}
           </div>
           <div
-            className={`${step == 1 ? "text-pulse-green" : "text-gray-600"}`}
+            className={`${step == 1 ? "text-pulse-green" : "text-gray-600 max-sm:hidden"}`}
           >
             Basics
           </div>
         </div>
-        <hr className="w-6 border-gray-400" />
+        <hr className="w-6 border-gray-400 max-sm:w-4" />
         <div className="flex gap-1">
           <div
             className={`flex h-6 w-6 items-center justify-center rounded-full border border-gray-400 ${step === 2 ? "border-pulse-green border-2" : "border-gray-400"} ${step >= 3 ? "bg-pulse-green" : "bg-white"}`}
@@ -92,12 +92,12 @@ export const TicketForm = () => {
             {step >= 3 ? <TiTickOutline color="white" /> : 2}
           </div>
           <div
-            className={`${step == 2 ? "text-pulse-green" : "text-gray-600"}`}
+            className={`${step == 2 ? "text-pulse-green" : "text-gray-600 max-sm:hidden"}`}
           >
             Details
           </div>
         </div>
-        <hr className="w-6 border-gray-400" />
+        <hr className="w-6 border-gray-400 max-sm:w-4" />
 
         <div className="flex gap-1">
           <div
@@ -106,7 +106,7 @@ export const TicketForm = () => {
             {step >= 4 ? <TiTickOutline color="white" /> : 3}
           </div>
           <div
-            className={`${step == 3 ? "text-pulse-green" : "text-gray-600"}`}
+            className={`${step == 3 ? "text-pulse-green" : "text-gray-600 max-sm:hidden"}`}
           >
             Review
           </div>
@@ -114,7 +114,7 @@ export const TicketForm = () => {
       </div>
       <div className="grid w-full grid-cols-1 items-start gap-6 xl:grid-cols-3">
         <div
-          className={`min-w-0 ${step != 1 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step != 1 ? "pointer-events-none text-gray-400 opacity-60 select-none max-lg:hidden" : "bg-white"}`}
         >
           <TicketFormBasics
             control={control}
@@ -123,7 +123,7 @@ export const TicketForm = () => {
           />
         </div>
         <div
-          className={`min-w-0 ${step != 2 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step != 2 ? "pointer-events-none text-gray-400 opacity-60 select-none max-lg:hidden" : "bg-white"}`}
         >
           <TicketFormDetails
             control={control}
@@ -133,7 +133,7 @@ export const TicketForm = () => {
           />
         </div>
         <div
-          className={`min-w-0 ${step != 3 ? "pointer-events-none text-gray-400 opacity-60 select-none" : "bg-white"}`}
+          className={`min-w-0 ${step != 3 ? "pointer-events-none text-gray-400 opacity-60 select-none max-lg:hidden" : "bg-white"}`}
         >
           <TicketFormReview control={control} />
         </div>
