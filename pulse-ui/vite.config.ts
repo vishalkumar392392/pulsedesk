@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -10,6 +11,11 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss(), svgr()],
     server: {
       port: Number.isNaN(configuredPort) ? 3000 : configuredPort,
+    },
+    test: {
+      environment: "jsdom",
+      setupFiles: ["./src/test/setup.ts"],
+      css: false,
     },
   };
 });
