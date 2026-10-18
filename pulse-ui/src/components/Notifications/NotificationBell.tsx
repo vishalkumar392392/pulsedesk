@@ -122,7 +122,7 @@ export const NotificationBell = () => {
         <div
           role="menu"
           aria-label="Notifications"
-          className="absolute right-0 z-40 mt-3 w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"
+          className="absolute right-0 z-40 mt-3 w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl max-lg:fixed max-lg:inset-x-4 max-lg:top-[calc(4.5rem+env(safe-area-inset-top))] max-lg:mt-0 max-lg:w-auto max-lg:max-w-none md:max-lg:right-6 md:max-lg:left-auto md:max-lg:w-96"
         >
           <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
             <div>
@@ -146,7 +146,7 @@ export const NotificationBell = () => {
             )}
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto max-lg:max-h-[min(24rem,calc(100dvh-14rem))]">
             {isLoading && (
               <p className="px-5 py-8 text-center text-gray-500">
                 Loading notifications…
